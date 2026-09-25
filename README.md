@@ -1,15 +1,15 @@
-# @orbio/sdk
+# @orbiodotso/sdk
 
 One key for AI inference, agent tools and the CREDIT protocol. An agent that
 can call a model but cannot buy more when it runs out has a deadline. This is
 how it pays for itself.
 
 ```bash
-npm install @orbio/sdk viem
+npm install @orbiodotso/sdk viem
 ```
 
 ```ts
-import { createOrbio } from '@orbio/sdk'
+import { createOrbio } from '@orbiodotso/sdk'
 
 const orbio = await createOrbio({ apiKey: process.env.ORBIO_API_KEY })
 
@@ -54,7 +54,7 @@ integer of micro-dollars. Nothing here turns an amount into a JavaScript
 number, because `0.1 + 0.2` is not `0.3`.
 
 ```ts
-import { parseCredit, formatCredit } from '@orbio/sdk'
+import { parseCredit, formatCredit } from '@orbiodotso/sdk'
 
 parseCredit('1.25')      // 1250000n
 formatCredit(1999999n)   // '1.999999', truncated, never rounded up
@@ -159,7 +159,7 @@ operation spends the sender's own ETH.
 ## Errors are something to branch on
 
 ```ts
-import { NotConnectedError, OrbioError } from '@orbio/sdk'
+import { NotConnectedError, OrbioError } from '@orbiodotso/sdk'
 
 try {
   await orbio.tools.post('Shipped v2.')

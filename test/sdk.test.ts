@@ -86,7 +86,11 @@ const stubFetch = (calls: string[] = []) =>
       return new Response(JSON.stringify(status), { headers: { 'content-type': 'application/json' } })
     }
     if (url.endsWith('/api/v1/tools')) {
-      return new Response(JSON.stringify({ tools }), { headers: { 'content-type': 'application/json' } })
+      // The envelope the gateway actually ships: OpenAI's `{ object, data }`.
+      // The SDK read `{ tools }` and quietly saw nothing, which looks the same
+      // as a deployment with no tools, so nothing failed until a real gateway
+      // was in front of it.
+      return new Response(JSON.stringify({ object: 'list', data: tools }), { headers: { 'content-type': 'application/json' } })
     }
     return new Response(JSON.stringify({ error: { message: 'not stubbed', code: 'unknown' } }), { status: 404 })
   }) as typeof fetch
@@ -175,7 +179,7 @@ describe('errors are something to branch on, not prose to read', () => {
     const fetchImpl = (async (input: RequestInfo | URL) => {
       const url = String(input)
       if (url.endsWith('/api/protocol/status')) return new Response(JSON.stringify(status))
-      if (url.endsWith('/api/v1/tools')) return new Response(JSON.stringify({ tools }))
+      if (url.endsWith('/api/v1/tools')) return new Response(JSON.stringify({ object: 'list', data: tools }))
       return new Response(
         JSON.stringify({
           error: { message: 'no social account is connected yet', code: 'not_connected' },
@@ -204,5 +208,41 @@ describe('errors are something to branch on, not prose to read', () => {
     expect(new OrbioError('provider fell over', { code: 'tool_failed', status: 502 }).retryable).toBe(true)
     expect(new OrbioError('bad limit', { code: 'invalid_request', status: 400 }).retryable).toBe(false)
     expect(new OrbioError('no such tool', { code: 'unknown_tool', status: 404 }).retryable).toBe(false)
+  })
+})
+
+describe('the catalogue is read from whichever envelope the gateway sends', () => {
+  const shapes: [string, unknown][] = [
+    ['{ object, data } as shipped', { object: 'list', data: tools }],
+    ['{ tools }', { tools }],
+    ['a bare array', tools],
+  ]
+
+  for (const [name, body] of shapes) {
+    it(`reads ${name}`, async () => {
+      const fetchImpl = (async (input: RequestInfo | URL) => {
+        const url = String(input)
+        if (url.endsWith('/api/protocol/status')) return new Response(JSON.stringify(status))
+        if (url.endsWith('/api/v1/tools')) return new Response(JSON.stringify(body))
+        return new Response('{}', { status: 404 })
+      }) as typeof fetch
+      const orbio = await createOrbio({ fetch: fetchImpl, baseUrl: 'https://example.test' })
+      expect(orbio.tools.list()).toHaveLength(2)
+      expect(orbio.tools.describe('social.x.posts')).toBeTruthy()
+    })
+  }
+
+  it('reads an unknown envelope as empty rather than throwing', async () => {
+    // A gateway with no catalogue is a real state. What must not happen is an
+    // unrecognised shape being indistinguishable from it forever, which is why
+    // the three known shapes above are pinned.
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.endsWith('/api/protocol/status')) return new Response(JSON.stringify(status))
+      return new Response(JSON.stringify({ unexpected: true }))
+    }) as typeof fetch
+    const orbio = await createOrbio({ fetch: fetchImpl, baseUrl: 'https://example.test' })
+    expect(orbio.tools.list()).toEqual([])
+    await expect(orbio.tools.call('social.x.posts')).rejects.toThrow(/no tool catalogue/)
   })
 })

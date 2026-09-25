@@ -1,5 +1,5 @@
 /**
- * `@orbio/sdk`
+ * `@orbiodotso/sdk`
  *
  * One key for AI inference, agent tools and the CREDIT protocol.
  *

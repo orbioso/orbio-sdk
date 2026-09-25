@@ -69,6 +69,26 @@ export type ToolDescriptor = {
   price: ToolPrice
 }
 
+/**
+ * The catalogue, in every shape the gateway has answered in.
+ *
+ * It ships as `{ object: 'list', data: [...] }`, OpenAI's envelope, which is
+ * what a client pointed at a real deployment gets. The other two are accepted
+ * because guessing wrong here fails silently: an unrecognised envelope reads
+ * as an empty catalogue, and an empty catalogue looks exactly like a gateway
+ * with no tools deployed. This library shipped with that bug, and the contract
+ * test passed anyway, because production answered 404 and the empty case was
+ * the one being exercised.
+ */
+type CatalogueBody = { object?: string; data?: ToolDescriptor[] } | { tools?: ToolDescriptor[] } | ToolDescriptor[]
+
+const toolsOf = (body: CatalogueBody): ToolDescriptor[] => {
+  if (Array.isArray(body)) return body
+  if ('data' in body && Array.isArray(body.data)) return body.data
+  if ('tools' in body && Array.isArray(body.tools)) return body.tools
+  return []
+}
+
 /** What a client knows the moment it is ready, and nothing it had to be told. */
 export type Manifest = {
   status: ProtocolStatus
@@ -91,11 +111,10 @@ export const loadManifest = async (http: Http): Promise<Manifest> => {
     // somebody the protocol reads over a feature they were not using. The
     // refusal belongs at `tools.call`, which names what is missing.
     http
-      .get<{ tools?: ToolDescriptor[] } | ToolDescriptor[]>('/api/v1/tools')
+      .get<CatalogueBody>('/api/v1/tools')
       .catch(() => [] as ToolDescriptor[]),
   ])
-  const tools = Array.isArray(catalogue) ? catalogue : (catalogue.tools ?? [])
-  return { status, tools }
+  return { status, tools: toolsOf(catalogue) }
 }
 
 /** The addresses, or a refusal that names what is missing rather than an address of zero. */

@@ -1,5 +1,5 @@
 {
-  "name": "@orbio/sdk",
+  "name": "@orbiodotso/sdk",
   "version": "0.1.0",
   "description": "One key for AI inference, agent tools and the CREDIT protocol. Read with an API key, sign with a wallet, and let an agent pay for itself.",
   "keywords": [
@@ -75,5 +75,8 @@
     "unrun": "^0.3.1",
     "viem": "^2.55.10",
     "vitest": "^2.1.8"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
