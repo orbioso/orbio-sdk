@@ -1,0 +1,52 @@
+name: Release
+
+# Publishing is a deliberate act: a tag, pushed on purpose, never a side effect
+# of a merge. The tag is the record of what was published and from where.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # The whole point. GitHub mints a short-lived OIDC token, npm trades it
+      # for publish rights, and no long-lived secret exists to leak. There is
+      # deliberately no NPM_TOKEN here.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing landed in npm 11.5.1. The Node 22 image ships an
+      # older npm, so pin a new enough one rather than discovering the gap in
+      # the middle of a release.
+      - run: npm install -g npm@latest
+
+      - run: pnpm install --frozen-lockfile
+
+      # The tag says what is being published; package.json decides. Publishing
+      # v0.2.0 from a tree that still says 0.1.0 would put the wrong thing on
+      # the registry under the right name, so refuse instead.
+      - name: The tag and the manifest must agree
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "tag v$tag does not match package.json $pkg"
+            exit 1
+          fi
+
+      # prepublishOnly runs typecheck, test, build and check:publish, so the
+      # gate a consumer would hit runs here before anything is published.
+      # Provenance is not passed as a flag: with id-token write and a trusted
+      # publisher configured, npm attaches it, and .npmrc asks for it.
+      - run: npm publish
