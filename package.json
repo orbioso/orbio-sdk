@@ -1,0 +1,79 @@
+{
+  "name": "@orbio/sdk",
+  "version": "0.1.0",
+  "description": "One key for AI inference, agent tools and the CREDIT protocol. Read with an API key, sign with a wallet, and let an agent pay for itself.",
+  "keywords": [
+    "orbio",
+    "ai",
+    "agents",
+    "inference",
+    "credit",
+    "web3",
+    "viem",
+    "mcp"
+  ],
+  "homepage": "https://orbio.so",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orbioso/orbio-sdk.git"
+  },
+  "bugs": "https://github.com/orbioso/orbio-sdk/issues",
+  "license": "MIT",
+  "author": "Orbio Labs",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run --exclude \"test/contract.test.ts\"",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepublishOnly": "pnpm run typecheck && pnpm run test && pnpm run build && pnpm run check:publish",
+    "check:publish": "publint --strict && attw --pack .",
+    "test:contract": "ORBIO_CONTRACT_TEST=1 vitest run test/contract.test.ts"
+  },
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "publint": "^0.3.24",
+    "tsdown": "^0.23.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "unrun": "^0.3.1",
+    "viem": "^2.55.10",
+    "vitest": "^2.1.8"
+  }
+}
