@@ -20,16 +20,24 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 47 contracts.
+Current breadth increment: source fixture/generated types contain 78 contracts.
+The latest 31 additions expose Vercel/Fly/Supabase allocation/control mutations
+and assigned-inbox drafts/send/delete/labels, with typed helpers in the existing
+provider namespaces. Vercel environment reads preserve their existing method;
+setEnvironment/removeEnvironment are explicit additional helpers. Native IDs are
+still nested targets, never replacements for resource UUIDs. Positive lifetime
+ceilings, active funding and private root credentials are platform responsibilities;
+the client neither invents costs nor treats a succeeded operation as settled.
+The platform now has catalogue-driven owner workflow controls and authenticated
+256 KiB request envelopes for bounded artifacts. Its complete native attribution,
+spending enforcement and additional provider features remain release gates.
+No checks/tests/CI polling or live calls were performed for this increment.
+Generation is engineering output, not verification. Keep version 0.1.0 unpublished;
+do not inherit historical green counts below.
 
-The latest four additions are mail.thread.list/get and mail.message.attachment/
-mail.draft.attachment. Typed helpers are under mail.threads and the existing
-mail.messages/mail.drafts namespaces. Attachment links are private and temporary;
-thread pages contain summaries, so fetch a message separately for bounded bodies.
-This increment is unverified: the user explicitly deferred tests/checks/CI/smoke
-runs until the whole engineering stack is implemented. Do not inherit prior green
-results. Internal platform mutations for the remaining providers are in progress;
-their public accounting contracts/helpers remain required in the same release.
+Earlier four mail-read additions (thread summaries and signed attachment links)
+remain available in source. Attachment links are private and temporary; thread
+pages contain summaries, so fetch a message separately for bounded bodies.
 Workspace helpers now include files, directories, commands/output/stdin/stop,
 process listing and private previews. Mail, deployments, workers and databases
 have scoped read helpers with explicit resource UUID arguments. Readable shapes
@@ -37,8 +45,8 @@ come from the application catalogue; dynamic SQL rows are caller-typed unknown
 data rather than a promise of a particular table schema. Native provider IDs are
 nested targets only. This increment is unverified: the user requested finishing
 engineering first, then running tests/checks and smoke tests at the end. Earlier
-passing counts below do not validate these new helpers. Remaining provider
-mutation helpers wait for the application's funded action contracts. No publish.
+passing counts below do not validate these new helpers. Further provider features
+and final full-stack verification remain required. No publish.
 
 The 2026-10-04 lifecycle increment adds typed `workspaces.quote/create/resume/pause/delete`
 helpers and regenerates the shared fixture/types for ten public capabilities.
