@@ -20,14 +20,23 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 108 contracts.
+Current breadth increment: source fixture/generated types contain 115 contracts.
+Latest addition (2026-10-05): workers.images.blob/publish and uploads.get/begin/
+chunk/complete/cancel mirror the platform's exact assigned-repository artifact
+path. Callers save original requests/keys/caps and explicitly wait; no bulk loop,
+retry, key creation or upstream credentials are introduced. 128 KiB chunks support
+512 MiB blobs, fixed upload deadlines and immutable sha256 manifest publication.
+Private native URLs remain encrypted server-side. Publication does not build or
+start a Machine. Unknown steps block further writes; native cost/retention and
+ambiguous-session cleanup remain platform release work. Source unverified;
+contract generation is engineering output, not validation.
 Latest addition: workers.images.inspect resolves native digest/compressed-size
 metadata through the assigned Fly app. Private registry references are exact
 app-bound; the platform refuses cross-product/agent repositories before holds
 and native dispatch, and on existing Machine start/restart. No token/manifest/
 image bytes are returned. Native Fly registry reuse is organization-wide, so
-standard deploy tokens remain private; brokered chunk publishing and billing are
-still platform engineering work. README/generated schemas/owner discovery match;
+standard deploy tokens remain private. Brokered upload/publish helpers are now
+added below; native billing/retention and final workflow verification remain. README/generated schemas/owner discovery match;
 new source remains unverified and unpublished.
 Latest addition: resources.spending exposes recorded, non-final native cost
 observations without a provider call. The platform captures private scoped Vercel
@@ -178,3 +187,10 @@ an intentional version tag. Do not create a new long-lived npm token as a defaul
 Confirm release readiness, version/tag agreement and the operator's authorization
 at that final step. Provider root secrets never belong in an SDK client;
 `ORBIO_INFRA_KEY` is an owner-issued Orbio grant, separate from `ORBIO_API_KEY`.
+
+
+On 2026-10-05 the SDK worktree was found absent. Both draft PRs were still open
+at their prior heads. Restored codex/toolkit-infra-sdk from 844f4c2, restored local
+Fly helper edits and regenerated the 115-contract fixture/types. Dependencies
+were installed with lifecycle scripts disabled. No tests/checks/CI/provider calls,
+publication, tag, merge or main push. App progress remained present in its worktree.

@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 7b79998036cf1fc055f9719c62c1a77b9ec8fc4d4a5ae686ebcabb8a20d1e922. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: b6b9f336e374ec0fda679590058c74f2502544fa8019a41e4c625bb61e3b864f. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -222,6 +222,14 @@ export interface InfrastructureContracts {
     'worker.app': {
       resource_id: string
     }
+    'worker.image.upload.get': {
+      resource_id: string
+      upload_id: string
+    }
+    'worker.image.blob.inspect': {
+      resource_id: string
+      digest: string
+    }
     'worker.image.inspect': {
       resource_id: string
       image: string
@@ -435,6 +443,40 @@ export interface InfrastructureContracts {
       idempotency_key: string
       max_cost: string
       resource_id: string
+    }
+    'worker.image.upload.begin': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      digest: string
+      size_bytes: number
+    }
+    'worker.image.upload.chunk': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      upload_id: string
+      offset: number
+      content_base64: string
+    }
+    'worker.image.upload.complete': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      upload_id: string
+    }
+    'worker.image.upload.cancel': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      upload_id: string
+    }
+    'worker.image.publish': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      digest: string
+      manifest_base64: string
     }
     'worker.volume.create': {
       idempotency_key: string
@@ -5397,6 +5439,20 @@ export interface InfrastructureContracts {
       app_name: string
       state: string
     }
+    'worker.image.upload.get': {
+      upload_id: string
+      resource_id: string
+      digest: string
+      size_bytes: number
+      received_bytes: number
+      state: 'preparing' | 'uploading' | 'completed' | 'cancelled'
+      expires_at: string
+    }
+    'worker.image.blob.inspect': {
+      digest: string
+      present: boolean
+      size_bytes: number | null
+    }
     'worker.image.inspect': {
       app_name: string
       image: string
@@ -5878,6 +5934,106 @@ export interface InfrastructureContracts {
       retry_after_seconds: number | null
     }
     'deployment.delete': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.image.upload.begin': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.image.upload.chunk': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.image.upload.complete': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.image.upload.cancel': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.image.publish': {
       id: string
       project_id: string
       agent_id: string
@@ -6506,5 +6662,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '7b79998036cf1fc055f9719c62c1a77b9ec8fc4d4a5ae686ebcabb8a20d1e922'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = 'b6b9f336e374ec0fda679590058c74f2502544fa8019a41e4c625bb61e3b864f'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

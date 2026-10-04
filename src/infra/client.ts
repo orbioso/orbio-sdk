@@ -215,6 +215,15 @@ export class Infrastructure {
     app: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.app', resourceId, {}, options),
     images: {
       inspect: (resourceId: string, image: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.inspect', resourceId, { image }, options),
+      blob: (resourceId: string, digest: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.blob.inspect', resourceId, { digest }, options),
+      publish: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.publish'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.publish', resourceId, args, options),
+      uploads: {
+        get: (resourceId: string, uploadId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.get', resourceId, { upload_id: uploadId }, options),
+        begin: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.upload.begin'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.begin', resourceId, args, options),
+        chunk: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.upload.chunk'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.chunk', resourceId, args, options),
+        complete: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.upload.complete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.complete', resourceId, args, options),
+        cancel: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.upload.cancel'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.cancel', resourceId, args, options),
+      },
     },
     logs: (resourceId: string, args: Omit<InfrastructureInput<'worker.logs'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('worker.logs', resourceId, args, options),
     volumes: {

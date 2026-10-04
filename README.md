@@ -455,4 +455,26 @@ holds and again at dispatch; starts/restarts also refuse foreign private images.
 The helper returns no image bytes/manifest/provider credential and does not
 build, push or start compute. `deployment_performed:false` describes the read,
 not a Machine's existing image history. Compressed size is not billable rootfs
-usage. Brokered publishing/accounting and final verification remain unfinished.
+usage. Brokered artifact publishing helpers are described below; native accounting,
+retention and final workflow verification remain unfinished.
+
+
+infra.workers.images.blob(resourceId, digest) checks exact native blob presence.
+Use images.uploads.begin/chunk/complete to send a config/layer blob, uploads.get
+for recorded progress, and uploads.cancel for a known open session. Each mutation
+accepts its generated argument type with the original idempotency_key/max_cost;
+helpers never generate keys, retry or wait. Save each exact request before sending
+and explicitly confirm its operation before advancing the offset. Native session
+URLs and registry credentials are never returned. Chunks decode to at most 128 KiB,
+blobs to 512 MiB; the first chunk contains at least two bytes. Session deadlines
+are fixed and cannot be extended by reads or resource renewal.
+
+images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schema-2
+manifest bytes and their sha256. The platform verifies every assigned-repository
+blob digest/size, then returns an immutable image reference without starting a
+Machine. Inspect it and explicitly create/update a funded Machine separately.
+These seven added contracts bring the source fixture to 115. Unknown native steps
+are not repeated; native cost/retention and ambiguous-session cleanup still need
+completion before release. See the platform
+[Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
+Current additions remain unverified/unpublished; no checks or provider smoke ran.
