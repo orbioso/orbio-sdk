@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 7575175cc77ed45e6656114f37a02ae21a522d6450264cd0d1503540b233583b. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 28610f54c4617b422bd7345825044a953f566112977f0c53cf73cc0f374c20cc. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -7274,5 +7274,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '7575175cc77ed45e6656114f37a02ae21a522d6450264cd0d1503540b233583b'
+export const INFRA_SCHEMA_REVISION = '28610f54c4617b422bd7345825044a953f566112977f0c53cf73cc0f374c20cc'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

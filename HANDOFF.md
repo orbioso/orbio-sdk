@@ -21,7 +21,14 @@ Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
 Current breadth increment: source fixture/generated types contain 122 contracts / 54 provider writes.
-Latest mail addition (2026-10-05): mail.metrics.usage/events accept typed selected
+Latest lifecycle descriptions (2026-10-05): worker.resume now verifies native
+created/stopped/suspended/destroyed overall states, refusing failed/transient/
+version-specific ambiguity. No implicit Machine start. Platform cleanup uses
+the same states and requests at most two stops per claim; confirmed paused Vercel
+projects avoid repeated pause writes. Funding task duration is 240 seconds below
+the existing five-minute lease. Retained bills stay unknown; no checks/live calls.
+
+Prior mail addition (2026-10-05): mail.metrics.usage/events accept typed selected
 inbox metric names, optional UTC start/end and 60/3600/86400 second periods. Native
 reads require the manually connected inbox key to authorize metrics; no root
 fallback. Defaults use the prior day hourly or 199 minutes for minute periods;
