@@ -235,6 +235,21 @@ export class Infrastructure {
     query: <T = unknown>(resourceId: string, args: Omit<InfrastructureInput<'database.query'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.query', resourceId, args, options) as Promise<T>,
     migrations: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.migration.list', resourceId, {}, options),
     buckets: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.bucket.list', resourceId, {}, options),
+    storage: {
+      buckets: {
+        get: (resourceId: string, bucketId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.bucket.get', resourceId, { bucket_id: bucketId }, options),
+        create: (resourceId: string, args: Omit<InfrastructureInput<'database.bucket.create'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.bucket.create', resourceId, args, options),
+        configure: (resourceId: string, args: Omit<InfrastructureInput<'database.bucket.configure'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.bucket.configure', resourceId, args, options),
+        delete: (resourceId: string, args: Omit<InfrastructureInput<'database.bucket.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.bucket.delete', resourceId, args, options),
+      },
+      objects: {
+        list: (resourceId: string, args: Omit<InfrastructureInput<'database.object.list'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.object.list', resourceId, args, options),
+        read: (resourceId: string, args: Omit<InfrastructureInput<'database.object.read'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.object.read', resourceId, args, options),
+        write: (resourceId: string, args: Omit<InfrastructureInput<'database.object.write'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.object.write', resourceId, args, options),
+        delete: (resourceId: string, args: Omit<InfrastructureInput<'database.object.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.object.delete', resourceId, args, options),
+        downloadLink: (resourceId: string, args: Omit<InfrastructureInput<'database.object.download.link'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.object.download.link', resourceId, args, options),
+      },
+    },
     connection: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.connection', resourceId, {}, options),
   }
   private async wait(operationId: string, options: InfrastructureWaitOptions): Promise<InfrastructureOperation> {

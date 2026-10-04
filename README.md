@@ -372,3 +372,18 @@ Updates preserve omitted HTTP and disable it with null; mounts and regions canno
 change in-place. Logs are private text; truncated pages have no advancing cursor
 because that would skip omitted native entries. All additions remain unpublished
 and unverified; native spending/accounting are platform release requirements.
+
+
+Assigned Supabase storage helpers are available in the draft source as
+infra.databases.storage.buckets.get/create/configure/delete and
+infra.databases.storage.objects.list/read/write/delete/downloadLink.
+Use the Orbio database resource UUID, not a Supabase URL or privileged key.
+Buckets stay private. Uploads accept canonical base64 (128 KiB decoded maximum),
+with overwrite:false by default; inline reads return complete files up to 64 KiB.
+List pages use bounded offsets and can shift under concurrent writes. Deletion
+uses exact selected paths, and nonempty bucket deletion is refused. Signed
+links last 30–300 seconds; anyone holding them can download until expiry even
+after an Orbio grant revoke. Preserve the original mutation/key/ceiling and read
+its operation; no uncertain upload retry or automatic link refresh occurs.
+Native storage/egress costs and bootstrap/spend verification remain platform
+release requirements. These SDK additions are unpublished and unverified.

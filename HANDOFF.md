@@ -20,7 +20,18 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 89 contracts.
+Current breadth increment: source fixture/generated types contain 98 contracts.
+Latest addition: databases.storage.buckets get/create/configure/delete and
+objects list/read/write/delete/downloadLink. Buckets stay private, uploads use
+bounded canonical base64 with explicit overwrite, inline reads refuse oversize,
+and deletion never recursively empties a bucket. Download links last 30–300
+seconds and survive grant revocation until expiry; receipt recovery never
+refreshes them. Native project keys stay in the platform. Storage workload funding,
+permissions and exact native project binding are platform enforced. Bootstrap,
+native storage/egress accounting and final verification remain unfinished. No
+checks/live storage calls/publish were performed; generation is source output.
+
+Prior source fixture/generated types contained 89 contracts.
 Latest increment adds workers.logs, workers.volumes list/get/create/extend/delete
 and workers.ips list/allocate/release. Generated Machine types add verified volume
 mounts and explicit HTTP ingress with no proxy autostart. Omitted HTTP preserves
