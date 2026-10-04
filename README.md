@@ -352,3 +352,13 @@ Use the SDK when you are writing code, MCP when a model is driving.
 ## Licence
 
 MIT
+
+
+Draft mail attachments use canonical base64 in attachments on creation or
+content.add_attachments on updates. content.remove_attachments contains IDs
+verified in the assigned draft. Limits: 10 files, 64 KiB each and 96 KiB total
+decoded; combined draft fields fit 192 KiB serialized. Remote attachment URLs
+are not accepted. Keep the original request/key; a lost upload reply is never
+repeated automatically. mail.labelEvents(resourceId, {limit, cursor}) reads a
+page of label-change audit events, not delivery or incoming-mail notifications.
+These new source contracts remain unverified and unpublished.

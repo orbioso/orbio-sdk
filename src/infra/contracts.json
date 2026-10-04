@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "0561482d0a11198642f625bb59214f06480946d90e28989f3aff0977a42774e2",
+  "schemaRevision": "eac845460de67d4fb79753934fdb8a209e82d34aceb121adeeb9415a9d8e6986",
   "tools": [
     {
       "name": "infra.status",
@@ -4767,6 +4767,153 @@
                   "state",
                   "created_at",
                   "updated_at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane",
+      "upstream": true
+    },
+    {
+      "name": "mail.label.event.list",
+      "description": "Read a bounded page of native label change audit events from the assigned inbox only. Pass next_cursor as cursor. This is a label audit log, not a delivery receipt or an incoming-mail subscription; use mail.message.list/get for received mail.",
+      "permission": "mail.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "default": 10
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "inbox_id": {
+                          "type": "string"
+                        },
+                        "event_id": {
+                          "type": "string"
+                        },
+                        "event_type": {
+                          "enum": [
+                            "label.added",
+                            "label.removed"
+                          ]
+                        },
+                        "message_id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "event_at": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "inbox_id",
+                        "event_id",
+                        "event_type",
+                        "message_id",
+                        "label",
+                        "event_at",
+                        "created_at"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "items",
+                  "next_cursor"
                 ],
                 "additionalProperties": false
               }
@@ -12697,7 +12844,7 @@
     {
       "name": "mail.draft.create",
       "permission": "mail.draft",
-      "description": "Create an unsent draft only in the manually owner-assigned inbox. For a reply, supply in_reply_to and optional reply_all; for a forward, supply forward_of. Source messages are verified in that inbox. These sources are mutually exclusive. No automatic send, schedule or inbox provisioning. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Create an unsent draft only in the manually owner-assigned inbox. For a reply, supply in_reply_to and optional reply_all; for a forward, supply forward_of. Sources are mutually exclusive and verified in that inbox. Inline base64 attachments allow 10 files, 64 KiB per file and 96 KiB decoded total; all draft fields together fit 192 KiB serialized. No remote attachment URLs, send, scheduling or inbox provisioning. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -12752,6 +12899,48 @@
           "html": {
             "type": "string",
             "maxLength": 65536
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "maxLength": 87384,
+                  "description": "Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL."
+                },
+                "filename": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255,
+                  "description": "A filename, without directory separators or control characters."
+                },
+                "content_type": {
+                  "type": "string",
+                  "maxLength": 127,
+                  "description": "MIME type without parameters, for example application/pdf."
+                },
+                "content_disposition": {
+                  "enum": [
+                    "inline",
+                    "attachment"
+                  ]
+                },
+                "content_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9._@-]+$",
+                  "description": "Allowed only with content_disposition:inline."
+                }
+              },
+              "required": [
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10
           },
           "in_reply_to": {
             "type": "string",
@@ -12961,7 +13150,7 @@
     {
       "name": "mail.draft.update",
       "permission": "mail.draft",
-      "description": "Update an unsent draft verified in the assigned inbox. Provide at least one content field; null clears it. No send, scheduling or source-message change. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Update an unscheduled draft verified in the assigned inbox. Provide at least one content field; null clears scalar/recipient fields. add_attachments uses bounded inline base64; remove_attachments contains IDs verified in this draft. Total serialized content fits 192 KiB. Lost attachment upload replies cannot be inferred from metadata and are never repeated. No send, scheduling or source-message change. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -13042,6 +13231,58 @@
                   "null"
                 ],
                 "maxLength": 65536
+              },
+              "add_attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "maxLength": 87384,
+                      "description": "Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL."
+                    },
+                    "filename": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "A filename, without directory separators or control characters."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "maxLength": 127,
+                      "description": "MIME type without parameters, for example application/pdf."
+                    },
+                    "content_disposition": {
+                      "enum": [
+                        "inline",
+                        "attachment"
+                      ]
+                    },
+                    "content_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9._@-]+$",
+                      "description": "Allowed only with content_disposition:inline."
+                    }
+                  },
+                  "required": [
+                    "content"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10
+              },
+              "remove_attachments": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                "maxItems": 100,
+                "uniqueItems": true
               }
             },
             "required": [],
@@ -13245,7 +13486,7 @@
     {
       "name": "mail.draft.send",
       "permission": "mail.send",
-      "description": "Send an existing draft verified in the owner-assigned inbox. Inspect recipients and body first. Sending is irreversible, may be billed per recipient, and does not prove delivery. An unknown send outcome is never automatically repeated. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Send an existing draft verified in the owner-assigned inbox, with 1 to 20 total recipients. Inspect recipients and body first. Sending is irreversible, consumes provider email allowance and does not prove delivery. An unknown send outcome is never automatically repeated. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {

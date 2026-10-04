@@ -155,6 +155,7 @@ export class Infrastructure {
   }
   readonly mail = {
     inbox: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox', resourceId, {}, options),
+    labelEvents: (resourceId: string, args: Omit<InfrastructureInput<'mail.label.event.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.label.event.list', resourceId, args, options),
     messages: {
       list: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.list', resourceId, args, options),
       get: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.get', resourceId, args, options),

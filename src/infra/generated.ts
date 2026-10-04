@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 0561482d0a11198642f625bb59214f06480946d90e28989f3aff0977a42774e2. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: eac845460de67d4fb79753934fdb8a209e82d34aceb121adeeb9415a9d8e6986. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -137,6 +137,11 @@ export interface InfrastructureContracts {
     }
     'mail.inbox': {
       resource_id: string
+    }
+    'mail.label.event.list': {
+      resource_id: string
+      limit?: number
+      cursor?: string
     }
     'mail.message.list': {
       resource_id: string
@@ -880,6 +885,1076 @@ export interface InfrastructureContracts {
       subject?: string
       text?: string
       html?: string
+      /**
+       * @maxItems 10
+       */
+      attachments?:
+        | []
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
+        | [
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            },
+            {
+              /**
+               * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+               */
+              content: string
+              /**
+               * A filename, without directory separators or control characters.
+               */
+              filename?: string
+              /**
+               * MIME type without parameters, for example application/pdf.
+               */
+              content_type?: string
+              content_disposition?: 'inline' | 'attachment'
+              /**
+               * Allowed only with content_disposition:inline.
+               */
+              content_id?: string
+            }
+          ]
       in_reply_to?: string
       forward_of?: string
       reply_all?: boolean
@@ -1349,6 +2424,1080 @@ export interface InfrastructureContracts {
         subject?: string | null
         text?: string | null
         html?: string | null
+        /**
+         * @maxItems 10
+         */
+        add_attachments?:
+          | []
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+          | [
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              },
+              {
+                /**
+                 * Canonical base64; at most 64 KiB decoded per file and 96 KiB across the batch. No remote URL.
+                 */
+                content: string
+                /**
+                 * A filename, without directory separators or control characters.
+                 */
+                filename?: string
+                /**
+                 * MIME type without parameters, for example application/pdf.
+                 */
+                content_type?: string
+                content_disposition?: 'inline' | 'attachment'
+                /**
+                 * Allowed only with content_disposition:inline.
+                 */
+                content_id?: string
+              }
+            ]
+        /**
+         * @maxItems 100
+         */
+        remove_attachments?: string[]
       }
     }
     'mail.draft.send': {
@@ -2436,6 +4585,18 @@ export interface InfrastructureContracts {
       created_at: string
       updated_at: string
     }
+    'mail.label.event.list': {
+      items: {
+        inbox_id: string
+        event_id: string
+        event_type: 'label.added' | 'label.removed'
+        message_id: string
+        label: string
+        event_at: string
+        created_at: string
+      }[]
+      next_cursor: string | null
+    }
     'mail.message.list': {
       items: {
         inbox_id: string
@@ -3327,5 +5488,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '0561482d0a11198642f625bb59214f06480946d90e28989f3aff0977a42774e2'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.connection"])
+export const INFRA_SCHEMA_REVISION = 'eac845460de67d4fb79753934fdb8a209e82d34aceb121adeeb9415a9d8e6986'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.connection"])

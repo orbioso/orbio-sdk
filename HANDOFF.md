@@ -20,8 +20,16 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 79 contracts.
-Latest addition: workspaces.renew explicitly funds a running workspace continuation
+Current breadth increment: source fixture/generated types contain 80 contracts.
+Latest increment adds mail.labelEvents (native label audit, not delivery
+webhooks) and generated inline attachment fields for draft create/update. Uploads
+are canonical base64, limited to 10 files/64 KiB each/96 KiB total decoded and
+192 KiB serialized draft fields. Remove IDs must belong to the assigned draft.
+No remote URLs or automatic upload retry. The platform adds atomic known-cost/
+readiness checkpoint recovery; mail monetary attribution remains unfinished.
+All current changes are unverified, with checks still deferred.
+
+Prior addition: workspaces.renew explicitly funds a running workspace continuation
 under caller-saved arguments/key/ceiling. The platform now has adjacent funding
 and native measured execution allocation, immutable lease-checked cost shares,
 early native-zero continuation settlement and captured published paused-retention
