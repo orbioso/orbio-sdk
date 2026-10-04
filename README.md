@@ -125,6 +125,14 @@ still have a held bill or leave a worker running; inspect all returned state.
 Failed/cancelled terminal operations are returned for inspection rather than
 losing their billing and error fields in an exception.
 
+`workspaces.renew(resourceId, args)` explicitly funds a continuation for a running
+workspace, preserving code/commands/private credentials. Quote the additional
+interval and save its original key and ceiling. The new window starts at the
+previous funded boundary; it does not resume paused compute. The resulting
+remaining timeout must fit one hour: renew nearer expiry or use a shorter interval.
+Reads and reconnection never renew; native execution usage is allocated once
+across the funded windows. Complete native evidence determines any unused refund.
+
 For an existing client, pass `infraKey` to `createOrbio()` and use `orbio.infra`.
 `orbio.tools.refresh()` re-reads the legacy catalogue. `orbio.refresh()` returns
 a refreshed client retaining its original transport, keys and signer.

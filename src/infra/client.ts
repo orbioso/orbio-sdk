@@ -131,6 +131,7 @@ export class Infrastructure {
     quote: (args: InfrastructureInput<'workspace.quote'> = {}, options: InfrastructureRequestOptions = {}) => this.call('workspace.quote', args, options),
     create: (args: InfrastructureInput<'workspace.create'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.create', args, options),
     resume: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.resume', { ...args, resource_id: uuid(resourceId) }, options),
+    renew: (resourceId: string, args: Omit<InfrastructureInput<'workspace.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.renew', resourceId, args, options),
     pause: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.pause'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.pause', { ...args, resource_id: uuid(resourceId) }, options),
     delete: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.delete', { ...args, resource_id: uuid(resourceId) }, options),
     files: {

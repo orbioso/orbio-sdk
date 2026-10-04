@@ -20,7 +20,15 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 78 contracts.
+Current breadth increment: source fixture/generated types contain 79 contracts.
+Latest addition: workspaces.renew explicitly funds a running workspace continuation
+under caller-saved arguments/key/ceiling. The platform now has adjacent funding
+and native measured execution allocation, immutable lease-checked cost shares,
+early native-zero continuation settlement and captured published paused-retention
+policy. These changes are unverified, with final checks still deferred. Root keys
+remain private; renewal does not start waiting, reconnect or repeat a timeout call.
+
+The preceding 78-contract increment:
 The latest 31 additions expose Vercel/Fly/Supabase allocation/control mutations
 and assigned-inbox drafts/send/delete/labels, with typed helpers in the existing
 provider namespaces. Vercel environment reads preserve their existing method;

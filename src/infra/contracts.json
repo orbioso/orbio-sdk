@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "386c55e932b1a264c15656b5a87b183fecb91511687d203e7581894870a51181",
+  "schemaRevision": "0561482d0a11198642f625bb59214f06480946d90e28989f3aff0977a42774e2",
   "tools": [
     {
       "name": "infra.status",
@@ -1331,6 +1331,230 @@
     {
       "name": "workspace.resume",
       "description": "Explicitly fund and resume an assigned paused workspace; never implicitly renew running compute. Requires workspace.manage and infra.read. Quote first, approve max_cost and keep the same idempotency_key for lost admission recovery. Pass an Orbio resource UUID, never a sandbox ID. Poll operation.get; credentials stay in the broker. Code persists across pause/resume.",
+      "permission": "workspace.manage",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 3600,
+            "default": 300
+          },
+          "on_grant_revocation": {
+            "enum": [
+              "finish_window",
+              "stop"
+            ],
+            "default": "finish_window"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "prepaid_compute",
+      "destructive": false
+    },
+    {
+      "name": "workspace.renew",
+      "description": "Explicitly prepay a continuation for an assigned running workspace, preserving its current code, commands and private connection credentials. Requires workspace.manage and infra.read. Quote the additional timeout_seconds, approve max_cost and save the original key/arguments. The new funded interval starts after the prior funded boundary, including its cleanup buffer; unused continuation is refunded only from complete native execution evidence. Never resumes a paused VM. The resulting remaining provider timeout must fit one hour: renew nearer expiry or choose a shorter interval. Reads and local reconnects cannot renew it. Poll operation.get; lost timeout replies are read back, never replayed.",
       "permission": "workspace.manage",
       "inputSchema": {
         "type": "object",
