@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: b6b9f336e374ec0fda679590058c74f2502544fa8019a41e4c625bb61e3b864f. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 897450823edebfee955e31ae2142c238c0a05075918d1d4351c4dc67cbb2fbd1. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -145,6 +145,19 @@ export interface InfrastructureContracts {
       max_cost: string
       resource_id: string
       command_operation_id: string
+    }
+    'mail.delivery.status': {
+      resource_id: string
+    }
+    'mail.delivery.event.list': {
+      resource_id: string
+      limit?: number
+      cursor?: string
+      message_id?: string
+    }
+    'mail.delivery.event.get': {
+      resource_id: string
+      delivery_id: string
     }
     'mail.inbox': {
       resource_id: string
@@ -5207,6 +5220,87 @@ export interface InfrastructureContracts {
       result?: unknown
       retry_after_seconds: number | null
     }
+    'mail.delivery.status': {
+      resource_id: string
+      inbox_id: string
+      connected: boolean
+      callback_url: string
+      webhook_id: string | null
+      event_types: (
+        | 'message.received'
+        | 'message.received.spam'
+        | 'message.received.blocked'
+        | 'message.received.unauthenticated'
+        | 'message.sent'
+        | 'message.delivered'
+        | 'message.bounced'
+        | 'message.complained'
+        | 'message.rejected'
+        | 'message.opened'
+      )[]
+      connected_at: string | null
+      last_received_at: string | null
+      retention_days: 30
+    }
+    'mail.delivery.event.list': {
+      items: {
+        delivery_id: string
+        resource_id: string
+        event_id: string
+        event_type:
+          | 'message.received'
+          | 'message.received.spam'
+          | 'message.received.blocked'
+          | 'message.received.unauthenticated'
+          | 'message.sent'
+          | 'message.delivered'
+          | 'message.bounced'
+          | 'message.complained'
+          | 'message.rejected'
+          | 'message.opened'
+        inbox_id: string
+        thread_id: string
+        message_id: string
+        occurred_at: string
+        received_at: string
+        recipients: {
+          address: string
+          status: string | null
+        }[]
+        reason: string | null
+        category: string | null
+        subcategory: string | null
+      }[]
+      next_cursor: string | null
+    }
+    'mail.delivery.event.get': {
+      delivery_id: string
+      resource_id: string
+      event_id: string
+      event_type:
+        | 'message.received'
+        | 'message.received.spam'
+        | 'message.received.blocked'
+        | 'message.received.unauthenticated'
+        | 'message.sent'
+        | 'message.delivered'
+        | 'message.bounced'
+        | 'message.complained'
+        | 'message.rejected'
+        | 'message.opened'
+      inbox_id: string
+      thread_id: string
+      message_id: string
+      occurred_at: string
+      received_at: string
+      recipients: {
+        address: string
+        status: string | null
+      }[]
+      reason: string | null
+      category: string | null
+      subcategory: string | null
+    }
     'mail.inbox': {
       inbox_id: string
       email: string
@@ -6662,5 +6756,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'b6b9f336e374ec0fda679590058c74f2502544fa8019a41e4c625bb61e3b864f'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = '897450823edebfee955e31ae2142c238c0a05075918d1d4351c4dc67cbb2fbd1'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

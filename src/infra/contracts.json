@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "b6b9f336e374ec0fda679590058c74f2502544fa8019a41e4c625bb61e3b864f",
+  "schemaRevision": "897450823edebfee955e31ae2142c238c0a05075918d1d4351c4dc67cbb2fbd1",
   "tools": [
     {
       "name": "infra.status",
@@ -5316,6 +5316,552 @@
       "readOnly": false,
       "costBasis": "free_control_plane",
       "destructive": true
+    },
+    {
+      "name": "mail.delivery.status",
+      "description": "Read recorded delivery-subscription status for this assigned inbox. Free broker metadata, no AgentMail call. The owner manually creates an inbox-scoped webhook at callback_url and connects its webhook ID in the dashboard; signing secrets stay private. connected means a verified hook is recorded, not proof that the provider remains enabled or that email has arrived. last_received_at is the last newly recorded signed event, not delivery confirmation for any particular message.",
+      "permission": "mail.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "resource_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "inbox_id": {
+                    "type": "string"
+                  },
+                  "connected": {
+                    "type": "boolean"
+                  },
+                  "callback_url": {
+                    "type": "string"
+                  },
+                  "webhook_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "event_types": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "message.received",
+                        "message.received.spam",
+                        "message.received.blocked",
+                        "message.received.unauthenticated",
+                        "message.sent",
+                        "message.delivered",
+                        "message.bounced",
+                        "message.complained",
+                        "message.rejected",
+                        "message.opened"
+                      ]
+                    }
+                  },
+                  "connected_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "last_received_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "retention_days": {
+                    "const": 30
+                  }
+                },
+                "required": [
+                  "resource_id",
+                  "inbox_id",
+                  "connected",
+                  "callback_url",
+                  "webhook_id",
+                  "event_types",
+                  "connected_at",
+                  "last_received_at",
+                  "retention_days"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane",
+      "upstream": false
+    },
+    {
+      "name": "mail.delivery.event.list",
+      "description": "Read a bounded page of signed incoming, sent, delivered, bounced, complained, rejected and opened events recorded for this assigned inbox. Free broker read, no provider call. Requires the owner-connected webhook; only subscribed events arriving after connection are captured, with no historical backfill. Pass next_cursor unchanged as cursor with the same optional message_id filter. Pages follow journal ingestion order; occurred_at is provider time and may arrive out of order. Metadata expires after 30 days. A missing event is unknown, never proof of delivery failure. Email bodies and subject are omitted; use mail.message.get for content. Recipients/status describe the individual event, not aggregate delivery to every recipient.",
+      "permission": "mail.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "default": 10
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "message_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "delivery_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "resource_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "event_id": {
+                          "type": "string"
+                        },
+                        "event_type": {
+                          "enum": [
+                            "message.received",
+                            "message.received.spam",
+                            "message.received.blocked",
+                            "message.received.unauthenticated",
+                            "message.sent",
+                            "message.delivered",
+                            "message.bounced",
+                            "message.complained",
+                            "message.rejected",
+                            "message.opened"
+                          ]
+                        },
+                        "inbox_id": {
+                          "type": "string"
+                        },
+                        "thread_id": {
+                          "type": "string"
+                        },
+                        "message_id": {
+                          "type": "string"
+                        },
+                        "occurred_at": {
+                          "type": "string"
+                        },
+                        "received_at": {
+                          "type": "string"
+                        },
+                        "recipients": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "address": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "address",
+                              "status"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "category": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "subcategory": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "delivery_id",
+                        "resource_id",
+                        "event_id",
+                        "event_type",
+                        "inbox_id",
+                        "thread_id",
+                        "message_id",
+                        "occurred_at",
+                        "received_at",
+                        "recipients",
+                        "reason",
+                        "category",
+                        "subcategory"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "items",
+                  "next_cursor"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane",
+      "upstream": false
+    },
+    {
+      "name": "mail.delivery.event.get",
+      "description": "Read one recorded delivery UUID belonging to this exact assigned inbox. Free broker read; delivery_id grants no authority. Contains the provider event kind/time and bounded recipient metadata, with no email content, credentials or raw callback. Event absence or expiry is not evidence of failure. Delivered means the provider reported this event for its listed recipients; sent is not delivered, and opened is not reliable proof that a human read it.",
+      "permission": "mail.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "delivery_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "resource_id",
+          "delivery_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "delivery_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "event_id": {
+                    "type": "string"
+                  },
+                  "event_type": {
+                    "enum": [
+                      "message.received",
+                      "message.received.spam",
+                      "message.received.blocked",
+                      "message.received.unauthenticated",
+                      "message.sent",
+                      "message.delivered",
+                      "message.bounced",
+                      "message.complained",
+                      "message.rejected",
+                      "message.opened"
+                    ]
+                  },
+                  "inbox_id": {
+                    "type": "string"
+                  },
+                  "thread_id": {
+                    "type": "string"
+                  },
+                  "message_id": {
+                    "type": "string"
+                  },
+                  "occurred_at": {
+                    "type": "string"
+                  },
+                  "received_at": {
+                    "type": "string"
+                  },
+                  "recipients": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "address": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "address",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "reason": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "category": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "subcategory": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "delivery_id",
+                  "resource_id",
+                  "event_id",
+                  "event_type",
+                  "inbox_id",
+                  "thread_id",
+                  "message_id",
+                  "occurred_at",
+                  "received_at",
+                  "recipients",
+                  "reason",
+                  "category",
+                  "subcategory"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane",
+      "upstream": false
     },
     {
       "name": "mail.inbox",

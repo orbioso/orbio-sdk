@@ -163,6 +163,11 @@ export class Infrastructure {
     preview: (resourceId: string, args: Omit<InfrastructureInput<'workspace.preview'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.preview', resourceId, args, options),
   }
   readonly mail = {
+    delivery: {
+      status: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.status', resourceId, {}, options),
+      list: (resourceId: string, args: Omit<InfrastructureInput<'mail.delivery.event.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.event.list', resourceId, args, options),
+      get: (resourceId: string, args: Omit<InfrastructureInput<'mail.delivery.event.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.event.get', resourceId, args, options),
+    },
     inbox: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox', resourceId, {}, options),
     labelEvents: (resourceId: string, args: Omit<InfrastructureInput<'mail.label.event.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.label.event.list', resourceId, args, options),
     messages: {

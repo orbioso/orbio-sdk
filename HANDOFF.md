@@ -194,3 +194,16 @@ at their prior heads. Restored codex/toolkit-infra-sdk from 844f4c2, restored lo
 Fly helper edits and regenerated the 115-contract fixture/types. Dependencies
 were installed with lifecycle scripts disabled. No tests/checks/CI/provider calls,
 publication, tag, merge or main push. App progress remained present in its worktree.
+
+## 2026-10-05: Recorded inbox delivery helpers
+
+Application contracts now total 118. Added infra.mail.delivery.status/list/get
+for exact assigned inbox resources. These free broker reads require mail.read;
+owner connection/disable remains Privy-only in the application. Results contain
+signed event metadata, not email content or secrets. Native occurred time and
+broker received time are distinct; ingestion-order cursors bind the same
+resource/filter. Events expire after 30 days. Sent is not delivered; missing
+receipts are unknown. See application docs/TOOLKIT_MAIL_DELIVERY.md for manual
+native webhook setup, callback limits, signatures and reconnection semantics.
+Generated source only: no tests/build/package checks, publish or live calls.
+Full billing/retention and final all-provider verification remain outstanding.

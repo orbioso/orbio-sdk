@@ -478,3 +478,13 @@ are not repeated; native cost/retention and ambiguous-session cleanup still need
 completion before release. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
 Current additions remain unverified/unpublished; no checks or provider smoke ran.
+
+Draft infrastructure delivery helpers: `infra.mail.delivery.status(resourceId)`,
+`infra.mail.delivery.list(resourceId, { limit: 10 })` and
+`infra.mail.delivery.get(resourceId, { delivery_id })` read signed metadata
+recorded after the owner connects an inbox-scoped AgentMail webhook. Pass the
+returned cursor unchanged with the same optional message filter. Records expire
+after 30 days; sent is not delivered and a missing event is unknown. These reads
+require `mail.read` for the assigned inbox and never expose callback secrets or
+email bodies. Owner setup remains in the Orbio dashboard. This draft SDK is
+unpublished and still requires final validation.
