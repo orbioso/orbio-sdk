@@ -20,8 +20,24 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 98 contracts.
-Latest platform addition: new-project security bootstrap captures policy before
+Current breadth increment: source fixture/generated types contain 103 contracts.
+Latest addition: deployments.renew/workers.renew/databases.renew explicitly prepay
+one adjacent native-provider window. Broker-only zero API cost is separate from
+the positive lifetime hold; no provider restart/deploy/restore occurs. The platform
+atomically checks current continuous paid parent, subject, live grant and balance/
+budget before reservation/activation. Recovery reads the original immutable window,
+never reactivates it or extends the deadline. Expired-resource resume/accounting/
+spending/retention remain platform engineering work in the same release.
+
+Added funding.list(resourceId, pageArgs) and funding.get(fundingId), with generated
+public financial shapes. Reads stay scoped to product/agent, include deleted-
+resource bills and expose no private evidence/credentials. A null cost is unknown;
+future windows do not start compute. The owner panel shows bounded UUID pages,
+individual lookup and independent lifetime holds/charges. All 45 provider writes
+now have typed helpers. Generation is engineering output only; no checks/CI/
+provider calls/publication were performed. Full verification remains deferred.
+
+Prior platform addition: new-project security bootstrap captures policy before
 allocation, gates native SQL once under the original funding claim, then reads
 native proof and checkpoints readiness. SQL/storage/connection access stays
 blocked until resources.get metadata.supabase_bootstrap.state:verified, regardless

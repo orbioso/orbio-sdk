@@ -398,3 +398,23 @@ must grant table/function access and add RLS policies deliberately. Background
 funding sweeps do not reset later application policies. Unknown initial setup
 never authorizes another SQL dispatch or project creation; owner inspection and
 pause/delete remain available. Current bootstrap source is unverified/unpublished.
+
+Vercel/Fly/Supabase funded continuity is explicit:
+`infra.deployments.renew(resourceId, args)`, `infra.workers.renew(resourceId, args)`
+and `infra.databases.renew(resourceId, args)`. Save the exact original arguments
+and idempotency key first, with positive `max_cost`, `lifetime_seconds` (60–86400)
+and optional `on_grant_revocation`. The platform atomically prepays the next
+adjacent window only while a continuous current paid window exists. The broker
+API operation costs zero; native compute/storage remains a separate lifetime
+hold. Renewal never starts, restores, deploys or promises resource health.
+Lost responses use original-request/operation recovery, never a new request key.
+
+Read `infra.funding.list(resourceId, { limit: 30, before })` and
+`infra.funding.get(fundingId)` for the independent lifetime interval, held maximum,
+nullable native cost/charge and shutdown policy. Use `next_cursor` as `before`;
+pages order by UUID, not time. Financial records remain readable after resource
+deletion within the same product/agent. Null cost is pending, not zero; settled
+funding does not prove every other bill ended. No private proof/root credential
+is returned, and these reads never renew compute or settle bills. Native finality/
+spending/retention and final workflow verification remain unfinished; this source
+is unpublished and unverified.

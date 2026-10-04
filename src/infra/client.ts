@@ -125,6 +125,12 @@ export class Infrastructure {
     /** Read-only polling. No dispatch, replay or cancellation on timeout/abort. */
     wait: (operationId: string, options: InfrastructureWaitOptions = {}) => this.wait(operationId, options),
   }
+  /** Lifetime holds are independent of operation completion. Null cost remains
+   * unknown; this read neither resumes compute nor settles an upstream bill. */
+  readonly funding = {
+    list: (resourceId: string, args: Omit<InfrastructureInput<'funding.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('funding.list', resourceId, args, options),
+    get: (fundingId: string, options: InfrastructureRequestOptions = {}) => this.call('funding.get', { funding_id: uuid(fundingId) }, options),
+  }
   /** Every mutation returns a durable operation. Save the caller-chosen key and
    * original arguments before sending; these helpers never retry or raise caps. */
   readonly workspaces = {
@@ -180,6 +186,7 @@ export class Infrastructure {
   }
   readonly deployments = {
     create: (args: InfrastructureInput<'deployment.create'>, options: InfrastructureRequestOptions = {}) => this.call('deployment.create', args, options),
+    renew: (resourceId: string, args: Omit<InfrastructureInput<'deployment.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.renew', resourceId, args, options),
     configure: (resourceId: string, args: Omit<InfrastructureInput<'deployment.configure'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.configure', resourceId, args, options),
     upload: (resourceId: string, args: Omit<InfrastructureInput<'deployment.upload'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.upload', resourceId, args, options),
     promote: (resourceId: string, args: Omit<InfrastructureInput<'deployment.promote'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.promote', resourceId, args, options),
@@ -196,6 +203,7 @@ export class Infrastructure {
   }
   readonly workers = {
     create: (args: InfrastructureInput<'worker.create'>, options: InfrastructureRequestOptions = {}) => this.call('worker.create', args, options),
+    renew: (resourceId: string, args: Omit<InfrastructureInput<'worker.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.renew', resourceId, args, options),
     delete: (resourceId: string, args: Omit<InfrastructureInput<'worker.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.delete', resourceId, args, options),
     execute: (resourceId: string, args: Omit<InfrastructureInput<'worker.execute'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.execute', resourceId, args, options),
     app: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.app', resourceId, {}, options),
@@ -226,6 +234,7 @@ export class Infrastructure {
   }
   readonly databases = {
     create: (args: InfrastructureInput<'database.create'>, options: InfrastructureRequestOptions = {}) => this.call('database.create', args, options),
+    renew: (resourceId: string, args: Omit<InfrastructureInput<'database.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.renew', resourceId, args, options),
     resume: (resourceId: string, args: Omit<InfrastructureInput<'database.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.resume', resourceId, args, options),
     pause: (resourceId: string, args: Omit<InfrastructureInput<'database.pause'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.pause', resourceId, args, options),
     delete: (resourceId: string, args: Omit<InfrastructureInput<'database.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.delete', resourceId, args, options),
