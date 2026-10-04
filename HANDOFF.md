@@ -20,7 +20,15 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 107 contracts.
+Current breadth increment: source fixture/generated types contain 108 contracts.
+Latest addition: workers.images.inspect resolves native digest/compressed-size
+metadata through the assigned Fly app. Private registry references are exact
+app-bound; the platform refuses cross-product/agent repositories before holds
+and native dispatch, and on existing Machine start/restart. No token/manifest/
+image bytes are returned. Native Fly registry reuse is organization-wide, so
+standard deploy tokens remain private; brokered chunk publishing and billing are
+still platform engineering work. README/generated schemas/owner discovery match;
+new source remains unverified and unpublished.
 Latest addition: resources.spending exposes recorded, non-final native cost
 observations without a provider call. The platform captures private scoped Vercel
 calendar-period evidence and requests production pause at protective high-water

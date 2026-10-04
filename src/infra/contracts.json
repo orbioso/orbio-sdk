@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "f3e0478f4f072ea2eda0a51a63734a94c9a215d4890b76bee00fb47a135c1fcc",
+  "schemaRevision": "7b79998036cf1fc055f9719c62c1a77b9ec8fc4d4a5ae686ebcabb8a20d1e922",
   "tools": [
     {
       "name": "infra.status",
@@ -8012,6 +8012,122 @@
       "upstream": true
     },
     {
+      "name": "worker.image.inspect",
+      "description": "Resolve an immutable container image through this assigned Fly app and verify its exact digest and compressed size. Private registry.fly.io images must belong to this app; another product/agent’s private repository is refused because native registry access is organization-wide. Public registry images use no caller-supplied registry credentials. Returns bounded metadata only, no native manifest, token or image bytes. This does not build, push, deploy or start compute, and compressed size is not root filesystem billable usage.",
+      "permission": "worker.manage",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "image": {
+            "type": "string",
+            "maxLength": 512,
+            "pattern": "^[a-z0-9./_-]+@sha256:[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "resource_id",
+          "image"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "app_name": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  },
+                  "compressed_size_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 68719476736
+                  },
+                  "deployment_performed": {
+                    "const": false
+                  }
+                },
+                "required": [
+                  "app_name",
+                  "image",
+                  "digest",
+                  "compressed_size_bytes",
+                  "deployment_performed"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane",
+      "upstream": true
+    },
+    {
       "name": "worker.volume.list",
       "description": "List at most 100 persistent volume summaries only inside the assigned Fly app. Volumes and snapshots can bill while all Machines are stopped; no deletion or creation occurs.",
       "permission": "worker.manage",
@@ -15126,7 +15242,7 @@
     {
       "name": "worker.machine.create",
       "permission": "worker.manage",
-      "description": "Create a Machine within the assigned isolated Fly app. Supply an immutable container digest and region; requires active funding. Optionally mount one previously created unattached volume from this app/region. Explicit http exposes ports 80/443 after app IP allocation; no proxy autostart. Memory is a multiple of 256 MiB. Broker subject metadata cannot be overridden, and root credentials never enter the container. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Create a Machine within the assigned isolated Fly app. Supply an immutable container digest and region; requires active funding. Fly private registry references must belong to this assigned app; cross-product/agent repositories and normalized hostname/path aliases are refused. Use worker.image.inspect for bounded digest/size verification first. Optionally mount one previously created unattached volume from this app/region. Explicit http exposes ports 80/443 after app IP allocation; no proxy autostart. Memory is a multiple of 256 MiB. Broker subject metadata cannot be overridden, and root credentials never enter the container. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15426,7 +15542,7 @@
     {
       "name": "worker.machine.update",
       "permission": "worker.manage",
-      "description": "Update one verified Machine configuration in this assigned Fly app, with active funding and native version protection. Omitted env becomes empty and omitted command uses the image default. Region cannot move. Omitted http preserves routing; null removes it. A volume mount is preserved and cannot be swapped by an update; if supplied it must match the existing mount. Broker isolation metadata stays intact. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Update one verified Machine configuration in this assigned Fly app, with active funding and native version protection. Supply an immutable digest; a Fly private image must belong to this app, never another agent/product repository. Omitted env becomes empty and omitted command uses the image default. Region cannot move. Omitted http preserves routing; null removes it. A volume mount is preserved and cannot be swapped by an update; if supplied it must match the existing mount. Broker isolation metadata stays intact. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {

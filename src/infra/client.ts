@@ -213,6 +213,9 @@ export class Infrastructure {
     delete: (resourceId: string, args: Omit<InfrastructureInput<'worker.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.delete', resourceId, args, options),
     execute: (resourceId: string, args: Omit<InfrastructureInput<'worker.execute'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.execute', resourceId, args, options),
     app: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.app', resourceId, {}, options),
+    images: {
+      inspect: (resourceId: string, image: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.inspect', resourceId, { image }, options),
+    },
     logs: (resourceId: string, args: Omit<InfrastructureInput<'worker.logs'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('worker.logs', resourceId, args, options),
     volumes: {
       list: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.volume.list', resourceId, {}, options),

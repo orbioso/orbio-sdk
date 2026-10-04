@@ -445,3 +445,14 @@ is not a final invoice or customer charge. The platform requests production
 pause at observed capacity, but previews/storage can continue billing.
 Native finality/allocation and other provider billing remain unfinished; this
 source is unpublished and unverified.
+
+`infra.workers.images.inspect(resourceId, image)` verifies an immutable image's
+native digest and compressed size inside the assigned Fly app/organization.
+Private `registry.fly.io` images must belong to that exact app; native registry
+access is organization-wide, so the platform refuses cross-agent repositories
+before native calls. Machine create/update apply this scope before admission
+holds and again at dispatch; starts/restarts also refuse foreign private images.
+The helper returns no image bytes/manifest/provider credential and does not
+build, push or start compute. `deployment_performed:false` describes the read,
+not a Machine's existing image history. Compressed size is not billable rootfs
+usage. Brokered publishing/accounting and final verification remain unfinished.
