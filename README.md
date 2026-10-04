@@ -474,7 +474,7 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-The current source fixture has 122 contracts / 54 provider writes. Unknown native
+The current source fixture has 123 contracts / 54 provider writes. Unknown native
 steps are not repeated; native cost/retention and ambiguous-session cleanup still need
 completion before release. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
@@ -526,3 +526,14 @@ Missing metrics remain `null`; gaps and empty arrays never establish zero or
 complete reporting. Do not sum cumulative stocks or treat event counts as prices
 or per-recipient receipts. `coverage: "unverified"` and `billing_final: false`
 remain explicit. No automatic upstream account connection or fallback is added.
+
+Recorded Fly artifact capacity: infra.workers.images.retention(resourceId) is a
+free broker read of this app's recorded digest, maximum-declared-byte and begin
+counts. Limits are 128 digests, 4 GiB and 1000 begins per app, plus separate shared
+account caps. These are technical admission counters, not native storage or
+invoices. Native usage remains null and cleanup/finality false. Cancel, abandon,
+expiry and app deletion do not reclaim them. A local capacity refusal occurs
+before native requests and returns capacity_exceeded in the failed original
+operation, releasing only its no-dispatch hold. Do not automatically create a
+new key/account or raise the ceiling to evade the limit. Native cleanup resolution
+and full verification remain required before this draft release is ready.

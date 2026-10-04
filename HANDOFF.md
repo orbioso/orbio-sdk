@@ -20,8 +20,33 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 122 contracts / 54 provider writes.
-Latest platform accounting recovery (2026-10-05): E2B sibling/retried funding
+Current breadth increment: source fixture/generated types contain 123 contracts / 54 provider writes.
+Latest Fly artifact increment (2026-10-05): workers.images.retention(resourceId)
+reads this app's conservative recorded digest/maximum-declared-byte/begin-count
+capacity, not native storage or invoices. App limits are 128 digests, 4 GiB and
+1000 begins; account limits are shared without exposing account/other-agent
+aggregates. Native usage stays null, cleanup/finality false. Cancel, abandon,
+expiry and app deletion do not reclaim counters. Local capacity refusal precedes
+native requests and releases only its original no-dispatch operation hold; SDK
+recognizes capacity_exceeded as a non-retryable error. Platform migration is
+unapplied; generated contracts contain 123 shared calls / 54 provider writes.
+No tests/checks/CI/live calls. See platform TOOLKIT_FLY_RETENTION.md. Native
+retained-artifact cleanup and pricing-model/inbox-payer decisions remain pending;
+this increment does not complete the full release.
+
+Prior platform history collection (2026-10-05): first-time E2B collection now
+persists collect/verify offsets/hashes across funding claims, at most two native
+100-row/256 KiB reads per run. Resumed head and verification changes restart;
+archive/checkpoint failure cannot advance money. Completed scans can outlive
+native history outages; incomplete scans cannot. Pricing still requires exact
+scope, complete measured execution, captured tariff and immutable shares. Native
+rate-limit backoff is bounded by upcoming expiry, with separate broker shutdown
+wake for newly necessary revocation/archival/expiry. No new SDK contract; source
+breadth remains 122/54. New platform migrations are unapplied; no checks/native
+calls. See TOOLKIT_E2B_HISTORY.md; final source/fixture/live/adversarial gates and
+remaining all-provider native accounting/retention stay required.
+
+Prior platform accounting recovery (2026-10-05): E2B sibling/retried funding
 windows reuse the exact original authenticated archived event only after an
 immutable allocation checkpoint exists. Native current-state reads, full subject/
 sandbox/event binding, candidate uniqueness/conflicts, captured tariff and lease-

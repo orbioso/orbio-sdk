@@ -29,6 +29,7 @@ export type OrbioErrorCode =
   | 'insufficient_balance'
   | 'idempotency_conflict'
   | 'resource_busy'
+  | 'capacity_exceeded'
   | 'upstream_unavailable'
   | 'outcome_unknown'
   | 'invalid_response'
