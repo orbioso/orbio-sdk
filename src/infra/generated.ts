@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 48127915d251213611e6f4791698dc86fd926195dc9ed7cb54b46179c0a5eca8. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 467b659aee763566991c15533e5c6e4a289d5867cefaa8af5970188f64d27447. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -649,6 +649,12 @@ export interface InfrastructureContracts {
       resource_id: string
       digest: string
       manifest_base64: string
+    }
+    'worker.image.delete': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      digest: string
     }
     'worker.volume.create': {
       idempotency_key: string
@@ -6683,6 +6689,26 @@ export interface InfrastructureContracts {
       result?: unknown
       retry_after_seconds: number | null
     }
+    'worker.image.delete': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
     'worker.volume.create': {
       id: string
       project_id: string
@@ -7292,5 +7318,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '48127915d251213611e6f4791698dc86fd926195dc9ed7cb54b46179c0a5eca8'
+export const INFRA_SCHEMA_REVISION = '467b659aee763566991c15533e5c6e4a289d5867cefaa8af5970188f64d27447'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

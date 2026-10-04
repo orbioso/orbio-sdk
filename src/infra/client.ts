@@ -227,6 +227,7 @@ export class Infrastructure {
       inspect: (resourceId: string, image: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.inspect', resourceId, { image }, options),
       blob: (resourceId: string, digest: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.blob.inspect', resourceId, { digest }, options),
       publish: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.publish'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.publish', resourceId, args, options),
+      delete: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.delete', resourceId, args, options),
       uploads: {
         list: (resourceId: string, args: Omit<InfrastructureInput<'worker.image.upload.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.list', resourceId, args, options),
         get: (resourceId: string, uploadId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.image.upload.get', resourceId, { upload_id: uploadId }, options),

@@ -474,7 +474,7 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-The current source fixture has 123 contracts / 54 provider writes. Unknown native
+The current source fixture has 124 contracts / 55 provider writes. Unknown native
 steps are not repeated; native cost/retention and ambiguous-session cleanup still need
 completion before release. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
@@ -537,3 +537,14 @@ before native requests and returns capacity_exceeded in the failed original
 operation, releasing only its no-dispatch hold. Do not automatically create a
 new key/account or raise the ceiling to evade the limit. Native cleanup resolution
 and full verification remain required before this draft release is ready.
+
+Explicit Fly manifest cleanup: infra.workers.images.delete(resourceId, args)
+accepts digest and the ordinary saved idempotency_key/max_cost. max_cost:"0" uses
+the cleanup lane after funding expiry. Configured Machine references and earlier
+unresolved writers prevent cleanup. A durable fence blocks publication and
+Machine create/update/start/restart for the same digest; stop/delete remain
+available. Recovery never repeats DELETE. Success records manifest absence at
+observation time, blob_cleanup:not_requested, artifact_capacity_reclaimed:false
+and billing_final:false. It does not establish blob/layer removal, reclaimed
+capacity or a final bill. Native Fly DELETE compatibility is unverified; see the
+[cleanup guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_RETENTION.md).

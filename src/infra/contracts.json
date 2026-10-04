@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "48127915d251213611e6f4791698dc86fd926195dc9ed7cb54b46179c0a5eca8",
+  "schemaRevision": "467b659aee763566991c15533e5c6e4a289d5867cefaa8af5970188f64d27447",
   "tools": [
     {
       "name": "infra.status",
@@ -16777,7 +16777,7 @@
     {
       "name": "worker.image.publish",
       "permission": "worker.manage",
-      "description": "Publish a bounded single-platform OCI/Docker schema-2 manifest by immutable sha256 digest in the assigned private repository, with active funding. Supply exact manifest bytes as canonical base64 (32 KiB maximum) and their digest; every referenced config/layer digest and size must already exist in this repository. At most 64 layers, 512 MiB per layer and 1 GiB total. Foreign layers, external URLs, mutable tags and cross-repository mounts are refused. Returns an immutable image reference; then inspect it and explicitly create/update a Machine. This never builds code or starts compute. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Publish a bounded single-platform OCI/Docker schema-2 manifest by immutable sha256 digest in the assigned private repository, with active funding. Supply exact manifest bytes as canonical base64 (32 KiB maximum) and their digest; every referenced config/layer digest and size must already exist in this repository. At most 64 layers, 512 MiB per layer and 1 GiB total. Foreign layers, external URLs, mutable tags and cross-repository mounts are refused. Returns an immutable image reference; then inspect it and explicitly create/update a Machine. Pending cleanup of this same digest blocks publication. This never builds code or starts compute. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -16996,6 +16996,223 @@
       "costBasis": "provider_metered",
       "upstream": true,
       "destructive": false
+    },
+    {
+      "name": "worker.image.delete",
+      "permission": "worker.manage",
+      "description": "Explicitly attempt permanent deletion of one immutable image manifest by digest only in this assigned Fly app repository. Stop/delete or reconfigure every Machine referencing it first; stopped Machines also retain their image reference. Unknown Machine configuration or unresolved prior publication/configuration blocks cleanup. May use max_cost:\"0\" for the cleanup lane after funding expires. A durable fence blocks publication and Machine create/update/start/restart using this digest until observed absence or definite refusal; stop/delete remain available. Save the original intent and poll operation.get after uncertainty: recovery never repeats DELETE. Success records manifest absence at that observation, not layer/blob removal, reclaimed artifact capacity, garbage collection, a finalized bill or a future absence guarantee. Fly native DELETE support remains unverified and can refuse the request. This never deletes a Machine or releases an incurred bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id",
+          "digest"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "provider_metered",
+      "upstream": true,
+      "destructive": true
     },
     {
       "name": "worker.volume.create",
@@ -18112,7 +18329,7 @@
     {
       "name": "worker.machine.create",
       "permission": "worker.manage",
-      "description": "Create a Machine within the assigned isolated Fly app. Supply an immutable container digest and region; requires active funding. Fly private registry references must belong to this assigned app; cross-product/agent repositories and normalized hostname/path aliases are refused. Use worker.image.inspect for bounded digest/size verification first. Optionally mount one previously created unattached volume from this app/region. Explicit http exposes ports 80/443 after app IP allocation; no proxy autostart. Memory is a multiple of 256 MiB. Broker subject metadata cannot be overridden, and root credentials never enter the container. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Create a Machine within the assigned isolated Fly app. Supply an immutable container digest and region; requires active funding. Fly private registry references must belong to this assigned app; cross-product/agent repositories and normalized hostname/path aliases are refused. Use worker.image.inspect for bounded digest/size verification first. Pending cleanup of this image blocks creation. Optionally mount one previously created unattached volume from this app/region. Explicit http exposes ports 80/443 after app IP allocation; no proxy autostart. Memory is a multiple of 256 MiB. Broker subject metadata cannot be overridden, and root credentials never enter the container. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -18412,7 +18629,7 @@
     {
       "name": "worker.machine.update",
       "permission": "worker.manage",
-      "description": "Update one verified Machine configuration in this assigned Fly app, with active funding and native version protection. Supply an immutable digest; a Fly private image must belong to this app, never another agent/product repository. Omitted env becomes empty and omitted command uses the image default. Region cannot move. Omitted http preserves routing; null removes it. A volume mount is preserved and cannot be swapped by an update; if supplied it must match the existing mount. Broker isolation metadata stays intact. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Update one verified Machine configuration in this assigned Fly app, with active funding and native version protection. Supply an immutable digest; a Fly private image must belong to this app, never another agent/product repository. Omitted env becomes empty and omitted command uses the image default. Region cannot move. Omitted http preserves routing; null removes it. A volume mount is preserved and cannot be swapped by an update; if supplied it must match the existing mount. Pending cleanup of the replacement image blocks this update. Broker isolation metadata stays intact. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -22297,7 +22514,7 @@
     {
       "name": "worker.machine.start",
       "permission": "worker.manage",
-      "description": "Start one Machine verified in the assigned Fly app. Requires active funding. Native lifecycle state is separate from application health; stopped Machine storage can still bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Start one Machine verified in the assigned Fly app. Requires active funding; pending cleanup of the configured image blocks this action. Native lifecycle state is separate from application health; stopped Machine storage can still bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -22733,7 +22950,7 @@
     {
       "name": "worker.machine.restart",
       "permission": "worker.manage",
-      "description": "Request a restart of one Machine verified in the assigned Fly app. Requires active funding. Native lifecycle state is separate from application health; stopped Machine storage can still bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Request a restart of one Machine verified in the assigned Fly app. Requires active funding; pending cleanup of the configured image blocks this action. Native lifecycle state is separate from application health; stopped Machine storage can still bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {

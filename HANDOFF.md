@@ -20,8 +20,23 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 123 contracts / 54 provider writes.
-Latest Fly artifact increment (2026-10-05): workers.images.retention(resourceId)
+Current breadth increment: source fixture/generated types contain 124 contracts / 55 provider writes.
+Latest Fly cleanup increment (2026-10-05): workers.images.delete(resourceId, args)
+mirrors exact assigned-repository immutable manifest deletion. Supply digest plus
+saved idempotency key/max_cost; max_cost:"0" enables the cleanup admission lane.
+Configured/unknown Machine references and unresolved earlier writers prevent
+cleanup. A checking fence precedes inventory and a separate single-attempt marker
+precedes native DELETE; recovery never repeats DELETE. Publication/create/update/
+start/restart for this digest are fenced until resolution, while stop/delete stay
+available. Success is historical observed manifest absence, not blob/layer removal,
+reclaimed capacity or final charges. Native Fly compatibility remains unverified.
+Platform migration 20261005022000 is unapplied; current fixture/generated source
+has 124 contracts / 55 provider writes. Generation is engineering output, not
+validation. No checks/tests/CI/native calls/publication. Physical retention,
+pricing/inbox-payer decisions and final full-stack gates remain. See platform
+TOOLKIT_FLY_RETENTION.md and canonical handoff.
+
+Prior Fly artifact increment (2026-10-05): workers.images.retention(resourceId)
 reads this app's conservative recorded digest/maximum-declared-byte/begin-count
 capacity, not native storage or invoices. App limits are 128 digests, 4 GiB and
 1000 begins; account limits are shared without exposing account/other-agent
