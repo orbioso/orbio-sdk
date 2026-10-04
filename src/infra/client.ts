@@ -118,6 +118,9 @@ export class Infrastructure {
   readonly resources = {
     list: (args: InfrastructureInput<'resource.list'> = {}, options: InfrastructureRequestOptions = {}) => this.call('resource.list', args, options),
     get: async (resourceId: string, options: InfrastructureRequestOptions = {}) => this.call('resource.get', { resource_id: uuid(resourceId) }, options),
+    /** Recorded, delayed native cost observations; never a final customer bill.
+     * Decimal micro-USD strings preserve resource-wide totals. No provider call. */
+    spending: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.call('resource.spending', { resource_id: uuid(resourceId) }, options),
   }
   readonly operations = {
     list: (args: InfrastructureInput<'operation.list'> = {}, options: InfrastructureRequestOptions = {}) => this.call('operation.list', args, options),

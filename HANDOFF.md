@@ -20,7 +20,15 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 106 contracts.
+Current breadth increment: source fixture/generated types contain 107 contracts.
+Latest addition: resources.spending exposes recorded, non-final native cost
+observations without a provider call. The platform captures private scoped Vercel
+calendar-period evidence and requests production pause at protective high-water
+capacity. Public summaries use decimal micro-USD strings, retain deleted-resource
+visibility and leave missing evidence null. Final funding/customer charges stay
+in funding.list/get. README/generated contracts/owner views mirror the addition;
+no tests/CI/native changes/publication. Full all-provider native billing, remaining
+workflows and final verification remain required.
 Latest addition: deployments.resume/pause and workers.resume reuse original
 platform lifecycle funding/receipt rails. Vercel resume prepays a fresh window
 before native unpause (explicit production/domain effects), while pause verifies

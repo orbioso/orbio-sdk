@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 3e08b64cebc26cb2aef82d25abf8d8bc2a6769848406230221355bf5cd2f34da. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: f3e0478f4f072ea2eda0a51a63734a94c9a215d4890b76bee00fb47a135c1fcc. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -8,6 +8,9 @@ export interface InfrastructureContracts {
       before?: string
     }
     'resource.get': {
+      resource_id: string
+    }
+    'resource.spending': {
       resource_id: string
     }
     'operation.list': {
@@ -4743,6 +4746,20 @@ export interface InfrastructureContracts {
       updated_at: string
       deleted_at: string | null
     }
+    'resource.spending': {
+      resource_id: string
+      project_id: string
+      agent_id: string
+      provider: 'e2b' | 'vercel' | 'fly' | 'supabase' | 'agentmail'
+      available: boolean
+      reported_upstream_micro_usd: string | null
+      protective_high_water_micro_usd: string | null
+      approved_upstream_capacity_micro_usd: string | null
+      periods_observed: number
+      captured_at: string | null
+      billing_final: false
+      budget_exhausted: boolean | null
+    }
     'operation.list': {
       items: {
         id: string
@@ -4803,7 +4820,8 @@ export interface InfrastructureContracts {
         usage_ended_at: string | null
         on_grant_revocation: 'finish_window' | 'stop'
         shutdown_requested_at: string | null
-        shutdown_reason: 'owner_requested' | 'funding_expired' | 'grant_revoked' | 'provider_error' | null
+        shutdown_reason:
+          'owner_requested' | 'funding_expired' | 'grant_revoked' | 'provider_error' | 'budget_exhausted' | null
         created_at: string
         updated_at: string
         closed_at: string | null
@@ -4826,7 +4844,8 @@ export interface InfrastructureContracts {
       usage_ended_at: string | null
       on_grant_revocation: 'finish_window' | 'stop'
       shutdown_requested_at: string | null
-      shutdown_reason: 'owner_requested' | 'funding_expired' | 'grant_revoked' | 'provider_error' | null
+      shutdown_reason:
+        'owner_requested' | 'funding_expired' | 'grant_revoked' | 'provider_error' | 'budget_exhausted' | null
       created_at: string
       updated_at: string
       closed_at: string | null
@@ -6476,5 +6495,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '3e08b64cebc26cb2aef82d25abf8d8bc2a6769848406230221355bf5cd2f34da'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = 'f3e0478f4f072ea2eda0a51a63734a94c9a215d4890b76bee00fb47a135c1fcc'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

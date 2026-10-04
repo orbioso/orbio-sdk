@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "3e08b64cebc26cb2aef82d25abf8d8bc2a6769848406230221355bf5cd2f34da",
+  "schemaRevision": "f3e0478f4f072ea2eda0a51a63734a94c9a215d4890b76bee00fb47a135c1fcc",
   "tools": [
     {
       "name": "infra.status",
@@ -498,6 +498,168 @@
                   "created_at",
                   "updated_at",
                   "deleted_at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "resource.spending",
+      "description": "Read recorded native spending for one assigned resource, including retained observations after deletion. Free broker metadata; no provider calls or credentials. Currently Vercel calendar-period reports only; other providers or missing evidence return available:false and null amounts, never invented zero. Amounts are decimal micro-USD strings. Reports are delayed and non-final: billing_final is always false, high-water protection can exceed a later credited report, and approved capacity is not your available account balance. The guard requests production pause at observed capacity; previews and retained storage may still bill. Read funding.list/get separately for held and final customer charges.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "resource_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "provider": {
+                    "enum": [
+                      "e2b",
+                      "vercel",
+                      "fly",
+                      "supabase",
+                      "agentmail"
+                    ]
+                  },
+                  "available": {
+                    "type": "boolean"
+                  },
+                  "reported_upstream_micro_usd": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^(0|[1-9][0-9]{0,38})$"
+                  },
+                  "protective_high_water_micro_usd": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^(0|[1-9][0-9]{0,38})$"
+                  },
+                  "approved_upstream_capacity_micro_usd": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^(0|[1-9][0-9]{0,38})$"
+                  },
+                  "periods_observed": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "captured_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "billing_final": {
+                    "const": false
+                  },
+                  "budget_exhausted": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "resource_id",
+                  "project_id",
+                  "agent_id",
+                  "provider",
+                  "available",
+                  "reported_upstream_micro_usd",
+                  "protective_high_water_micro_usd",
+                  "approved_upstream_capacity_micro_usd",
+                  "periods_observed",
+                  "captured_at",
+                  "billing_final",
+                  "budget_exhausted"
                 ],
                 "additionalProperties": false
               }
@@ -1106,6 +1268,7 @@
                             "funding_expired",
                             "grant_revoked",
                             "provider_error",
+                            "budget_exhausted",
                             null
                           ]
                         },
@@ -1328,6 +1491,7 @@
                       "funding_expired",
                       "grant_revoked",
                       "provider_error",
+                      "budget_exhausted",
                       null
                     ]
                   },

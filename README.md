@@ -433,3 +433,15 @@ funding. Both fresh resume paths require positive max_cost and refuse overlappin
 windows. Pausing early does not invent a refund or erase the old window. All
 current additions remain unverified/unpublished; full native billing/spending
 controls and final all-provider workflow checks remain required.
+
+`infra.resources.spending(resourceId)` reads recorded native cost without a
+provider call. It stays subject-scoped even after resource deletion. Vercel
+coverage currently returns delayed calendar-period observations; missing evidence
+and other providers return `available:false` and null costs. Monetary fields are
+decimal micro-USD strings: use `BigInt`, never floating-point arithmetic. The
+protective high-water amount may exceed a later credited report; approved upstream
+capacity is not your available account balance. `billing_final:false` means this
+is not a final invoice or customer charge. The platform requests production
+pause at observed capacity, but previews/storage can continue billing.
+Native finality/allocation and other provider billing remain unfinished; this
+source is unpublished and unverified.
