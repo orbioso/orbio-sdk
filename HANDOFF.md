@@ -20,14 +20,24 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 103 contracts.
+Current breadth increment: source fixture/generated types contain 106 contracts.
+Latest addition: deployments.resume/pause and workers.resume reuse original
+platform lifecycle funding/receipt rails. Vercel resume prepays a fresh window
+before native unpause (explicit production/domain effects), while pause verifies
+production paused:true without assuming preview bills ended. Project reads now
+include nullable native paused; absence is unknown. Fly resume finances an app
+with verified stopped/created/destroyed Machines, then requires a separate
+explicit Machine start/create. Overlapping windows are refused; no implicit
+restart/redeploy or unknown-zero refund. All 48 provider writes have typed
+helpers. README/generated schemas/owner workflows match; no checks/CI/native
+calls or publication. Complete native billing/finality/spend/retention remain.
+
 Latest addition: deployments.renew/workers.renew/databases.renew explicitly prepay
 one adjacent native-provider window. Broker-only zero API cost is separate from
 the positive lifetime hold; no provider restart/deploy/restore occurs. The platform
 atomically checks current continuous paid parent, subject, live grant and balance/
 budget before reservation/activation. Recovery reads the original immutable window,
-never reactivates it or extends the deadline. Expired-resource resume/accounting/
-spending/retention remain platform engineering work in the same release.
+never reactivates it or extends the deadline. Native accounting/spending/retention remain platform engineering work in the same release.
 
 Added funding.list(resourceId, pageArgs) and funding.get(fundingId), with generated
 public financial shapes. Reads stay scoped to product/agent, include deleted-

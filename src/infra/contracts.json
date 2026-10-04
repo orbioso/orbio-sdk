@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "1cd4b85a62e5d6c058519258b235883048ff8d40d3f776a95b8619318bc4599c",
+  "schemaRevision": "3e08b64cebc26cb2aef82d25abf8d8bc2a6769848406230221355bf5cd2f34da",
   "tools": [
     {
       "name": "infra.status",
@@ -7161,6 +7161,12 @@
                       "string",
                       "null"
                     ]
+                  },
+                  "paused": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   }
                 },
                 "required": [
@@ -7170,7 +7176,8 @@
                   "build_command",
                   "install_command",
                   "root_directory",
-                  "output_directory"
+                  "output_directory",
+                  "paused"
                 ],
                 "additionalProperties": false
               }
@@ -10692,6 +10699,456 @@
       "destructive": false
     },
     {
+      "name": "deployment.resume",
+      "permission": "deployment.manage",
+      "description": "Fund a fresh finite window before unpausing production in this assigned Vercel project. Requires native paused:true and a positive max_cost; overlapping paid windows are refused, so use deployment.renew for live continuity. The native unpause can restore existing production traffic and automatic domain assignment. It does not create a deployment or prove application health; preview usage and retained bills are separate. Save the original intent; recovery reads native paused:false or the saved reply, never repeats unpause. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lifetime_seconds": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 86400,
+            "default": 3600
+          },
+          "on_grant_revocation": {
+            "enum": [
+              "finish_window",
+              "stop"
+            ],
+            "default": "finish_window"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "provider_metered",
+      "upstream": true,
+      "destructive": true
+    },
+    {
+      "name": "worker.resume",
+      "permission": "worker.manage",
+      "description": "Fund a fresh finite window for an existing assigned Fly app with no running/starting Machines. Requires positive max_cost; overlapping windows are refused. Native stopped/created/destroyed states are verified before funding. This performs no Machine create/start/restart, image update or proxy autostart. Then explicitly call worker.machine.start for the verified Machine, using its own saved intent. Old compute/storage bills remain independent. Use worker.renew for continuous paid operation. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lifetime_seconds": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 86400,
+            "default": 3600
+          },
+          "on_grant_revocation": {
+            "enum": [
+              "finish_window",
+              "stop"
+            ],
+            "default": "finish_window"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "provider_metered",
+      "upstream": true,
+      "destructive": false
+    },
+    {
       "name": "deployment.renew",
       "permission": "deployment.manage",
       "description": "Prepay one adjacent continuation of an allocated resource that still has an active paid window. Reserve a positive max_cost for 60–86400 additional seconds. The atomic broker transaction checks a continuous paid parent chain, current grant, balance and product budget; concurrent tail changes are refused. No native create, restart, database restore, deployment or timeout call occurs. Funding preserves runtime state and does not promise application health or free usage/storage. Future windows do not trigger early native usage reads. Existing expiry stops compute unless an eligible prepaid successor covers the current time. Save the original request; recovery reads the accepted finance operation without reactivating or extending it. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
@@ -10913,7 +11370,7 @@
       },
       "readOnly": false,
       "costBasis": "provider_metered",
-      "upstream": true,
+      "upstream": false,
       "destructive": false
     },
     {
@@ -11138,7 +11595,7 @@
       },
       "readOnly": false,
       "costBasis": "provider_metered",
-      "upstream": true,
+      "upstream": false,
       "destructive": false
     },
     {
@@ -11363,7 +11820,7 @@
       },
       "readOnly": false,
       "costBasis": "provider_metered",
-      "upstream": true,
+      "upstream": false,
       "destructive": false
     },
     {
@@ -12779,6 +13236,218 @@
           "max_cost",
           "resource_id",
           "deployment_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "provider_metered",
+      "upstream": true,
+      "destructive": true
+    },
+    {
+      "name": "deployment.pause",
+      "permission": "deployment.manage",
+      "description": "Request stop of this resource’s funding windows and pause the assigned Vercel project’s production traffic. Native paused:true confirms production pause only; previews, builds and retained resources can still bill. No deployment/data deletion or unknown-zero settlement. Use deployment.resume with fresh funding to unpause after the existing window permits a nonoverlapping interval. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id"
         ],
         "additionalProperties": false
       },

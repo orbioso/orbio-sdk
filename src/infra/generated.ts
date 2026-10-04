@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 1cd4b85a62e5d6c058519258b235883048ff8d40d3f776a95b8619318bc4599c. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 3e08b64cebc26cb2aef82d25abf8d8bc2a6769848406230221355bf5cd2f34da. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -312,6 +312,20 @@ export interface InfrastructureContracts {
       lifetime_seconds?: number
       on_grant_revocation?: 'finish_window' | 'stop'
     }
+    'deployment.resume': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      lifetime_seconds?: number
+      on_grant_revocation?: 'finish_window' | 'stop'
+    }
+    'worker.resume': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      lifetime_seconds?: number
+      on_grant_revocation?: 'finish_window' | 'stop'
+    }
     'deployment.renew': {
       idempotency_key: string
       max_cost: string
@@ -404,6 +418,11 @@ export interface InfrastructureContracts {
       max_cost: string
       resource_id: string
       deployment_id: string
+    }
+    'deployment.pause': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
     }
     'deployment.delete': {
       idempotency_key: string
@@ -5315,6 +5334,7 @@ export interface InfrastructureContracts {
       install_command: string | null
       root_directory: string | null
       output_directory: string | null
+      paused: boolean | null
     }
     'deployment.list': {
       items: {
@@ -5567,6 +5587,46 @@ export interface InfrastructureContracts {
       result?: unknown
       retry_after_seconds: number | null
     }
+    'deployment.resume': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.resume': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
     'deployment.renew': {
       id: string
       project_id: string
@@ -5748,6 +5808,26 @@ export interface InfrastructureContracts {
       retry_after_seconds: number | null
     }
     'deployment.remove': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'deployment.pause': {
       id: string
       project_id: string
       agent_id: string
@@ -6396,5 +6476,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '1cd4b85a62e5d6c058519258b235883048ff8d40d3f776a95b8619318bc4599c'
+export const INFRA_SCHEMA_REVISION = '3e08b64cebc26cb2aef82d25abf8d8bc2a6769848406230221355bf5cd2f34da'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

@@ -418,3 +418,18 @@ funding does not prove every other bill ended. No private proof/root credential
 is returned, and these reads never renew compute or settle bills. Native finality/
 spending/retention and final workflow verification remain unfinished; this source
 is unpublished and unverified.
+
+`infra.deployments.resume(resourceId, args)` prepays a fresh nonoverlapping window
+before restoring verified paused production traffic. Unpause can restore existing
+production/domain assignment; it never builds code or proves app health.
+`infra.deployments.pause(resourceId, args)` requests funding shutdown and verifies
+production paused without erasing preview/build/storage bills. Project reads
+include nullable `paused`; missing native status is unknown.
+
+`infra.workers.resume(resourceId, args)` funds the existing assigned app only after
+its Machines are verified stopped/created/destroyed. No Machine starts implicitly;
+follow with `infra.workers.machines.start` or explicit creation under that active
+funding. Both fresh resume paths require positive max_cost and refuse overlapping
+windows. Pausing early does not invent a refund or erase the old window. All
+current additions remain unverified/unpublished; full native billing/spending
+controls and final all-provider workflow checks remain required.

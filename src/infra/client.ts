@@ -186,6 +186,8 @@ export class Infrastructure {
   }
   readonly deployments = {
     create: (args: InfrastructureInput<'deployment.create'>, options: InfrastructureRequestOptions = {}) => this.call('deployment.create', args, options),
+    resume: (resourceId: string, args: Omit<InfrastructureInput<'deployment.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.resume', resourceId, args, options),
+    pause: (resourceId: string, args: Omit<InfrastructureInput<'deployment.pause'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.pause', resourceId, args, options),
     renew: (resourceId: string, args: Omit<InfrastructureInput<'deployment.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.renew', resourceId, args, options),
     configure: (resourceId: string, args: Omit<InfrastructureInput<'deployment.configure'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.configure', resourceId, args, options),
     upload: (resourceId: string, args: Omit<InfrastructureInput<'deployment.upload'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.upload', resourceId, args, options),
@@ -203,6 +205,7 @@ export class Infrastructure {
   }
   readonly workers = {
     create: (args: InfrastructureInput<'worker.create'>, options: InfrastructureRequestOptions = {}) => this.call('worker.create', args, options),
+    resume: (resourceId: string, args: Omit<InfrastructureInput<'worker.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.resume', resourceId, args, options),
     renew: (resourceId: string, args: Omit<InfrastructureInput<'worker.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.renew', resourceId, args, options),
     delete: (resourceId: string, args: Omit<InfrastructureInput<'worker.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.delete', resourceId, args, options),
     execute: (resourceId: string, args: Omit<InfrastructureInput<'worker.execute'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.execute', resourceId, args, options),
