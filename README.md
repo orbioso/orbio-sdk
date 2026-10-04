@@ -362,3 +362,13 @@ are not accepted. Keep the original request/key; a lost upload reply is never
 repeated automatically. mail.labelEvents(resourceId, {limit, cursor}) reads a
 page of label-change audit events, not delivery or incoming-mail notifications.
 These new source contracts remain unverified and unpublished.
+
+
+Fly worker workflows also expose workers.volumes.list/get/create/extend/delete,
+workers.ips.list/allocate/release and workers.logs. Create persistent volumes
+before Machines and mount one from the assigned app/region. Machine http enables
+explicit 80/443 ingress after app IP allocation; proxy autostart stays disabled.
+Updates preserve omitted HTTP and disable it with null; mounts and regions cannot
+change in-place. Logs are private text; truncated pages have no advancing cursor
+because that would skip omitted native entries. All additions remain unpublished
+and unverified; native spending/accounting are platform release requirements.

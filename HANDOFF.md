@@ -20,8 +20,15 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 80 contracts.
-Latest increment adds mail.labelEvents (native label audit, not delivery
+Current breadth increment: source fixture/generated types contain 89 contracts.
+Latest increment adds workers.logs, workers.volumes list/get/create/extend/delete
+and workers.ips list/allocate/release. Generated Machine types add verified volume
+mounts and explicit HTTP ingress with no proxy autostart. Omitted HTTP preserves
+routing, null disables it; mounts/regions cannot change in-place. Native platform
+cost attribution/renewal/image credentials remain unfinished. This increment is
+unverified; no checks or live smoke performed.
+
+Prior increment adds mail.labelEvents (native label audit, not delivery
 webhooks) and generated inline attachment fields for draft create/update. Uploads
 are canonical base64, limited to 10 files/64 KiB each/96 KiB total decoded and
 192 KiB serialized draft fields. Remove IDs must belong to the assigned draft.

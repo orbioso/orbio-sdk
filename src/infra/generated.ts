@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: eac845460de67d4fb79753934fdb8a209e82d34aceb121adeeb9415a9d8e6986. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 5dc4efe70ff7c7c27078d3f6cf64c653a43d78dc1ae7b98aa53c3bfd4589a21f. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -211,6 +211,22 @@ export interface InfrastructureContracts {
     'worker.app': {
       resource_id: string
     }
+    'worker.volume.list': {
+      resource_id: string
+    }
+    'worker.volume.get': {
+      resource_id: string
+      volume_id: string
+    }
+    'worker.ip.list': {
+      resource_id: string
+    }
+    'worker.logs': {
+      resource_id: string
+      machine_id?: string
+      cursor?: string
+      maximum_bytes?: number
+    }
     'worker.machine.list': {
       resource_id: string
     }
@@ -348,6 +364,40 @@ export interface InfrastructureContracts {
       max_cost: string
       resource_id: string
     }
+    'worker.volume.create': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      region: string
+      size_gb?: number
+      auto_backup_enabled?: boolean
+      snapshot_retention?: number
+    }
+    'worker.volume.extend': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      volume_id: string
+      size_gb: number
+    }
+    'worker.volume.delete': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      volume_id: string
+    }
+    'worker.ip.allocate': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      type: 'shared_v4' | 'v6'
+    }
+    'worker.ip.release': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      address: string
+    }
     'worker.machine.create': {
       idempotency_key: string
       max_cost: string
@@ -363,6 +413,23 @@ export interface InfrastructureContracts {
       env?: {
         [k: string]: string
       }
+      volume?: {
+        volume_id: string
+        /**
+         * Absolute mount path without traversal; create the volume first in this region.
+         */
+        path: string
+      }
+      /**
+       * Explicit HTTP ingress on ports 80/443 with HTTPS redirect, no proxy autostart. null disables routing; omission preserves routing on updates. App IP allocation is separate.
+       */
+      http?: {
+        internal_port: number
+        /**
+         * Optional GET health path, for example /health.
+         */
+        health_path?: string
+      } | null
     }
     'worker.machine.update': {
       idempotency_key: string
@@ -381,6 +448,23 @@ export interface InfrastructureContracts {
         env?: {
           [k: string]: string
         }
+        volume?: {
+          volume_id: string
+          /**
+           * Absolute mount path without traversal; create the volume first in this region.
+           */
+          path: string
+        }
+        /**
+         * Explicit HTTP ingress on ports 80/443 with HTTPS redirect, no proxy autostart. null disables routing; omission preserves routing on updates. App IP allocation is separate.
+         */
+        http?: {
+          internal_port: number
+          /**
+           * Optional GET health path, for example /health.
+           */
+          health_path?: string
+        } | null
       }
     }
     'worker.execute': {
@@ -4808,6 +4892,51 @@ export interface InfrastructureContracts {
       app_name: string
       state: string
     }
+    'worker.volume.list': {
+      items: {
+        volume_id: string
+        name: string
+        state: string
+        region: string
+        size_gb: number
+        encrypted: boolean
+        attached_machine_id: string | null
+        created_at: string
+        auto_backup_enabled: boolean
+        snapshot_retention: number
+      }[]
+    }
+    'worker.volume.get': {
+      volume_id: string
+      name: string
+      state: string
+      region: string
+      size_gb: number
+      encrypted: boolean
+      attached_machine_id: string | null
+      created_at: string
+      auto_backup_enabled: boolean
+      snapshot_retention: number
+    }
+    'worker.ip.list': {
+      hostname: string
+      url: string | null
+      items: {
+        address: string
+        type: 'shared_v4' | 'v4' | 'v6' | 'private_v6'
+      }[]
+    }
+    'worker.logs': {
+      items: {
+        timestamp: string
+        message: string
+        level: string
+        machine_id: string | null
+        region: string | null
+      }[]
+      truncated: boolean
+      next_cursor: string | null
+    }
     'worker.machine.list': {
       items: {
         machine_id: string
@@ -4819,6 +4948,11 @@ export interface InfrastructureContracts {
         cpu_count: number
         memory_mb: number
         environment_keys: string[]
+        mounts: {
+          volume_id: string
+          path: string
+        }[]
+        http_port: number | null
       }[]
     }
     'worker.machine.get': {
@@ -4831,6 +4965,11 @@ export interface InfrastructureContracts {
       cpu_count: number
       memory_mb: number
       environment_keys: string[]
+      mounts: {
+        volume_id: string
+        path: string
+      }[]
+      http_port: number | null
     }
     'worker.machine.events': {
       items: unknown[]
@@ -5080,6 +5219,106 @@ export interface InfrastructureContracts {
       retry_after_seconds: number | null
     }
     'deployment.delete': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.volume.create': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.volume.extend': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.volume.delete': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.ip.allocate': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.ip.release': {
       id: string
       project_id: string
       agent_id: string
@@ -5488,5 +5727,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'eac845460de67d4fb79753934fdb8a209e82d34aceb121adeeb9415a9d8e6986'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.connection"])
+export const INFRA_SCHEMA_REVISION = '5dc4efe70ff7c7c27078d3f6cf64c653a43d78dc1ae7b98aa53c3bfd4589a21f'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.connection"])

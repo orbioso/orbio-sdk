@@ -199,6 +199,19 @@ export class Infrastructure {
     delete: (resourceId: string, args: Omit<InfrastructureInput<'worker.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.delete', resourceId, args, options),
     execute: (resourceId: string, args: Omit<InfrastructureInput<'worker.execute'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.execute', resourceId, args, options),
     app: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.app', resourceId, {}, options),
+    logs: (resourceId: string, args: Omit<InfrastructureInput<'worker.logs'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('worker.logs', resourceId, args, options),
+    volumes: {
+      list: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.volume.list', resourceId, {}, options),
+      get: (resourceId: string, volumeId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.volume.get', resourceId, { volume_id: volumeId }, options),
+      create: (resourceId: string, args: Omit<InfrastructureInput<'worker.volume.create'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.volume.create', resourceId, args, options),
+      extend: (resourceId: string, args: Omit<InfrastructureInput<'worker.volume.extend'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.volume.extend', resourceId, args, options),
+      delete: (resourceId: string, args: Omit<InfrastructureInput<'worker.volume.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.volume.delete', resourceId, args, options),
+    },
+    ips: {
+      list: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.ip.list', resourceId, {}, options),
+      allocate: (resourceId: string, args: Omit<InfrastructureInput<'worker.ip.allocate'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.ip.allocate', resourceId, args, options),
+      release: (resourceId: string, args: Omit<InfrastructureInput<'worker.ip.release'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.ip.release', resourceId, args, options),
+    },
     machines: {
       create: (resourceId: string, args: Omit<InfrastructureInput<'worker.machine.create'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.machine.create', resourceId, args, options),
       update: (resourceId: string, args: Omit<InfrastructureInput<'worker.machine.update'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('worker.machine.update', resourceId, args, options),
