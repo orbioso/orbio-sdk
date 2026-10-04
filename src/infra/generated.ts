@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 84271d9aa3ca7a9288c58f39659002e7c34556e02fa0f0185cacf40a495315ae. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 75182cf03630500aac6752e1b5577f22c1352173b2017e08f4ca77fe042fb1d1. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -4826,6 +4826,8 @@ export interface InfrastructureContracts {
       protective_high_water_micro_usd: string | null
       approved_upstream_capacity_micro_usd: string | null
       periods_observed: number
+      periods_expected: number | null
+      period_coverage_complete: boolean | null
       captured_at: string | null
       billing_final: false
       budget_exhausted: boolean | null
@@ -6801,5 +6803,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '84271d9aa3ca7a9288c58f39659002e7c34556e02fa0f0185cacf40a495315ae'
+export const INFRA_SCHEMA_REVISION = '75182cf03630500aac6752e1b5577f22c1352173b2017e08f4ca77fe042fb1d1'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

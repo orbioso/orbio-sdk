@@ -21,6 +21,14 @@ Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
 Current breadth increment: source fixture/generated types contain 120 contracts / 54 provider writes.
+Latest finance addition (2026-10-05): resources.spending now includes typed
+periods_expected and period_coverage_complete. Platform observation follows
+current-month retained costs beyond funding expiry and one missing/stale prior
+month per claim. Missing-month totals can understate spend; complete month
+coverage is not freshness/finality. Saved protective evidence remains usable
+when a new refresh fails. Generated types/README mirror the change; no checks
+or provider calls. Native invoice attribution and all-provider accounting remain.
+
 Latest addition (2026-10-05): workers.images.uploads.list/abandon mirror scoped
 broker inventory and explicit unknown-begin closure. Upload UUIDs equal original
 begin operation UUIDs. Known-session cancel now fences writes after earlier

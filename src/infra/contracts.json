@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "84271d9aa3ca7a9288c58f39659002e7c34556e02fa0f0185cacf40a495315ae",
+  "schemaRevision": "75182cf03630500aac6752e1b5577f22c1352173b2017e08f4ca77fe042fb1d1",
   "tools": [
     {
       "name": "infra.status",
@@ -558,7 +558,7 @@
     },
     {
       "name": "resource.spending",
-      "description": "Read recorded native spending for one assigned resource, including retained observations after deletion. Free broker metadata; no provider calls or credentials. Currently Vercel calendar-period reports only; other providers or missing evidence return available:false and null amounts, never invented zero. Amounts are decimal micro-USD strings. Reports are delayed and non-final: billing_final is always false, high-water protection can exceed a later credited report, and approved capacity is not your available account balance. The guard requests production pause at observed capacity; previews and retained storage may still bill. Read funding.list/get separately for held and final customer charges.",
+      "description": "Read recorded native spending for one assigned resource, including retained observations after deletion. Free broker metadata; no provider calls or credentials. Currently Vercel calendar-period reports only; other providers or missing evidence return available:false and null amounts, never invented zero. Amounts are decimal micro-USD strings. periods_expected and period_coverage_complete show whether every month since resource creation has a recorded report, including months after funding expiry. Complete period coverage does not prove freshness or invoice finality. Reports are delayed and non-final: billing_final is always false, high-water protection can exceed a later credited report, and approved capacity is not your available account balance. The guard requests production pause at observed capacity; previews and retained storage may still bill. Read funding.list/get separately for held and final customer charges.",
       "permission": "infra.read",
       "inputSchema": {
         "type": "object",
@@ -631,6 +631,19 @@
                     "type": "integer",
                     "minimum": 0
                   },
+                  "periods_expected": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 1
+                  },
+                  "period_coverage_complete": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
                   "captured_at": {
                     "type": [
                       "string",
@@ -657,6 +670,8 @@
                   "protective_high_water_micro_usd",
                   "approved_upstream_capacity_micro_usd",
                   "periods_observed",
+                  "periods_expected",
+                  "period_coverage_complete",
                   "captured_at",
                   "billing_final",
                   "budget_exhausted"

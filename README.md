@@ -506,3 +506,11 @@ normal admissions). Terminal-but-held outcomes preserve their monetary holds
 without occupying execution slots. Rate/grant/budget/resource checks still apply.
 These changes remain unverified and unpublished; complete native accounting and
 full-stack final checks remain release requirements.
+
+Recorded Vercel spending includes periods_expected and period_coverage_complete.
+These report whether every UTC month from resource creation through the current
+month has a recorded report. Missing history can understate actual spend; complete
+coverage proves neither freshness nor final invoices. The platform follows the
+current month beyond funding expiry and one missing/stale historical month per
+claim. Recorded amounts remain non-final and do not settle or refund funding.
+A failed refresh cannot erase an exhaustion proved by existing saved evidence.
