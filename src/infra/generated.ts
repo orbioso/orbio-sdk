@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: a9d932db2be1c3506d5c4971f4e4395e128d3b0a9f6e9e9d591f096c4c5623f7. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 8fbef1704b118a4b7aaffab57d5234569a614bb8f64821630ca7b49d66c21fe0. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -16,6 +16,33 @@ export interface InfrastructureContracts {
     }
     'operation.get': {
       operation_id: string
+    }
+    'workspace.quote': {
+      timeout_seconds?: number
+    }
+    'workspace.create': {
+      idempotency_key: string
+      max_cost: string
+      name: string
+      timeout_seconds?: number
+      on_grant_revocation?: 'finish_window' | 'stop'
+    }
+    'workspace.resume': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      timeout_seconds?: number
+      on_grant_revocation?: 'finish_window' | 'stop'
+    }
+    'workspace.pause': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+    }
+    'workspace.delete': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
     }
   }
   results: {
@@ -125,6 +152,95 @@ export interface InfrastructureContracts {
       result?: unknown
       retry_after_seconds: number | null
     }
+    'workspace.quote': {
+      timeout_seconds: number
+      reserve_micro_usd: number
+      suggested_max_cost: string
+      cpu_count: number
+      memory_mb: number
+      margin_bps: number
+      tariff_version: string
+    }
+    'workspace.create': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'workspace.resume': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'workspace.pause': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'workspace.delete': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
   }
 }
 
@@ -134,5 +250,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'a9d932db2be1c3506d5c4971f4e4395e128d3b0a9f6e9e9d591f096c4c5623f7'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get"])
+export const INFRA_SCHEMA_REVISION = '8fbef1704b118a4b7aaffab57d5234569a614bb8f64821630ca7b49d66c21fe0'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote"])

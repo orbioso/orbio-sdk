@@ -17,6 +17,7 @@ export type InfrastructureDescriptor = {
   name: string; description: string; permission: string
   inputSchema: Record<string, unknown>; outputSchema: Record<string, unknown>
   readOnly: boolean; costBasis: string
+  destructive?: boolean
 }
 export type InfrastructureCatalogue = { version: 1; enabled: boolean; tools: InfrastructureDescriptor[] }
 export type InfrastructureOptions = {
@@ -81,9 +82,9 @@ export class Infrastructure {
     if (!object(data) || data.version !== 1 || typeof data.enabled !== 'boolean' || !Array.isArray(data.tools) || data.tools.length > 200) throw invalidResponse()
     const names = new Set<string>()
     const tools = data.tools.map(value => {
-      if (!object(value) || typeof value.name !== 'string' || names.has(value.name) || typeof value.description !== 'string' || typeof value.permission !== 'string' || typeof value.readOnly !== 'boolean' || typeof value.costBasis !== 'string' || !object(value.inputSchema) || !object(value.outputSchema)) throw invalidResponse()
+      if (!object(value) || typeof value.name !== 'string' || names.has(value.name) || typeof value.description !== 'string' || typeof value.permission !== 'string' || typeof value.readOnly !== 'boolean' || typeof value.costBasis !== 'string' || (value.destructive !== undefined && typeof value.destructive !== 'boolean') || !object(value.inputSchema) || !object(value.outputSchema)) throw invalidResponse()
       names.add(value.name)
-      return { name: value.name, description: value.description, permission: value.permission, readOnly: value.readOnly, costBasis: value.costBasis, inputSchema: value.inputSchema, outputSchema: value.outputSchema }
+      return { name: value.name, description: value.description, permission: value.permission, readOnly: value.readOnly, costBasis: value.costBasis, inputSchema: value.inputSchema, outputSchema: value.outputSchema, ...(value.destructive === undefined ? {} : { destructive: value.destructive }) }
     })
     return { version: 1, enabled: data.enabled, tools }
   }
@@ -94,7 +95,7 @@ export class Infrastructure {
     const { data, headers } = await this.http.request<unknown>(`/api/v1/infra/tools/${encodeURIComponent(name)}`, { method: 'POST', body: args, signal: options.signal, maximumBytes: 4_194_304 }).catch((error: unknown) => {
       if (error instanceof OrbioError && error.code === 'unknown' && error.status === 0) {
         if (READ_ONLY_INFRASTRUCTURE_TOOLS.includes(name) || this.cached?.tools.some(tool => tool.name === name && tool.readOnly)) throw new OrbioError('the infrastructure read could not be completed', { code: 'upstream_unavailable', status: 503 })
-        throw new OrbioError('the request outcome is unknown; recover by operation ID before retrying', { code: 'outcome_unknown' })
+        throw new OrbioError('the request outcome is unknown; read the saved operation ID, or recover admission with identical arguments and the same idempotency_key', { code: 'outcome_unknown' })
       }
       throw error
     })
@@ -118,6 +119,15 @@ export class Infrastructure {
     get: async (operationId: string, options: InfrastructureRequestOptions = {}) => this.call('operation.get', { operation_id: uuid(operationId) }, options),
     /** Read-only polling. No dispatch, replay or cancellation on timeout/abort. */
     wait: (operationId: string, options: InfrastructureWaitOptions = {}) => this.wait(operationId, options),
+  }
+  /** Every mutation returns a durable operation. Save the caller-chosen key and
+   * original arguments before sending; these helpers never retry or raise caps. */
+  readonly workspaces = {
+    quote: (args: InfrastructureInput<'workspace.quote'> = {}, options: InfrastructureRequestOptions = {}) => this.call('workspace.quote', args, options),
+    create: (args: InfrastructureInput<'workspace.create'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.create', args, options),
+    resume: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.resume', { ...args, resource_id: uuid(resourceId) }, options),
+    pause: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.pause'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.pause', { ...args, resource_id: uuid(resourceId) }, options),
+    delete: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.delete', { ...args, resource_id: uuid(resourceId) }, options),
   }
   private async wait(operationId: string, options: InfrastructureWaitOptions): Promise<InfrastructureOperation> {
     operationId = uuid(operationId)

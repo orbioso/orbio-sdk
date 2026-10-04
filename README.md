@@ -29,8 +29,8 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 - **The agent launchpad.** Launch a token, harvest its creator fees, claim the
   CREDIT they earn, and manage the agent, all from one wallet.
 - **Paying for itself.** `topUp()` and `keepFunded()`.
-- **Scoped infrastructure.** Assigned product/agent overview, resource metadata
-  and durable operation recovery through the same contracts as hosted MCP.
+- **Scoped infrastructure.** Assigned product/agent overview, resource metadata,
+  explicit workspace allocation and durable recovery through hosted MCP contracts.
   An explicit infrastructure grant is required; broad gateway keys gain no authority.
 
 ## Agent infrastructure
@@ -38,8 +38,9 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 This source branch prepares infrastructure helpers for the platform release;
 these additions are not yet published on npm. The platform must enable the
 capabilities and the owner must assign a product, agent and permissions.
-Provider mutation workflows, owner resource setup and their typed helpers remain
-under development. Do not treat provider credential presence as readiness.
+Workspace quote/create/resume/pause/delete helpers are implemented here. Full
+billing, files/processes, other provider workflows and owner resource controls
+remain under development. Do not treat provider credential presence as readiness.
 
 ```ts
 import { createInfrastructure, InfrastructureWaitTimeout } from '@orbiodotso/sdk'
@@ -65,6 +66,42 @@ try {
   }
 }
 ```
+
+Workspace lifecycle grants require both `infra.read` and `workspace.manage`.
+Allocation is finite (15–3600 seconds, default 300), with explicit funding and a
+caller-approved decimal CREDIT ceiling. Quote first; it reserves nothing.
+
+```ts
+const quote = await infra.workspaces.quote({ timeout_seconds: 300 })
+// Check quote.reserve_micro_usd against your approved 0.03 CREDIT ceiling.
+if (BigInt(quote.reserve_micro_usd) > 30_000n) throw new Error('Quote exceeds approved ceiling')
+const request = {
+  name: 'Builder workspace',
+  timeout_seconds: 300,
+  idempotency_key: crypto.randomUUID(),
+  max_cost: '0.03',
+} // Persist the original request before sending it.
+const admitted = await infra.workspaces.create(request)
+// Persist admitted.id; allocation runs asynchronously after durable admission.
+const completed = await infra.operations.wait(admitted.id)
+// Inspect completed.state and billing_state separately, then read its resource UUID.
+
+// A confirmed resource can be paused without deleting its code:
+await infra.workspaces.pause(savedResourceId, {
+  idempotency_key: savedPauseKey,
+  max_cost: '0',
+})
+```
+
+An ambiguous admission is never automatically retried. If its operation UUID
+was lost, resubmit the identical saved request with the same `idempotency_key`.
+A new key can allocate a second workspace; raising a ceiling or changing args
+is not recovery. `resume(resourceId, args)`, `pause(resourceId, args)` and
+`delete(resourceId, args)` require an Orbio resource UUID and saved key/ceiling.
+Resume explicitly funds a paused workspace. Pause keeps code; delete permanently
+removes it. Neither action erases incurred compute charges or an uncertain bill.
+The default allocation revocation policy is `finish_window`; choose
+`on_grant_revocation:'stop'` to request stop when consent is revoked.
 
 The owner issues a dedicated `orbio_infra_` key or assigns an Orbio OAuth
 connection with explicit `infra` consent to one product and stable agent.
@@ -270,7 +307,7 @@ Use the SDK when you are writing code, MCP when a model is driving.
 | --- | --- |
 | `createOrbio(options)` | Make a client. Fetches addresses and the catalogue. |
 | `orbio.tools` | `list`, `describe`, `priceOf`, `call`, and named helpers |
-| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait` |
+| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait`, `workspaces.quote/create/resume/pause/delete` |
 | `orbio.account` | `key`, `balance`, `models` |
 | `orbio.credit` | `balanceOf`, `activate`, `feeExempt` |
 | `orbio.staking` | `stake`, `unstake`, `claim`, `positionOf`, `settledOf` |

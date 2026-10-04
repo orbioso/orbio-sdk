@@ -29,7 +29,7 @@ describe('infrastructure discovery and shared contracts', () => {
     const first = await infra.catalogue()
     expect(first.tools.map(tool => tool.name)).toContain('operation.get')
     first.tools.length = 0
-    expect((await infra.catalogue()).tools).toHaveLength(5)
+    expect((await infra.catalogue()).tools).toHaveLength(fixture.tools.length)
     expect(calls).toHaveLength(1)
     await infra.refresh()
     expect(calls).toHaveLength(2)
@@ -39,7 +39,7 @@ describe('infrastructure discovery and shared contracts', () => {
     let calls = 0
     const infra = client(async () => ++calls === 1 ? error('not_configured', 503) : Response.json(catalogue))
     await expect(infra.catalogue()).rejects.toMatchObject({ code: 'not_configured', retryable: false })
-    expect((await infra.catalogue()).tools).toHaveLength(5)
+    expect((await infra.catalogue()).tools).toHaveLength(fixture.tools.length)
     const malformed = client(async () => Response.json({ version: 2, enabled: true, tools: [] }))
     await expect(malformed.catalogue()).rejects.toMatchObject({ code: 'invalid_response' })
   })
@@ -90,6 +90,71 @@ describe('infrastructure discovery and shared contracts', () => {
     const results = await Promise.all([first, second])
     results[1].tools[0]!.name = 'changed'
     expect((await infra.catalogue()).tools[0]!.name).toBe('infra.status')
+  })
+  it('retains explicit destructive discovery hints and rejects malformed ones', async () => {
+    const infra = client(async () => Response.json(catalogue))
+    expect((await infra.catalogue()).tools.find(tool => tool.name === 'workspace.delete')).toMatchObject({ readOnly: false, destructive: true })
+    const invalid = client(async () => Response.json({ ...catalogue, tools: [{ ...(fixture.tools[0] as object), destructive: 'true' }] }))
+    await expect(invalid.catalogue()).rejects.toMatchObject({ code: 'invalid_response' })
+  })
+})
+
+describe('workspace admission and explicit recovery', () => {
+  it('quotes without admitting work and preserves original keys, ceilings and scope UUIDs for all lifecycle helpers', async () => {
+    const calls: { path: string; body: unknown }[] = []
+    const controller = new AbortController()
+    const infra = client(async (url, init) => {
+      calls.push({ path: new URL(String(url)).pathname, body: JSON.parse(String(init?.body)) })
+      expect(new Headers(init?.headers).get('authorization')).toBe('Bearer test-infra-grant')
+      expect(init?.signal).toBeInstanceOf(AbortSignal)
+      return json(String(url).endsWith('workspace.quote') ? { suggested_max_cost: '0.006831' } : operation('queued'))
+    })
+    expect(await infra.workspaces.quote({ timeout_seconds: 15 })).toEqual({ suggested_max_cost: '0.006831' })
+    const args = { name: 'Workspace', timeout_seconds: 15, idempotency_key: 'saved-create', max_cost: '0.006831' }
+    expect(await infra.workspaces.create(args, { signal: controller.signal })).toMatchObject({ id: operationId, state: 'queued' })
+    await infra.workspaces.resume(projectId.toUpperCase(), { idempotency_key: 'saved-resume', max_cost: '0.006831', timeout_seconds: 15, on_grant_revocation: 'stop' })
+    await infra.workspaces.pause(projectId, { idempotency_key: 'saved-pause', max_cost: '0' })
+    await infra.workspaces.delete(projectId, { idempotency_key: 'saved-delete', max_cost: '0' })
+    expect(calls).toEqual([
+      { path: '/api/v1/infra/tools/workspace.quote', body: { timeout_seconds: 15 } },
+      { path: '/api/v1/infra/tools/workspace.create', body: args },
+      { path: '/api/v1/infra/tools/workspace.resume', body: { resource_id: projectId, idempotency_key: 'saved-resume', max_cost: '0.006831', timeout_seconds: 15, on_grant_revocation: 'stop' } },
+      { path: '/api/v1/infra/tools/workspace.pause', body: { resource_id: projectId, idempotency_key: 'saved-pause', max_cost: '0' } },
+      { path: '/api/v1/infra/tools/workspace.delete', body: { resource_id: projectId, idempotency_key: 'saved-delete', max_cost: '0' } },
+    ])
+  })
+  it('never retries an ambiguous admission and explains recovery when its operation ID was lost', async () => {
+    let calls = 0
+    const bodies: unknown[] = []
+    const infra = client(async (_url, init) => {
+      bodies.push(JSON.parse(String(init?.body)))
+      if (++calls === 1) throw new Error('fixture private provider value')
+      return json(operation('queued'))
+    })
+    const args = { name: 'Workspace', idempotency_key: 'same-original-key', max_cost: '0.02' }
+    const failure = await infra.workspaces.create(args).catch(reason => reason)
+    expect(failure).toMatchObject({ code: 'outcome_unknown', retryable: false })
+    expect(String(failure)).toContain('identical arguments')
+    expect(String(failure)).toContain('same idempotency_key')
+    expect(String(failure)).not.toContain('private provider value')
+    expect(calls).toBe(1)
+    expect(await infra.workspaces.create(args)).toMatchObject({ id: operationId, state: 'queued' })
+    expect(bodies).toEqual([args, args])
+  })
+  it('rejects provider IDs before sending lifecycle mutations', async () => {
+    let calls = 0
+    const infra = client(async () => { calls++; return json(operation('queued')) })
+    const args = { idempotency_key: 'saved-key', max_cost: '0' }
+    await expect(infra.workspaces.resume('provider-sandbox-id', args)).rejects.toMatchObject({ code: 'invalid_request' })
+    await expect(infra.workspaces.pause('provider-sandbox-id', args)).rejects.toMatchObject({ code: 'invalid_request' })
+    await expect(infra.workspaces.delete('provider-sandbox-id', args)).rejects.toMatchObject({ code: 'invalid_request' })
+    expect(calls).toBe(0)
+  })
+  it('never treats a quote transport failure as an ambiguous mutation', async () => {
+    let calls = 0
+    const infra = client(async () => { calls++; throw new Error('fixture hidden transport error') })
+    await expect(infra.workspaces.quote()).rejects.toMatchObject({ code: 'upstream_unavailable', retryable: true })
+    expect(calls).toBe(1)
   })
 })
 
