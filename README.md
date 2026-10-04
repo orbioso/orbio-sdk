@@ -307,7 +307,7 @@ Use the SDK when you are writing code, MCP when a model is driving.
 | --- | --- |
 | `createOrbio(options)` | Make a client. Fetches addresses and the catalogue. |
 | `orbio.tools` | `list`, `describe`, `priceOf`, `call`, and named helpers |
-| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait`, `workspaces.quote/create/resume/pause/delete` |
+| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait`, workspace lifecycle/files/commands/output/preview, scoped `mail`, `deployments`, `workers`, `databases` reads |
 | `orbio.account` | `key`, `balance`, `models` |
 | `orbio.credit` | `balanceOf`, `activate`, `feeExempt` |
 | `orbio.staking` | `stake`, `unstake`, `claim`, `positionOf`, `settledOf` |

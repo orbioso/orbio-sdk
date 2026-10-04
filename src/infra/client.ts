@@ -110,6 +110,11 @@ export class Infrastructure {
   /** Cheap assigned product/agent overview; provider presence is not a health probe. */
   status(options: InfrastructureRequestOptions = {}) { return this.call('infra.status', {}, options) }
 
+  private scoped<K extends InfrastructureToolName>(name: K, resourceId: string,
+    args: Omit<InfrastructureInput<K>, 'resource_id'>, options: InfrastructureRequestOptions) {
+    return this.call(name, { ...args, resource_id: uuid(resourceId) } as InfrastructureInput<K>, options)
+  }
+
   readonly resources = {
     list: (args: InfrastructureInput<'resource.list'> = {}, options: InfrastructureRequestOptions = {}) => this.call('resource.list', args, options),
     get: async (resourceId: string, options: InfrastructureRequestOptions = {}) => this.call('resource.get', { resource_id: uuid(resourceId) }, options),
@@ -128,6 +133,57 @@ export class Infrastructure {
     resume: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.resume', { ...args, resource_id: uuid(resourceId) }, options),
     pause: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.pause'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.pause', { ...args, resource_id: uuid(resourceId) }, options),
     delete: async (resourceId: string, args: Omit<InfrastructureInput<'workspace.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.call('workspace.delete', { ...args, resource_id: uuid(resourceId) }, options),
+    files: {
+      read: (resourceId: string, args: Omit<InfrastructureInput<'workspace.file.read'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.file.read', resourceId, args, options),
+      list: (resourceId: string, args: Omit<InfrastructureInput<'workspace.file.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.file.list', resourceId, args, options),
+      stat: (resourceId: string, path: string, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.file.stat', resourceId, { path }, options),
+      write: (resourceId: string, args: Omit<InfrastructureInput<'workspace.file.write'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.file.write', resourceId, args, options),
+      rename: (resourceId: string, args: Omit<InfrastructureInput<'workspace.file.rename'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.file.rename', resourceId, args, options),
+      delete: (resourceId: string, args: Omit<InfrastructureInput<'workspace.file.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.file.delete', resourceId, args, options),
+      mkdir: (resourceId: string, args: Omit<InfrastructureInput<'workspace.directory.create'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.directory.create', resourceId, args, options),
+    },
+    commands: {
+      start: (resourceId: string, args: Omit<InfrastructureInput<'workspace.command.start'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.command.start', resourceId, args, options),
+      output: (resourceId: string, args: Omit<InfrastructureInput<'workspace.command.output'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.command.output', resourceId, args, options),
+      input: (resourceId: string, args: Omit<InfrastructureInput<'workspace.command.input'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.command.input', resourceId, args, options),
+      close: (resourceId: string, args: Omit<InfrastructureInput<'workspace.command.close'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.command.close', resourceId, args, options),
+      stop: (resourceId: string, args: Omit<InfrastructureInput<'workspace.command.stop'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.command.stop', resourceId, args, options),
+    },
+    processes: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.process.list', resourceId, {}, options),
+    preview: (resourceId: string, args: Omit<InfrastructureInput<'workspace.preview'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.preview', resourceId, args, options),
+  }
+  readonly mail = {
+    inbox: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox', resourceId, {}, options),
+    messages: {
+      list: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.list', resourceId, args, options),
+      get: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.get', resourceId, args, options),
+    },
+    drafts: {
+      list: (resourceId: string, args: Omit<InfrastructureInput<'mail.draft.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.draft.list', resourceId, args, options),
+      get: (resourceId: string, args: Omit<InfrastructureInput<'mail.draft.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.draft.get', resourceId, args, options),
+    },
+  }
+  readonly deployments = {
+    project: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.project', resourceId, {}, options),
+    list: (resourceId: string, args: Omit<InfrastructureInput<'deployment.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.list', resourceId, args, options),
+    get: (resourceId: string, deploymentId: string, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.get', resourceId, { deployment_id: deploymentId }, options),
+    logs: (resourceId: string, deploymentId: string, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.logs', resourceId, { deployment_id: deploymentId }, options),
+    environment: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('deployment.environment.list', resourceId, {}, options),
+  }
+  readonly workers = {
+    app: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.app', resourceId, {}, options),
+    machines: {
+      list: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.machine.list', resourceId, {}, options),
+      get: (resourceId: string, machineId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.machine.get', resourceId, { machine_id: machineId }, options),
+      events: (resourceId: string, machineId: string, options: InfrastructureRequestOptions = {}) => this.scoped('worker.machine.events', resourceId, { machine_id: machineId }, options),
+    },
+  }
+  readonly databases = {
+    project: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.project', resourceId, {}, options),
+    query: <T = unknown>(resourceId: string, args: Omit<InfrastructureInput<'database.query'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('database.query', resourceId, args, options) as Promise<T>,
+    migrations: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.migration.list', resourceId, {}, options),
+    buckets: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.bucket.list', resourceId, {}, options),
+    connection: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('database.connection', resourceId, {}, options),
   }
   private async wait(operationId: string, options: InfrastructureWaitOptions): Promise<InfrastructureOperation> {
     operationId = uuid(operationId)

@@ -20,6 +20,17 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
+Current breadth increment: source fixture/generated types contain 43 contracts.
+Workspace helpers now include files, directories, commands/output/stdin/stop,
+process listing and private previews. Mail, deployments, workers and databases
+have scoped read helpers with explicit resource UUID arguments. Readable shapes
+come from the application catalogue; dynamic SQL rows are caller-typed unknown
+data rather than a promise of a particular table schema. Native provider IDs are
+nested targets only. This increment is unverified: the user requested finishing
+engineering first, then running tests/checks and smoke tests at the end. Earlier
+passing counts below do not validate these new helpers. Remaining provider
+mutation helpers wait for the application's funded action contracts. No publish.
+
 The 2026-10-04 lifecycle increment adds typed `workspaces.quote/create/resume/pause/delete`
 helpers and regenerates the shared fixture/types for ten public capabilities.
 Each mutation requires caller-saved original arguments, an idempotency key and
