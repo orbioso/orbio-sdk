@@ -474,7 +474,7 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-The current source fixture has 124 contracts / 55 provider writes. Unknown native
+The current source fixture has 125 contracts / 55 provider writes. Unknown native
 steps are not repeated; native cost/retention and ambiguous-session cleanup still need
 completion before release. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
@@ -548,3 +548,13 @@ observation time, blob_cleanup:not_requested, artifact_capacity_reclaimed:false
 and billing_final:false. It does not establish blob/layer removal, reclaimed
 capacity or a final bill. Native Fly DELETE compatibility is unverified; see the
 [cleanup guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_RETENTION.md).
+
+Explicit queued cancellation: infra.operations.cancel(operationId) makes no
+provider request. It needs infra.read and the original action permission and
+returns { operation, cancelled, native_cancellation:false }. Only a still-queued
+operation can be cancelled before dispatch; other states and their holds stay
+intact. No new key, ceiling or operation is created. After a lost reply, read
+that original operation or explicitly repeat cancellation for that same UUID.
+Local wait abort/timeout never requests cancellation automatically. Use the
+resource's explicit stop/delete action for dispatched work. This source addition
+is unpublished and unverified; see the platform API/handoff.

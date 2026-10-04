@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "467b659aee763566991c15533e5c6e4a289d5867cefaa8af5970188f64d27447",
+  "schemaRevision": "82901e3a1e847203c9add7292edd35dd5ce6a7d3108a704c409599b06a4b4796",
   "tools": [
     {
       "name": "infra.status",
@@ -1154,6 +1154,224 @@
       },
       "readOnly": true,
       "costBasis": "free_control_plane"
+    },
+    {
+      "name": "operation.cancel",
+      "permission": "infra.read",
+      "readOnly": false,
+      "costBasis": "free_control_plane",
+      "destructive": true,
+      "upstream": false,
+      "description": "Explicitly cancel one assigned operation only while still queued, before dispatch. Requires infra.read plus its original action permission. Supply the original operation UUID only; no new idempotency key or max_cost. This atomic broker transaction makes no provider request and releases only a proved undispatched hold. Repeating the same operation UUID returns its saved current state. cancelled:true means it is cancelled; false means no cancellation occurred and its state/holds remain intact. Never stops dispatched work, recalls mail, deletes existing resources or settles unknown bills. Use the resource’s explicit pause/stop/delete action after dispatch. Local wait abort/timeout never invokes this automatically. After a lost reply read operation.get or explicitly repeat this same cancellation UUID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "operation_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "project_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "agent_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "resource_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "format": "uuid"
+                      },
+                      "action": {
+                        "type": "string"
+                      },
+                      "permission": {
+                        "type": "string"
+                      },
+                      "state": {
+                        "enum": [
+                          "queued",
+                          "dispatched",
+                          "running",
+                          "reconciling",
+                          "succeeded",
+                          "failed",
+                          "cancelled"
+                        ]
+                      },
+                      "billing_state": {
+                        "enum": [
+                          "held",
+                          "settled",
+                          "released"
+                        ]
+                      },
+                      "reserved_micro_usd": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "charged_micro_usd": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "upstream_micro_usd": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "provider_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "error_code": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "completed_at": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "result": {},
+                      "retry_after_seconds": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "project_id",
+                      "agent_id",
+                      "resource_id",
+                      "action",
+                      "permission",
+                      "state",
+                      "billing_state",
+                      "reserved_micro_usd",
+                      "charged_micro_usd",
+                      "upstream_micro_usd",
+                      "provider_id",
+                      "error_code",
+                      "created_at",
+                      "updated_at",
+                      "completed_at",
+                      "retry_after_seconds"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "cancelled": {
+                    "type": "boolean"
+                  },
+                  "native_cancellation": {
+                    "const": false
+                  }
+                },
+                "required": [
+                  "operation",
+                  "cancelled",
+                  "native_cancellation"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
     },
     {
       "name": "funding.list",

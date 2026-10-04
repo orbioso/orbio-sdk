@@ -20,8 +20,22 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 124 contracts / 55 provider writes.
-Latest Fly cleanup increment (2026-10-05): workers.images.delete(resourceId, args)
+Current breadth increment: source fixture/generated types contain 125 contracts / 55 provider writes.
+Latest queued cancellation (2026-10-05): operations.cancel(operationId) uses
+operation.cancel with only the original operation UUID. It requires infra.read
+and the original action permission; creates no new operation, key or ceiling.
+Atomic cancellation/dispatch/hold release serialize in the platform. Only a
+queued undispatched operation can be cancelled; dispatched/uncertain/terminal
+work is returned unchanged. Result has operation, cancelled and
+native_cancellation:false. Read the original operation or explicitly repeat that
+same cancellation UUID after uncertainty. Timeout/abort never invokes it.
+Current source fixture/generated types have 125 contracts / 55 provider writes.
+Platform owner history button and shared MCP/HTTP contract are wired. Platform
+migration 20261005023000 is unapplied. No checks/tests/CI/native calls/publication.
+Final fixtures require the new service cancellation method; billing decisions,
+full retention/accounting and all-provider verification remain open.
+
+Prior Fly cleanup increment (2026-10-05): workers.images.delete(resourceId, args)
 mirrors exact assigned-repository immutable manifest deletion. Supply digest plus
 saved idempotency key/max_cost; max_cost:"0" enables the cleanup admission lane.
 Configured/unknown Machine references and unresolved earlier writers prevent
@@ -261,7 +275,8 @@ matches the application descriptor export byte-for-byte. No provider calls,
 production changes or publication occurred. After push, inspect this head's CI
 separately from earlier read-helper CI `37187651777`.
 
-Remaining: workspace files/processes/preview and worker/deployment/database/mail helpers and
+Historical lifecycle-only checkpoint (superseded by current breadth above):
+At that point, remaining work was workspace files/processes/preview and worker/deployment/database/mail helpers and
 their finalized mutation/reconciliation/lifetime-cost contracts, full platform
 integration and live feature evidence, final adversarial review, version bump and
 release preparation. Generating current read types does not implement these

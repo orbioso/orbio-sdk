@@ -94,6 +94,7 @@ export class Infrastructure {
     if (!/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/.test(name)) throw new OrbioError('use the canonical capability name from infrastructure discovery', { code: 'invalid_request' })
     const { data, headers } = await this.http.request<unknown>(`/api/v1/infra/tools/${encodeURIComponent(name)}`, { method: 'POST', body: args, signal: options.signal, maximumBytes: 4_194_304 }).catch((error: unknown) => {
       if (error instanceof OrbioError && error.code === 'unknown' && error.status === 0) {
+        if (name === 'operation.cancel') throw new OrbioError('queued cancellation could not be confirmed; read the original operation ID or explicitly repeat cancellation for that same ID', { code: 'outcome_unknown' })
         if (READ_ONLY_INFRASTRUCTURE_TOOLS.includes(name) || this.cached?.tools.some(tool => tool.name === name && tool.readOnly)) throw new OrbioError('the infrastructure read could not be completed', { code: 'upstream_unavailable', status: 503 })
         throw new OrbioError('the request outcome is unknown; read the saved operation ID, or recover admission with identical arguments and the same idempotency_key', { code: 'outcome_unknown' })
       }
@@ -125,6 +126,8 @@ export class Infrastructure {
   readonly operations = {
     list: (args: InfrastructureInput<'operation.list'> = {}, options: InfrastructureRequestOptions = {}) => this.call('operation.list', args, options),
     get: async (operationId: string, options: InfrastructureRequestOptions = {}) => this.call('operation.get', { operation_id: uuid(operationId) }, options),
+    /** Explicit queued-only cancellation. No provider stop, replay or new hold. */
+    cancel: (operationId: string, options: InfrastructureRequestOptions = {}) => this.call('operation.cancel', { operation_id: uuid(operationId) }, options),
     /** Read-only polling. No dispatch, replay or cancellation on timeout/abort. */
     wait: (operationId: string, options: InfrastructureWaitOptions = {}) => this.wait(operationId, options),
   }
