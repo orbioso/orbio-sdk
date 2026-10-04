@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 46ffc6e32c1fa0f7bf213018d7ed565504c42123bcf2edfbd6e7ba0a52316b7a. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 4ff5a012d638f79689be2a6a08392e0109882eb93c8e76f35a44ff79dff21936. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -6262,5 +6262,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '46ffc6e32c1fa0f7bf213018d7ed565504c42123bcf2edfbd6e7ba0a52316b7a'
+export const INFRA_SCHEMA_REVISION = '4ff5a012d638f79689be2a6a08392e0109882eb93c8e76f35a44ff79dff21936'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

@@ -21,6 +21,15 @@ Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
 Current breadth increment: source fixture/generated types contain 98 contracts.
+Latest platform addition: new-project security bootstrap captures policy before
+allocation, gates native SQL once under the original funding claim, then reads
+native proof and checkpoints readiness. SQL/storage/connection access stays
+blocked until resources.get metadata.supabase_bootstrap.state:verified, regardless
+of native ACTIVE_HEALTHY. Poll that resource after allocation acceptance; operation
+success alone does not prove readiness. Public-table RLS and explicit browser
+privileges are initial defaults, not recurring resets of app policy. Generated
+MCP/SDK descriptions are updated. Native/Auth/Storage/gate/UX isolation checks are
+still deferred; this source remains unverified and unpublished.
 Latest addition: databases.storage.buckets get/create/configure/delete and
 objects list/read/write/delete/downloadLink. Buckets stay private, uploads use
 bounded canonical base64 with explicit overwrite, inline reads refuse oversize,

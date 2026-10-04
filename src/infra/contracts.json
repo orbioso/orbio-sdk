@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "46ffc6e32c1fa0f7bf213018d7ed565504c42123bcf2edfbd6e7ba0a52316b7a",
+  "schemaRevision": "4ff5a012d638f79689be2a6a08392e0109882eb93c8e76f35a44ff79dff21936",
   "tools": [
     {
       "name": "infra.status",
@@ -8398,7 +8398,7 @@
     },
     {
       "name": "database.project",
-      "description": "Read status, region and URL for the assigned Supabase project in the toolkit organization. Management credentials stay private.",
+      "description": "Read native status, region and URL for the assigned Supabase project in the toolkit organization. ACTIVE_HEALTHY alone is not readiness: also read resource.get and its supabase_bootstrap metadata. Management credentials stay private.",
       "permission": "database.read",
       "inputSchema": {
         "type": "object",
@@ -9792,7 +9792,7 @@
     {
       "name": "database.create",
       "permission": "database.manage",
-      "description": "Allocate one assigned Supabase project under a finite lifetime. Approve a positive max_cost for the separate lifetime hold. Creation does not deploy code or connect GitHub. Expiry requests provider shutdown; retained storage and previously incurred usage can still bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Allocate one assigned Supabase project under a finite lifetime. Approve a positive max_cost for the separate lifetime hold. Creation does not deploy code or connect GitHub. Expiry requests provider shutdown; retained storage and previously incurred usage can still bill. Database allocation success is not readiness: poll resource.get until metadata.supabase_bootstrap.state is verified and the project is ready/running. New projects install automatic public-table RLS and disable implicit browser privileges once before application SQL/storage. Application migrations must supply grants/RLS policies; background workers do not reset later policies. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -10025,7 +10025,7 @@
     {
       "name": "database.resume",
       "permission": "database.manage",
-      "description": "Explicitly restore one assigned Supabase project under a finite lifetime. Approve a positive max_cost for the separate lifetime hold. Creation does not deploy code or connect GitHub. Expiry requests provider shutdown; retained storage and previously incurred usage can still bill. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Explicitly restore one assigned Supabase project under a finite lifetime. Approve a positive max_cost for the separate lifetime hold. Creation does not deploy code or connect GitHub. Expiry requests provider shutdown; retained storage and previously incurred usage can still bill. Database allocation success is not readiness: poll resource.get until metadata.supabase_bootstrap.state is verified and the project is ready/running. New projects install automatic public-table RLS and disable implicit browser privileges once before application SQL/storage. Application migrations must supply grants/RLS policies; background workers do not reset later policies. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {

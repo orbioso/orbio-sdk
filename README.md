@@ -387,3 +387,14 @@ after an Orbio grant revoke. Preserve the original mutation/key/ceiling and read
 its operation; no uncertain upload retry or automatic link refresh occurs.
 Native storage/egress costs and bootstrap/spend verification remain platform
 release requirements. These SDK additions are unpublished and unverified.
+
+
+Database allocation acceptance is separate from readiness. After create, read
+infra.resources.get(resourceId) until metadata.supabase_bootstrap.state is
+verified and the resource is ready/running. Native ACTIVE_HEALTHY alone is not
+enough. The platform performs one initial security stage with automatic RLS on
+new public tables and disabled implicit browser privileges. Application migrations
+must grant table/function access and add RLS policies deliberately. Background
+funding sweeps do not reset later application policies. Unknown initial setup
+never authorizes another SQL dispatch or project creation; owner inspection and
+pause/delete remain available. Current bootstrap source is unverified/unpublished.
