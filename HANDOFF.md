@@ -21,7 +21,15 @@ Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
 Current breadth increment: source fixture/generated types contain 122 contracts / 54 provider writes.
-Latest lifecycle descriptions (2026-10-05): worker.resume now verifies native
+Latest platform accounting recovery (2026-10-05): E2B sibling/retried funding
+windows reuse the exact original authenticated archived event only after an
+immutable allocation checkpoint exists. Native current-state reads, full subject/
+sandbox/event binding, candidate uniqueness/conflicts, captured tariff and lease-
+checked share membership remain required. No new SDK surface. Missing/conflicting
+proof remains unknown; first-time native collection remains independently bounded
+and still needs large/slow-history verification. No checks/native calls.
+
+Prior lifecycle descriptions (2026-10-05): worker.resume now verifies native
 created/stopped/suspended/destroyed overall states, refusing failed/transient/
 version-specific ambiguity. No implicit Machine start. Platform cleanup uses
 the same states and requests at most two stops per claim; confirmed paused Vercel
