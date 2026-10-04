@@ -29,6 +29,78 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 - **The agent launchpad.** Launch a token, harvest its creator fees, claim the
   CREDIT they earn, and manage the agent, all from one wallet.
 - **Paying for itself.** `topUp()` and `keepFunded()`.
+- **Scoped infrastructure.** Assigned product/agent overview, resource metadata
+  and durable operation recovery through the same contracts as hosted MCP.
+  An explicit infrastructure grant is required; broad gateway keys gain no authority.
+
+## Agent infrastructure
+
+This source branch prepares infrastructure helpers for the platform release;
+these additions are not yet published on npm. The platform must enable the
+capabilities and the owner must assign a product, agent and permissions.
+Provider mutation workflows, owner resource setup and their typed helpers remain
+under development. Do not treat provider credential presence as readiness.
+
+```ts
+import { createInfrastructure, InfrastructureWaitTimeout } from '@orbiodotso/sdk'
+
+// Needs no chain manifest, signer or upstream provider SDK/key.
+const infra = createInfrastructure({ apiKey: process.env.ORBIO_INFRA_KEY })
+const discovery = await infra.catalogue() // public descriptions and schemas
+const overview = await infra.status()    // this grant's product and stable agent
+const page = await infra.resources.list({ limit: 10 })
+// Pass page.next_cursor as before to read the next page.
+
+// Recover the same operation after a transport disconnect, rather than dispatching again.
+const controller = new AbortController()
+try {
+  const operation = await infra.operations.wait(savedOperationId, {
+    timeoutMs: 300_000,
+    signal: controller.signal,
+  })
+  // Inspect operation.state, operation.result and operation.billing_state separately.
+} catch (error) {
+  if (error instanceof InfrastructureWaitTimeout) {
+    // error.operationId and error.lastKnown let a new connection resume reading.
+  }
+}
+```
+
+The owner issues a dedicated `orbio_infra_` key or assigns an Orbio OAuth
+connection with explicit `infra` consent to one product and stable agent.
+The SDK accepts that token and never connects the user's upstream providers
+itself. Provider account connection and assignment belong in owner setup.
+Each key/connection is scoped by the server; knowing a provider ID grants nothing.
+Resources and operations use Orbio UUIDs. One inbox per stable agent is manually
+created/assigned by the owner, never automatically by an agent.
+
+`infra.call(name, args, { signal })` preserves the shared result without the
+legacy tools' transformation. Known helpers have generated types; generic calls
+can use a future capability discovered at runtime without an SDK release.
+`infra.refresh()` explicitly refreshes discovery. `human_action_required`
+includes `error.setupUrl`; `rate_limited` includes `error.retryAfter` in seconds.
+An ambiguous mutation (`outcome_unknown`) is not automatically retried.
+
+Waiting polls operation reads only. It retries a bounded number of transient
+read failures, honors retry guidance and stops on revoked access. Abort and local
+timeout never send remote cancel, stop or delete calls. A terminal operation may
+still have a held bill or leave a worker running; inspect all returned state.
+Failed/cancelled terminal operations are returned for inspection rather than
+losing their billing and error fields in an exception.
+
+For an existing client, pass `infraKey` to `createOrbio()` and use `orbio.infra`.
+`orbio.tools.refresh()` re-reads the legacy catalogue. `orbio.refresh()` returns
+a refreshed client retaining its original transport, keys and signer.
+Infrastructure money fields remain exact bounded integer micro-USD numbers in
+the shared wire result, at most `1_000_000_000_000`; convert with `BigInt()` when
+doing wider arithmetic rather than treating CREDIT as floating point dollars.
+
+Types in `src/infra/generated.ts` come from `src/infra/contracts.json`, exported
+from the platform's shared MCP/HTTP capability definitions. `INFRA_SCHEMA_REVISION`
+identifies the pinned schema set. To update it, run the platform's
+`scripts/export-toolkit-contracts.mts` with that JSON file as its output, then
+`pnpm generate:infra`. `pnpm check:infra` checks reproducibility in CI and before
+publishing. Runtime discovery is independent of those pinned TypeScript types.
 
 ## Nothing is compiled in
 
@@ -198,6 +270,7 @@ Use the SDK when you are writing code, MCP when a model is driving.
 | --- | --- |
 | `createOrbio(options)` | Make a client. Fetches addresses and the catalogue. |
 | `orbio.tools` | `list`, `describe`, `priceOf`, `call`, and named helpers |
+| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait` |
 | `orbio.account` | `key`, `balance`, `models` |
 | `orbio.credit` | `balanceOf`, `activate`, `feeExempt` |
 | `orbio.staking` | `stake`, `unstake`, `claim`, `positionOf`, `settledOf` |

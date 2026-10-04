@@ -1,0 +1,982 @@
+{
+  "version": 1,
+  "schemaRevision": "a9d932db2be1c3506d5c4971f4e4395e128d3b0a9f6e9e9d591f096c4c5623f7",
+  "tools": [
+    {
+      "name": "infra.status",
+      "description": "Read your assigned product, stable agent, permissions, budget and configured providers. Free control-plane read; does not create, resume or extend resources. Ask the owner to assign resources in /dashboard#infrastructure.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "project": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "budget_micro_usd": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "reserved_micro_usd": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "spent_micro_usd": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "created_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "budget_micro_usd",
+                      "reserved_micro_usd",
+                      "spent_micro_usd",
+                      "created_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "agent": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "project_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "project_id",
+                      "name",
+                      "created_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "providers": {
+                    "type": "object",
+                    "properties": {
+                      "e2b": {
+                        "type": "boolean"
+                      },
+                      "fly": {
+                        "type": "boolean"
+                      },
+                      "vercel": {
+                        "type": "boolean"
+                      },
+                      "supabase": {
+                        "type": "boolean"
+                      },
+                      "agentmail": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "e2b",
+                      "fly",
+                      "vercel",
+                      "supabase",
+                      "agentmail"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "setup_url": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project",
+                  "agent",
+                  "permissions",
+                  "providers",
+                  "setup_url"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "resource.list",
+      "description": "List resource metadata assigned to this agent only. Free; never contacts an upstream provider or resumes paused compute. Pass next_cursor as before for another page. IDs are Orbio resource UUIDs, not provider IDs.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 30
+          },
+          "before": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "agent_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "kind": {
+                          "enum": [
+                            "workspace",
+                            "deployment",
+                            "worker",
+                            "database",
+                            "inbox"
+                          ]
+                        },
+                        "provider": {
+                          "enum": [
+                            "e2b",
+                            "vercel",
+                            "fly",
+                            "supabase",
+                            "agentmail"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "provider_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "state": {
+                          "enum": [
+                            "provisioning",
+                            "ready",
+                            "running",
+                            "paused",
+                            "stopped",
+                            "deleting",
+                            "deleted",
+                            "error",
+                            "unknown"
+                          ]
+                        },
+                        "metadata": {
+                          "type": "object"
+                        },
+                        "expires_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "deleted_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "project_id",
+                        "agent_id",
+                        "kind",
+                        "provider",
+                        "name",
+                        "provider_id",
+                        "state",
+                        "metadata",
+                        "expires_at",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "items",
+                  "next_cursor"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "resource.get",
+      "description": "Read persisted metadata for one assigned Orbio resource UUID. Free; does not refresh upstream state or resume compute. Another product or agent is inaccessible even if its provider ID is known.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "kind": {
+                    "enum": [
+                      "workspace",
+                      "deployment",
+                      "worker",
+                      "database",
+                      "inbox"
+                    ]
+                  },
+                  "provider": {
+                    "enum": [
+                      "e2b",
+                      "vercel",
+                      "fly",
+                      "supabase",
+                      "agentmail"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "state": {
+                    "enum": [
+                      "provisioning",
+                      "ready",
+                      "running",
+                      "paused",
+                      "stopped",
+                      "deleting",
+                      "deleted",
+                      "error",
+                      "unknown"
+                    ]
+                  },
+                  "metadata": {
+                    "type": "object"
+                  },
+                  "expires_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "deleted_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "kind",
+                  "provider",
+                  "name",
+                  "provider_id",
+                  "state",
+                  "metadata",
+                  "expires_at",
+                  "created_at",
+                  "updated_at",
+                  "deleted_at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "operation.list",
+      "description": "List this agent’s durable operations for permissions you still hold. Free metadata read; result bodies are omitted. Use operation.get for a specific result. Polling and client reconnects never dispatch an operation again.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 30
+          },
+          "before": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "agent_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "resource_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "uuid"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "permission": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "enum": [
+                            "queued",
+                            "dispatched",
+                            "running",
+                            "reconciling",
+                            "succeeded",
+                            "failed",
+                            "cancelled"
+                          ]
+                        },
+                        "billing_state": {
+                          "enum": [
+                            "held",
+                            "settled",
+                            "released"
+                          ]
+                        },
+                        "reserved_micro_usd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "charged_micro_usd": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "upstream_micro_usd": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "provider_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "error_code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "completed_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "result": {},
+                        "retry_after_seconds": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "project_id",
+                        "agent_id",
+                        "resource_id",
+                        "action",
+                        "permission",
+                        "state",
+                        "billing_state",
+                        "reserved_micro_usd",
+                        "charged_micro_usd",
+                        "upstream_micro_usd",
+                        "provider_id",
+                        "error_code",
+                        "created_at",
+                        "updated_at",
+                        "completed_at",
+                        "retry_after_seconds"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "items",
+                  "next_cursor"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "operation.get",
+      "description": "Read an operation UUID and its saved result, readiness, error and reservation/settlement state. Requires infra.read plus the original action permission. Free; use retry_after_seconds while nonterminal. Closing or aborting a local wait does not cancel or delete resources.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "operation_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    }
+  ]
+}

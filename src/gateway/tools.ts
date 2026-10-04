@@ -1,4 +1,4 @@
-import type { ToolDescriptor } from '../config.js'
+import { loadToolCatalogue, type ToolDescriptor } from '../config.js'
 import type { Http } from '../http.js'
 import { OrbioError } from '../errors.js'
 import { formatCreditShort, parseCredit } from '../money.js'
@@ -47,12 +47,19 @@ const microFromHeader = (headers: Headers, name: string): bigint | null => {
 export class Tools {
   constructor(
     private readonly http: Http,
-    private readonly catalogue: ToolDescriptor[],
+    private catalogue: ToolDescriptor[],
   ) {}
 
   /** Every tool, with its schemas and its price. No network call. */
   list(): ToolDescriptor[] {
     return [...this.catalogue]
+  }
+
+  /** Refresh discovery without replacing this client's credentials or signer. */
+  async refresh(): Promise<ToolDescriptor[]> {
+    const catalogue = await loadToolCatalogue(this.http)
+    this.catalogue = catalogue
+    return this.list()
   }
 
   describe(name: string): ToolDescriptor | undefined {

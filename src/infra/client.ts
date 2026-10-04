@@ -1,0 +1,167 @@
+import { DEFAULT_BASE_URL } from '../config.js'
+import { OrbioError } from '../errors.js'
+import { Http, responseError, type Fetcher } from '../http.js'
+import type { InfrastructureInput, InfrastructureOperation, InfrastructureResult, InfrastructureToolName } from './generated.js'
+import { READ_ONLY_INFRASTRUCTURE_TOOLS } from './generated.js'
+
+export type InfrastructureRequestOptions = { signal?: AbortSignal | undefined }
+export type InfrastructureWaitOptions = InfrastructureRequestOptions & {
+  /** Local waiting limit only. Expiration never cancels provider work. Default 5 minutes. */
+  timeoutMs?: number | undefined
+  /** Polling floor in milliseconds. The server may request a longer wait. Default 1000. */
+  pollIntervalMs?: number | undefined
+  /** Consecutive retryable read failures before returning the error. Default 3. */
+  maxReadRetries?: number | undefined
+}
+export type InfrastructureDescriptor = {
+  name: string; description: string; permission: string
+  inputSchema: Record<string, unknown>; outputSchema: Record<string, unknown>
+  readOnly: boolean; costBasis: string
+}
+export type InfrastructureCatalogue = { version: 1; enabled: boolean; tools: InfrastructureDescriptor[] }
+export type InfrastructureOptions = {
+  /** Dedicated infrastructure grant key or an Orbio OAuth token with explicit infra consent. */
+  apiKey?: string | undefined
+  baseUrl?: string | undefined
+  fetch?: Fetcher | undefined
+  timeoutMs?: number | undefined
+}
+
+export class InfrastructureWaitTimeout extends OrbioError {
+  constructor(readonly operationId: string, readonly lastKnown: InfrastructureOperation | null) {
+    super('local waiting timed out; resume with operations.get() or wait() using the same operation ID', { code: 'wait_timeout' })
+    this.name = 'InfrastructureWaitTimeout'
+  }
+}
+const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value)
+const invalidResponse = () => new OrbioError('the infrastructure API returned an invalid response', { code: 'invalid_response' })
+const uuid = (value: string): string => {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) throw new OrbioError('use an Orbio resource or operation UUID, not a provider ID', { code: 'invalid_request' })
+  return value.toLowerCase()
+}
+const aborted = () => new OrbioError('local waiting was aborted; the operation and its resources remain unchanged', { code: 'aborted' })
+const sleep = (milliseconds: number, signal: AbortSignal): Promise<void> => new Promise((resolve, reject) => {
+  if (signal.aborted) { reject(aborted()); return }
+  const cleanup = () => signal.removeEventListener('abort', stop)
+  const timer = setTimeout(() => { cleanup(); resolve() }, milliseconds)
+  const stop = () => { clearTimeout(timer); cleanup(); reject(aborted()) }
+  signal.addEventListener('abort', stop, { once: true })
+})
+const bound = (value: number, name: string, minimum: number, maximum: number): number => {
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) throw new OrbioError(`${name} must be an integer between ${minimum} and ${maximum}`, { code: 'invalid_request' })
+  return value
+}
+
+/** Shared HTTP contracts also used by hosted MCP; no upstream provider SDK or key needed. */
+export class Infrastructure {
+  private cached: InfrastructureCatalogue | null = null
+  private pending: Promise<InfrastructureCatalogue> | null = null
+  private generation = 0
+
+  constructor(private readonly http: Http) {}
+
+  /** Public discovery, fetched on first use and then cached. Does not list tenant resources. */
+  async catalogue(): Promise<InfrastructureCatalogue> {
+    if (this.cached) return structuredClone(this.cached)
+    return structuredClone(await (this.pending ?? this.refresh()))
+  }
+  /** Explicitly re-read discovery without recreating credentials or a signing client. */
+  async refresh(options: InfrastructureRequestOptions = {}): Promise<InfrastructureCatalogue> {
+    const generation = ++this.generation
+    const pending = this.readCatalogue(options)
+    this.pending = pending
+    try {
+      const result = await pending
+      if (generation === this.generation) this.cached = result
+      return structuredClone(result)
+    } finally { if (this.pending === pending) this.pending = null }
+  }
+  private async readCatalogue(options: InfrastructureRequestOptions): Promise<InfrastructureCatalogue> {
+    const { data } = await this.http.request<unknown>('/api/v1/infra/tools', { signal: options.signal, maximumBytes: 1_048_576 })
+    if (!object(data) || data.version !== 1 || typeof data.enabled !== 'boolean' || !Array.isArray(data.tools) || data.tools.length > 200) throw invalidResponse()
+    const names = new Set<string>()
+    const tools = data.tools.map(value => {
+      if (!object(value) || typeof value.name !== 'string' || names.has(value.name) || typeof value.description !== 'string' || typeof value.permission !== 'string' || typeof value.readOnly !== 'boolean' || typeof value.costBasis !== 'string' || !object(value.inputSchema) || !object(value.outputSchema)) throw invalidResponse()
+      names.add(value.name)
+      return { name: value.name, description: value.description, permission: value.permission, readOnly: value.readOnly, costBasis: value.costBasis, inputSchema: value.inputSchema, outputSchema: value.outputSchema }
+    })
+    return { version: 1, enabled: data.enabled, tools }
+  }
+  async call<K extends InfrastructureToolName>(name: K, args: InfrastructureInput<K>, options?: InfrastructureRequestOptions): Promise<InfrastructureResult<K>>
+  async call<T = unknown>(name: string, args?: Record<string, unknown>, options?: InfrastructureRequestOptions): Promise<T>
+  async call(name: string, args: Record<string, unknown> = {}, options: InfrastructureRequestOptions = {}): Promise<unknown> {
+    if (!/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/.test(name)) throw new OrbioError('use the canonical capability name from infrastructure discovery', { code: 'invalid_request' })
+    const { data, headers } = await this.http.request<unknown>(`/api/v1/infra/tools/${encodeURIComponent(name)}`, { method: 'POST', body: args, signal: options.signal, maximumBytes: 4_194_304 }).catch((error: unknown) => {
+      if (error instanceof OrbioError && error.code === 'unknown' && error.status === 0) {
+        if (READ_ONLY_INFRASTRUCTURE_TOOLS.includes(name) || this.cached?.tools.some(tool => tool.name === name && tool.readOnly)) throw new OrbioError('the infrastructure read could not be completed', { code: 'upstream_unavailable', status: 503 })
+        throw new OrbioError('the request outcome is unknown; recover by operation ID before retrying', { code: 'outcome_unknown' })
+      }
+      throw error
+    })
+    // A 202 ambiguous-outcome error is still an error, not a successful result.
+    if (object(data) && object(data.error)) {
+      const value = headers.get('retry-after')
+      throw responseError(202, data, value && /^\d{1,6}$/.test(value) ? Number(value) : null)
+    }
+    if (!object(data) || !Object.hasOwn(data, 'result')) throw invalidResponse()
+    return data.result
+  }
+  /** Cheap assigned product/agent overview; provider presence is not a health probe. */
+  status(options: InfrastructureRequestOptions = {}) { return this.call('infra.status', {}, options) }
+
+  readonly resources = {
+    list: (args: InfrastructureInput<'resource.list'> = {}, options: InfrastructureRequestOptions = {}) => this.call('resource.list', args, options),
+    get: async (resourceId: string, options: InfrastructureRequestOptions = {}) => this.call('resource.get', { resource_id: uuid(resourceId) }, options),
+  }
+  readonly operations = {
+    list: (args: InfrastructureInput<'operation.list'> = {}, options: InfrastructureRequestOptions = {}) => this.call('operation.list', args, options),
+    get: async (operationId: string, options: InfrastructureRequestOptions = {}) => this.call('operation.get', { operation_id: uuid(operationId) }, options),
+    /** Read-only polling. No dispatch, replay or cancellation on timeout/abort. */
+    wait: (operationId: string, options: InfrastructureWaitOptions = {}) => this.wait(operationId, options),
+  }
+  private async wait(operationId: string, options: InfrastructureWaitOptions): Promise<InfrastructureOperation> {
+    operationId = uuid(operationId)
+    const timeout = bound(options.timeoutMs ?? 300_000, 'timeoutMs', 1, 86_400_000)
+    const interval = bound(options.pollIntervalMs ?? 1000, 'pollIntervalMs', 100, 30_000)
+    const retries = bound(options.maxReadRetries ?? 3, 'maxReadRetries', 0, 20)
+    const controller = new AbortController()
+    const onAbort = () => controller.abort()
+    options.signal?.addEventListener('abort', onAbort, { once: true })
+    if (options.signal?.aborted) controller.abort()
+    let timedOut = false
+    const timer = setTimeout(() => { timedOut = true; controller.abort() }, timeout)
+    let lastKnown: InfrastructureOperation | null = null
+    let errors = 0
+    try {
+      for (;;) {
+        if (controller.signal.aborted) throw aborted()
+        let delay = interval
+        try {
+          const result = await this.operations.get(operationId, { signal: controller.signal })
+          if (!object(result) || result.id !== operationId || !['queued', 'dispatched', 'running', 'reconciling', 'succeeded', 'failed', 'cancelled'].includes(result.state)) throw invalidResponse()
+          lastKnown = result
+          errors = 0
+          if (['succeeded', 'failed', 'cancelled'].includes(result.state)) return result
+          if (typeof result.retry_after_seconds === 'number' && Number.isFinite(result.retry_after_seconds)) delay = Math.max(delay, Math.min(86_400_000, Math.max(0, result.retry_after_seconds) * 1000))
+        } catch (error) {
+          if (!(error instanceof OrbioError) || !error.retryable || ++errors > retries) throw error
+          delay = Math.max(delay, Math.min(86_400_000, (error.retryAfter ?? 3) * 1000))
+        }
+        await sleep(delay, controller.signal)
+      }
+    } catch (error) {
+      if (options.signal?.aborted) throw aborted()
+      if (timedOut) throw new InfrastructureWaitTimeout(operationId, lastKnown)
+      throw error
+    } finally {
+      clearTimeout(timer)
+      options.signal?.removeEventListener('abort', onAbort)
+    }
+  }
+}
+
+/** Standalone infra client needs no chain manifest, wallet or broad gateway key. */
+export const createInfrastructure = (options: InfrastructureOptions = {}): Infrastructure => new Infrastructure(new Http({
+  baseUrl: (options.baseUrl ?? process.env.ORBIO_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
+  apiKey: options.apiKey ?? process.env.ORBIO_INFRA_KEY, fetch: options.fetch, timeoutMs: options.timeoutMs ?? 30_000,
+}))

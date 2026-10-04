@@ -8,6 +8,7 @@ import { Staking } from './chain/staking.js'
 import { Swap } from './chain/swap.js'
 import { Agents } from './chain/agents.js'
 import { keepFunded, topUp, type TopUpOptions, type TopUpResult } from './topup.js'
+import { Infrastructure } from './infra/client.js'
 
 /**
  * The client.
@@ -25,16 +26,19 @@ import { keepFunded, topUp, type TopUpOptions, type TopUpResult } from './topup.
 
 export type OrbioOptions = SignerInput & {
   /** The gateway key. Reads work without one; anything that spends needs it. */
-  apiKey?: string
+  apiKey?: string | undefined
+  /** Explicit infrastructure grant. Broad gateway keys do not confer resource authority. */
+  infraKey?: string | undefined
   /** Point somewhere other than production, for a preview or a local stack. */
-  baseUrl?: string
-  fetch?: Fetcher
-  timeoutMs?: number
+  baseUrl?: string | undefined
+  fetch?: Fetcher | undefined
+  timeoutMs?: number | undefined
 }
 
 export class Orbio {
   readonly account: Account
   readonly tools: Tools
+  readonly infra: Infrastructure
   readonly credit: Credit
   readonly staking: Staking
   readonly swap: Swap
@@ -46,11 +50,13 @@ export class Orbio {
     private readonly http: Http,
     manifest: Manifest,
     readonly signer: Signer | null,
+    private readonly infraHttp: Http,
   ) {
     this.manifest = manifest
     const addresses = manifest.status.addresses
     this.account = new Account(http)
     this.tools = new Tools(http, manifest.tools)
+    this.infra = new Infrastructure(infraHttp)
     // The chain classes are built even without addresses so that reaching for
     // one gives a refusal naming what is not deployed, rather than a property
     // that does not exist.
@@ -80,7 +86,11 @@ export class Orbio {
       },
       manifest.status.chainId,
     )
-    return new Orbio(http, manifest, signer)
+    const infraHttp = new Http({
+      baseUrl: http.baseUrl, apiKey: options.infraKey ?? process.env.ORBIO_INFRA_KEY,
+      fetch: options.fetch, timeoutMs: options.timeoutMs ?? 30_000,
+    })
+    return new Orbio(http, manifest, signer, infraHttp)
   }
 
   /** Where the protocol is and how the indexer is doing, as read at startup. */
@@ -95,7 +105,9 @@ export class Orbio {
 
   /** Re-read the manifest, for a process that outlives a deployment. */
   async refresh(): Promise<Orbio> {
-    return await Orbio.create({ baseUrl: this.http.baseUrl })
+    // Reuse the original transports and signer; environment changes must not
+    // replace a running agent's credentials, custom fetch or signing authority.
+    return new Orbio(this.http, await loadManifest(this.http), this.signer, this.infraHttp)
   }
 
   /** Throws unless the protocol is deployed where this client is pointed. */

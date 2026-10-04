@@ -13,6 +13,16 @@
  */
 
 export { createOrbio, Orbio, type OrbioOptions } from './client.js'
+export {
+  createInfrastructure, Infrastructure, InfrastructureWaitTimeout,
+  type InfrastructureOptions, type InfrastructureCatalogue, type InfrastructureDescriptor,
+  type InfrastructureRequestOptions, type InfrastructureWaitOptions,
+} from './infra/client.js'
+export {
+  INFRA_SCHEMA_REVISION,
+  type InfrastructureContracts, type InfrastructureToolName, type InfrastructureInput, type InfrastructureResult,
+  type InfrastructureOverview, type InfrastructureResource, type InfrastructureOperation,
+} from './infra/generated.js'
 
 export {
   OrbioError,

@@ -21,6 +21,19 @@ export type OrbioErrorCode =
   | 'rate_limited'
   | 'not_configured'
   | 'not_live'
+  | 'unauthorized'
+  | 'forbidden'
+  | 'not_found'
+  | 'human_action_required'
+  | 'insufficient_budget'
+  | 'insufficient_balance'
+  | 'idempotency_conflict'
+  | 'resource_busy'
+  | 'upstream_unavailable'
+  | 'outcome_unknown'
+  | 'invalid_response'
+  | 'aborted'
+  | 'wait_timeout'
   | 'swap_refused'
   | 'swap_failed'
   | 'unknown'
@@ -30,13 +43,16 @@ export class OrbioError extends Error {
   readonly status: number
   /** Present when the server asked for a wait, in seconds. */
   readonly retryAfter: number | null
+  /** Owner setup URL supplied by the scoped infrastructure API, when needed. */
+  readonly setupUrl: string | null
 
-  constructor(message: string, opts: { code?: OrbioErrorCode; status?: number; retryAfter?: number | null } = {}) {
+  constructor(message: string, opts: { code?: OrbioErrorCode; status?: number; retryAfter?: number | null; setupUrl?: string | null } = {}) {
     super(message)
     this.name = 'OrbioError'
     this.code = opts.code ?? 'unknown'
     this.status = opts.status ?? 0
     this.retryAfter = opts.retryAfter ?? null
+    this.setupUrl = opts.setupUrl ?? null
   }
 
   /**
@@ -47,6 +63,7 @@ export class OrbioError extends Error {
    * anything waiting on a person.
    */
   get retryable(): boolean {
+    if (this.code === 'outcome_unknown' || this.code === 'human_action_required' || this.code === 'not_configured') return false
     return this.code === 'rate_limited' || this.code === 'tool_failed' || this.status >= 500
   }
 }
