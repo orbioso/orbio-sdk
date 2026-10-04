@@ -12,6 +12,16 @@ Package version remains `0.1.0` while work is in progress; select/bump the new
 release version only after the provider helpers/contracts are finalized.
 No publish, tag, release workflow or main push has been performed.
 
+Continuation dependency (2026-10-05): app source f97348b / SDK source 442dc3a
+are pushed. Remaining accounting/spending engineering is blocked on unanswered
+customer-pricing (declared Orbio rates versus actual supplier costs with invoice
+imports) and manual AgentMail subscription-payer (customer direct versus Orbio
+rebill) decisions. These select financial contracts, not routine implementation
+preferences. Do not infer prices, shared-plan allocations or zero bills. Answers
+are pending in this chat; canonical app handoff records the stopping point.
+Full goal is incomplete. Keep source unverified and both PRs draft; no checks,
+smoke, native mutations, publish or merge at this point.
+
 Implemented: standalone `createInfrastructure()` and `orbio.infra`, distinct
 explicit grant credential, public discovery/cache/refresh, typed status/resource/
 operation helpers and bounded operation polling. Local abort/timeout never sends
