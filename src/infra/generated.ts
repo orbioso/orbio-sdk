@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 3d6933d8673a491714d278521888a8196c875e8d0bc69e78a36bfe1ff0f05757. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 438af26b2af587c5a459d1b89cd3a8a2d871473649e0eb82424cbf8da4b53780. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -155,6 +155,27 @@ export interface InfrastructureContracts {
       resource_id: string
       draft_id: string
       maximum_body_characters?: number
+    }
+    'mail.thread.list': {
+      resource_id: string
+      limit?: number
+      cursor?: string
+    }
+    'mail.thread.get': {
+      resource_id: string
+      thread_id: string
+      limit?: number
+      cursor?: string
+    }
+    'mail.message.attachment': {
+      resource_id: string
+      message_id: string
+      attachment_id: string
+    }
+    'mail.draft.attachment': {
+      resource_id: string
+      draft_id: string
+      attachment_id: string
     }
     'deployment.project': {
       resource_id: string
@@ -708,6 +729,78 @@ export interface InfrastructureContracts {
       html: string | null
       truncated_fields: ('text' | 'html')[]
     }
+    'mail.thread.list': {
+      items: {
+        inbox_id: string
+        thread_id: string
+        labels: string[]
+        timestamp: string
+        senders: string[]
+        recipients: string[]
+        last_message_id: string
+        message_count: number
+        size: number
+        subject: string | null
+        preview: string | null
+        created_at: string
+        updated_at: string
+      }[]
+      next_cursor: string | null
+    }
+    'mail.thread.get': {
+      inbox_id: string
+      thread_id: string
+      labels: string[]
+      timestamp: string
+      senders: string[]
+      recipients: string[]
+      last_message_id: string
+      message_count: number
+      size: number
+      subject: string | null
+      preview: string | null
+      created_at: string
+      updated_at: string
+      messages: {
+        inbox_id: string
+        labels: string[]
+        to: string[]
+        cc: string[]
+        bcc: string[]
+        subject: string | null
+        preview: string | null
+        attachments: {
+          attachment_id: string
+          size: number
+          filename: string | null
+          content_type: string | null
+        }[]
+        message_id: string
+        thread_id: string
+        timestamp: string
+        from: string
+        size: number
+      }[]
+      next_cursor: string | null
+    }
+    'mail.message.attachment': {
+      attachment_id: string
+      size: number
+      filename: string | null
+      content_type: string | null
+      download_url: string
+      text_url: string | null
+      expires_at: string
+    }
+    'mail.draft.attachment': {
+      attachment_id: string
+      size: number
+      filename: string | null
+      content_type: string | null
+      download_url: string
+      text_url: string | null
+      expires_at: string
+    }
     'deployment.project': {
       project_id: string
       name: string
@@ -815,5 +908,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '3d6933d8673a491714d278521888a8196c875e8d0bc69e78a36bfe1ff0f05757'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.connection"])
+export const INFRA_SCHEMA_REVISION = '438af26b2af587c5a459d1b89cd3a8a2d871473649e0eb82424cbf8da4b53780'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","operation.list","operation.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.inbox","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.connection"])

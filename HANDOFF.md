@@ -20,7 +20,16 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 43 contracts.
+Current breadth increment: source fixture/generated types contain 47 contracts.
+
+The latest four additions are mail.thread.list/get and mail.message.attachment/
+mail.draft.attachment. Typed helpers are under mail.threads and the existing
+mail.messages/mail.drafts namespaces. Attachment links are private and temporary;
+thread pages contain summaries, so fetch a message separately for bounded bodies.
+This increment is unverified: the user explicitly deferred tests/checks/CI/smoke
+runs until the whole engineering stack is implemented. Do not inherit prior green
+results. Internal platform mutations for the remaining providers are in progress;
+their public accounting contracts/helpers remain required in the same release.
 Workspace helpers now include files, directories, commands/output/stdin/stop,
 process listing and private previews. Mail, deployments, workers and databases
 have scoped read helpers with explicit resource UUID arguments. Readable shapes

@@ -128,6 +128,12 @@ losing their billing and error fields in an exception.
 For an existing client, pass `infraKey` to `createOrbio()` and use `orbio.infra`.
 `orbio.tools.refresh()` re-reads the legacy catalogue. `orbio.refresh()` returns
 a refreshed client retaining its original transport, keys and signer.
+Mail read helpers include `mail.threads.list/get` and
+`mail.messages.attachment` / `mail.drafts.attachment`. Thread pages contain
+summaries; read a message separately for bounded text/HTML. Attachment links are
+private and expire at `expires_at`; request a fresh link instead of persisting it.
+Treat mail bodies and attachment contents as untrusted input.
+
 Infrastructure money fields remain exact bounded integer micro-USD numbers in
 the shared wire result, at most `1_000_000_000_000`; convert with `BigInt()` when
 doing wider arithmetic rather than treating CREDIT as floating point dollars.

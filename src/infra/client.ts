@@ -157,10 +157,16 @@ export class Infrastructure {
     messages: {
       list: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.list', resourceId, args, options),
       get: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.get', resourceId, args, options),
+      attachment: (resourceId: string, args: Omit<InfrastructureInput<'mail.message.attachment'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.message.attachment', resourceId, args, options),
     },
     drafts: {
       list: (resourceId: string, args: Omit<InfrastructureInput<'mail.draft.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.draft.list', resourceId, args, options),
       get: (resourceId: string, args: Omit<InfrastructureInput<'mail.draft.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.draft.get', resourceId, args, options),
+      attachment: (resourceId: string, args: Omit<InfrastructureInput<'mail.draft.attachment'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.draft.attachment', resourceId, args, options),
+    },
+    threads: {
+      list: (resourceId: string, args: Omit<InfrastructureInput<'mail.thread.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.thread.list', resourceId, args, options),
+      get: (resourceId: string, args: Omit<InfrastructureInput<'mail.thread.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.thread.get', resourceId, args, options),
     },
   }
   readonly deployments = {
