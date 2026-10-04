@@ -163,6 +163,10 @@ export class Infrastructure {
     preview: (resourceId: string, args: Omit<InfrastructureInput<'workspace.preview'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.preview', resourceId, args, options),
   }
   readonly mail = {
+    metrics: {
+      usage: (resourceId: string, args: Omit<InfrastructureInput<'mail.metrics.usage'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.metrics.usage', resourceId, args, options),
+      events: (resourceId: string, args: Omit<InfrastructureInput<'mail.metrics.events'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.metrics.events', resourceId, args, options),
+    },
     delivery: {
       status: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.status', resourceId, {}, options),
       list: (resourceId: string, args: Omit<InfrastructureInput<'mail.delivery.event.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.event.list', resourceId, args, options),

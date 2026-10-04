@@ -474,7 +474,7 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-The current source fixture has 120 contracts / 54 provider writes. Unknown native
+The current source fixture has 122 contracts / 54 provider writes. Unknown native
 steps are not repeated; native cost/retention and ambiguous-session cleanup still need
 completion before release. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
@@ -514,3 +514,15 @@ coverage proves neither freshness nor final invoices. The platform follows the
 current month beyond funding expiry and one missing/stale historical month per
 claim. Recorded amounts remain non-final and do not settle or refund funding.
 A failed refresh cannot erase an exhaustion proved by existing saved evidence.
+
+Draft inbox metrics helpers: `infra.mail.metrics.usage(resourceId)` reads cumulative
+storage/message/thread stocks; `infra.mail.metrics.events(resourceId, { types:
+["message.sent", "message.received"] })` reads aggregate event counts. Optional
+`start`, `end` and `period_seconds` (60/3600/86400) select aligned past UTC buckets
+within 90 days, at most 200 points per type. Defaults cover the previous day
+hourly; minute periods default to 199 minutes. Select up to three usage/four
+event types. The manually connected inbox key must authorize metrics reads.
+Missing metrics remain `null`; gaps and empty arrays never establish zero or
+complete reporting. Do not sum cumulative stocks or treat event counts as prices
+or per-recipient receipts. `coverage: "unverified"` and `billing_final: false`
+remain explicit. No automatic upstream account connection or fallback is added.

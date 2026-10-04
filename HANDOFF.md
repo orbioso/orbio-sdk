@@ -20,8 +20,20 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 120 contracts / 54 provider writes.
-Latest finance addition (2026-10-05): resources.spending now includes typed
+Current breadth increment: source fixture/generated types contain 122 contracts / 54 provider writes.
+Latest mail addition (2026-10-05): mail.metrics.usage/events accept typed selected
+inbox metric names, optional UTC start/end and 60/3600/86400 second periods. Native
+reads require the manually connected inbox key to authorize metrics; no root
+fallback. Defaults use the prior day hourly or 199 minutes for minute periods;
+limits are 200 points/type, three usage/four event types, a 90-day past range.
+Cumulative usage stocks must not be summed. Missing metrics are null, gaps and
+empty arrays do not establish zero or complete reporting; billing_final is false.
+Events are aggregate counts, not individual delivery receipts or prices. Platform
+strict timestamp/value/scope parsing and a 256 KiB native bound are unverified.
+Generation is engineering only; no checks/live calls/publication. See platform
+TOOLKIT_MAIL_METRICS.md. Native payer/price/finality/allocation work remains.
+
+Prior finance addition (2026-10-05): resources.spending now includes typed
 periods_expected and period_coverage_complete. Platform observation follows
 current-month retained costs beyond funding expiry and one missing/stale prior
 month per claim. Missing-month totals can understate spend; complete month

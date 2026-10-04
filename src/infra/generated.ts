@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 75182cf03630500aac6752e1b5577f22c1352173b2017e08f4ca77fe042fb1d1. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 7575175cc77ed45e6656114f37a02ae21a522d6450264cd0d1503540b233583b. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -161,6 +161,151 @@ export interface InfrastructureContracts {
     }
     'mail.inbox': {
       resource_id: string
+    }
+    'mail.metrics.usage': {
+      resource_id: string
+      start?: string
+      end?: string
+      period_seconds?: 60 | 3600 | 86400
+      /**
+       * @minItems 1
+       * @maxItems 3
+       */
+      types?:
+        | ['storage_bytes' | 'message_count' | 'thread_count']
+        | ['storage_bytes' | 'message_count' | 'thread_count', 'storage_bytes' | 'message_count' | 'thread_count']
+        | [
+            'storage_bytes' | 'message_count' | 'thread_count',
+            'storage_bytes' | 'message_count' | 'thread_count',
+            'storage_bytes' | 'message_count' | 'thread_count'
+          ]
+    }
+    'mail.metrics.events': {
+      resource_id: string
+      start?: string
+      end?: string
+      period_seconds?: 60 | 3600 | 86400
+      /**
+       * @minItems 1
+       * @maxItems 4
+       */
+      types?:
+        | [
+            | 'message.received'
+            | 'message.received.spam'
+            | 'message.received.blocked'
+            | 'message.received.unauthenticated'
+            | 'message.sent'
+            | 'message.delivered'
+            | 'message.bounced'
+            | 'message.complained'
+            | 'message.rejected'
+          ]
+        | [
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            ),
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            )
+          ]
+        | [
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            ),
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            ),
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            )
+          ]
+        | [
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            ),
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            ),
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            ),
+            (
+              | 'message.received'
+              | 'message.received.spam'
+              | 'message.received.blocked'
+              | 'message.received.unauthenticated'
+              | 'message.sent'
+              | 'message.delivered'
+              | 'message.bounced'
+              | 'message.complained'
+              | 'message.rejected'
+            )
+          ]
     }
     'mail.label.event.list': {
       resource_id: string
@@ -5322,6 +5467,332 @@ export interface InfrastructureContracts {
       created_at: string
       updated_at: string
     }
+    'mail.metrics.usage': {
+      inbox_id: string
+      start: string
+      end: string
+      period_seconds: 60 | 3600 | 86400
+      native_limit: 200
+      semantics: 'cumulative_usage'
+      coverage: 'unverified'
+      billing_final: false
+      /**
+       * @maxItems 3
+       */
+      items:
+        | []
+        | [
+            {
+              metric: 'storage_bytes' | 'message_count' | 'thread_count'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+        | [
+            {
+              metric: 'storage_bytes' | 'message_count' | 'thread_count'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric: 'storage_bytes' | 'message_count' | 'thread_count'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+        | [
+            {
+              metric: 'storage_bytes' | 'message_count' | 'thread_count'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric: 'storage_bytes' | 'message_count' | 'thread_count'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric: 'storage_bytes' | 'message_count' | 'thread_count'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+    }
+    'mail.metrics.events': {
+      inbox_id: string
+      start: string
+      end: string
+      period_seconds: 60 | 3600 | 86400
+      native_limit: 200
+      semantics: 'event_count'
+      coverage: 'unverified'
+      billing_final: false
+      /**
+       * @maxItems 4
+       */
+      items:
+        | []
+        | [
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+        | [
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+        | [
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+        | [
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            },
+            {
+              metric:
+                | 'message.received'
+                | 'message.received.spam'
+                | 'message.received.blocked'
+                | 'message.received.unauthenticated'
+                | 'message.sent'
+                | 'message.delivered'
+                | 'message.bounced'
+                | 'message.complained'
+                | 'message.rejected'
+              /**
+               * @maxItems 200
+               */
+              points:
+                | {
+                    timestamp: string
+                    value: number
+                  }[]
+                | null
+            }
+          ]
+    }
     'mail.label.event.list': {
       items: {
         inbox_id: string
@@ -6803,5 +7274,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '75182cf03630500aac6752e1b5577f22c1352173b2017e08f4ca77fe042fb1d1'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = '7575175cc77ed45e6656114f37a02ae21a522d6450264cd0d1503540b233583b'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
