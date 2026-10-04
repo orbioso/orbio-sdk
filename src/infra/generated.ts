@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 897450823edebfee955e31ae2142c238c0a05075918d1d4351c4dc67cbb2fbd1. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 84271d9aa3ca7a9288c58f39659002e7c34556e02fa0f0185cacf40a495315ae. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -234,6 +234,11 @@ export interface InfrastructureContracts {
     }
     'worker.app': {
       resource_id: string
+    }
+    'worker.image.upload.list': {
+      resource_id: string
+      limit?: number
+      before?: string
     }
     'worker.image.upload.get': {
       resource_id: string
@@ -479,6 +484,12 @@ export interface InfrastructureContracts {
       upload_id: string
     }
     'worker.image.upload.cancel': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+      upload_id: string
+    }
+    'worker.image.upload.abandon': {
       idempotency_key: string
       max_cost: string
       resource_id: string
@@ -5533,14 +5544,28 @@ export interface InfrastructureContracts {
       app_name: string
       state: string
     }
+    'worker.image.upload.list': {
+      items: {
+        upload_id: string
+        resource_id: string
+        digest: string
+        size_bytes: number
+        received_bytes: number
+        state: 'preparing' | 'uploading' | 'cancelling' | 'abandoning' | 'completed' | 'cancelled' | 'abandoned'
+        expires_at: string
+        native_session_cleanup: 'not_requested' | 'pending' | 'confirmed_absent' | 'unconfirmed'
+      }[]
+      next_cursor: string | null
+    }
     'worker.image.upload.get': {
       upload_id: string
       resource_id: string
       digest: string
       size_bytes: number
       received_bytes: number
-      state: 'preparing' | 'uploading' | 'completed' | 'cancelled'
+      state: 'preparing' | 'uploading' | 'cancelling' | 'abandoning' | 'completed' | 'cancelled' | 'abandoned'
       expires_at: string
+      native_session_cleanup: 'not_requested' | 'pending' | 'confirmed_absent' | 'unconfirmed'
     }
     'worker.image.blob.inspect': {
       digest: string
@@ -6108,6 +6133,26 @@ export interface InfrastructureContracts {
       retry_after_seconds: number | null
     }
     'worker.image.upload.cancel': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'worker.image.upload.abandon': {
       id: string
       project_id: string
       agent_id: string
@@ -6756,5 +6801,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '897450823edebfee955e31ae2142c238c0a05075918d1d4351c4dc67cbb2fbd1'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = '84271d9aa3ca7a9288c58f39659002e7c34556e02fa0f0185cacf40a495315ae'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

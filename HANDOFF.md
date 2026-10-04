@@ -20,8 +20,20 @@ are retained. Failed reads and uncertain mutations have different retry behavior
 Existing manifest refresh retains transport, credentials and signer; legacy
 tool discovery also has an explicit refresh method.
 
-Current breadth increment: source fixture/generated types contain 115 contracts.
-Latest addition (2026-10-05): workers.images.blob/publish and uploads.get/begin/
+Current breadth increment: source fixture/generated types contain 120 contracts / 54 provider writes.
+Latest addition (2026-10-05): workers.images.uploads.list/abandon mirror scoped
+broker inventory and explicit unknown-begin closure. Upload UUIDs equal original
+begin operation UUIDs. Known-session cancel now fences writes after earlier
+leases expire; an uncertain DELETE is only recovered by native absence. Abandon
+with max_cost:"0" proves no new native dispatch, never original session cleanup
+or refund. Public native_session_cleanup distinguishes pending/confirmed_absent/
+unconfirmed. Unknown expired/abandoned records retain quota. Execution/billing
+admission lanes retain monetary holds separately: 32 active, eight cleanup slots,
+10,000 held backlog, unchanged per-minute/grant/budget checks. Generation is
+engineering output; no checks/provider calls. Native attribution/retention and
+full-stack final verification remain.
+
+Prior addition (2026-10-05): workers.images.blob/publish and uploads.get/begin/
 chunk/complete/cancel mirror the platform's exact assigned-repository artifact
 path. Callers save original requests/keys/caps and explicitly wait; no bulk loop,
 retry, key creation or upstream credentials are introduced. 128 KiB chunks support

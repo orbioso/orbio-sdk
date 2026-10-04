@@ -461,7 +461,8 @@ retention and final workflow verification remain unfinished.
 
 infra.workers.images.blob(resourceId, digest) checks exact native blob presence.
 Use images.uploads.begin/chunk/complete to send a config/layer blob, uploads.get
-for recorded progress, and uploads.cancel for a known open session. Each mutation
+for recorded progress, uploads.list for recorded UUID discovery, and uploads.cancel
+for a known open session. uploads.abandon closes an unknown begin record only. Each mutation
 accepts its generated argument type with the original idempotency_key/max_cost;
 helpers never generate keys, retry or wait. Save each exact request before sending
 and explicitly confirm its operation before advancing the offset. Native session
@@ -473,8 +474,8 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-These seven added contracts bring the source fixture to 115. Unknown native steps
-are not repeated; native cost/retention and ambiguous-session cleanup still need
+The current source fixture has 120 contracts / 54 provider writes. Unknown native
+steps are not repeated; native cost/retention and ambiguous-session cleanup still need
 completion before release. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
 Current additions remain unverified/unpublished; no checks or provider smoke ran.
@@ -488,3 +489,20 @@ after 30 days; sent is not delivered and a missing event is unknown. These reads
 require `mail.read` for the assigned inbox and never expose callback secrets or
 email bodies. Owner setup remains in the Orbio dashboard. This draft SDK is
 unpublished and still requires final validation.
+
+Fly upload closure: each upload UUID equals its original begin operation UUID.
+Recorded upload pages sort by UUID; pass next_cursor as before. This does not
+list all native images or tags. After older writer leases expire, cancel fences
+subsequent writes and cancels the exact refreshed session. Uncertain DELETE
+responses are recovered by absence readback only. Public native_session_cleanup
+is pending during closure, confirmed_absent after cancellation, or unconfirmed
+after unknown-begin abandonment. Explicit abandon requires max_cost:"0", contacts
+no native provider and never refunds the original operation. Unknown abandoned
+and expired sessions continue consuming upload quota.
+
+The platform separately limits active executions (32 per account, plus eight
+slots for allowlisted zero-reserve cleanup) and held billing backlog (10,000 for
+normal admissions). Terminal-but-held outcomes preserve their monetary holds
+without occupying execution slots. Rate/grant/budget/resource checks still apply.
+These changes remain unverified and unpublished; complete native accounting and
+full-stack final checks remain release requirements.

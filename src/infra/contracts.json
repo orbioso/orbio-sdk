@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "897450823edebfee955e31ae2142c238c0a05075918d1d4351c4dc67cbb2fbd1",
+  "schemaRevision": "84271d9aa3ca7a9288c58f39659002e7c34556e02fa0f0185cacf40a495315ae",
   "tools": [
     {
       "name": "infra.status",
@@ -8558,8 +8558,176 @@
       "upstream": true
     },
     {
+      "name": "worker.image.upload.list",
+      "description": "List a bounded page of recorded upload UUIDs/progress for this exact assigned app/product/agent, including cancelled and abandoned records. Free broker metadata; no registry call, token, native Location or bytes. Pass next_cursor as before; pages sort by UUID rather than creation time and are not a transactional snapshot. Expiry stops write authority but does not prove native cleanup. A lost begin upload UUID equals its original operation UUID; inspect its record before explicit cancel/abandon. This inventory includes only broker uploads, not all native images or tags.",
+      "permission": "worker.manage",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "default": 10
+          },
+          "before": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "upload_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "resource_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^sha256:[a-f0-9]{64}$"
+                        },
+                        "size_bytes": {
+                          "type": "integer",
+                          "minimum": 2,
+                          "maximum": 536870912
+                        },
+                        "received_bytes": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 536870912
+                        },
+                        "state": {
+                          "enum": [
+                            "preparing",
+                            "uploading",
+                            "cancelling",
+                            "abandoning",
+                            "completed",
+                            "cancelled",
+                            "abandoned"
+                          ]
+                        },
+                        "expires_at": {
+                          "type": "string"
+                        },
+                        "native_session_cleanup": {
+                          "enum": [
+                            "not_requested",
+                            "pending",
+                            "confirmed_absent",
+                            "unconfirmed"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "upload_id",
+                        "resource_id",
+                        "digest",
+                        "size_bytes",
+                        "received_bytes",
+                        "state",
+                        "expires_at",
+                        "native_session_cleanup"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "items",
+                  "next_cursor"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane",
+      "upstream": false
+    },
+    {
       "name": "worker.image.upload.get",
-      "description": "Read the broker’s recorded progress for one upload UUID bound to this resource/product/agent. upload_id is returned by the original begin operation and grants no authority by itself. Returns digest, size, confirmed byte offset, state and fixed expiry; never a registry token, native upload URL or bytes. Does not contact Fly or extend funding. For uncertain steps, recover the original operation before sending the next chunk.",
+      "description": "Read the broker’s recorded progress for one upload UUID bound to this resource/product/agent. upload_id equals the original begin operation UUID, including a lost native begin reply, and grants no authority by itself. Returns digest, size, confirmed byte offset, state and fixed expiry; never a registry token, native upload URL or bytes. Does not contact Fly or extend funding. For uncertain steps, recover the original operation before sending another chunk; explicit cancel fences a known session and abandon only closes an unknown begin record. Inspect native_session_cleanup separately from state/expiry.",
       "permission": "worker.manage",
       "inputSchema": {
         "type": "object",
@@ -8614,12 +8782,23 @@
                     "enum": [
                       "preparing",
                       "uploading",
+                      "cancelling",
+                      "abandoning",
                       "completed",
-                      "cancelled"
+                      "cancelled",
+                      "abandoned"
                     ]
                   },
                   "expires_at": {
                     "type": "string"
+                  },
+                  "native_session_cleanup": {
+                    "enum": [
+                      "not_requested",
+                      "pending",
+                      "confirmed_absent",
+                      "unconfirmed"
+                    ]
                   }
                 },
                 "required": [
@@ -8629,7 +8808,8 @@
                   "size_bytes",
                   "received_bytes",
                   "state",
-                  "expires_at"
+                  "expires_at",
+                  "native_session_cleanup"
                 ],
                 "additionalProperties": false
               }
@@ -12437,7 +12617,7 @@
         ]
       },
       "readOnly": false,
-      "costBasis": "provider_metered",
+      "costBasis": "free_control_plane",
       "upstream": false,
       "destructive": false
     },
@@ -12662,7 +12842,7 @@
         ]
       },
       "readOnly": false,
-      "costBasis": "provider_metered",
+      "costBasis": "free_control_plane",
       "upstream": false,
       "destructive": false
     },
@@ -12887,7 +13067,7 @@
         ]
       },
       "readOnly": false,
-      "costBasis": "provider_metered",
+      "costBasis": "free_control_plane",
       "upstream": false,
       "destructive": false
     },
@@ -14918,7 +15098,7 @@
     {
       "name": "worker.image.upload.begin",
       "permission": "worker.manage",
-      "description": "Begin one blob upload into this assigned app’s private repository under active funding. Supply its exact sha256 digest and decoded size (2 bytes to 512 MiB). Poll operation.get for upload_id and confirmed offset; an already-present exact blob completes immediately. Sessions expire at the earlier of the current funded boundary or one hour, with at most four live uploads per app. No native upload URL/token is returned. Lost begin replies are never re-created automatically. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Begin one blob upload into this assigned app’s private repository under active funding. Supply its exact sha256 digest and decoded size (2 bytes to 512 MiB). The upload UUID equals this original begin operation UUID. Poll operation.get for upload_id and confirmed offset; an already-present exact blob completes immediately. Sessions expire at the earlier of the current funded boundary or one hour, with at most four live uploads per app. No native upload URL/token is returned. Lost begin replies are never re-created automatically. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15587,7 +15767,7 @@
     {
       "name": "worker.image.upload.cancel",
       "permission": "worker.manage",
-      "description": "Cancel one known native upload session bound to this resource; allowed after its deadline or funding expiry. Never deletes a completed blob, image, Machine or another upload. An unresolved earlier step must be recovered first. No automatic provider cleanup or refund of incurred usage is inferred. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Cancel one known native upload session bound to this resource; allowed after its deadline or funding expiry. Never deletes a completed blob, image, Machine or another upload. After an earlier writer’s lease expires, cancellation fences later writes and may interrupt its unresolved step. It refreshes and cancels the saved exact native session; an uncertain DELETE is only recovered by absence readback. Interrupted operations keep unknown billing. Does not delete a completed blob or refund incurred usage. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15799,6 +15979,223 @@
       "readOnly": false,
       "costBasis": "provider_metered",
       "upstream": true,
+      "destructive": true
+    },
+    {
+      "name": "worker.image.upload.abandon",
+      "permission": "worker.manage",
+      "description": "Explicitly close the broker record for an uncertain original begin whose native Location was never saved. After prior writer leases expire, fences that upload permanently and interrupts its unresolved begin. Broker-only: use max_cost:\"0\". Does not contact Fly, delete any native session/blob, prove expiry or settle/refund the original operation. Returns state abandoned and native_session_cleanup unconfirmed. Unknown abandoned sessions remain in upload quotas; a new begin does not clean up the old session. Cannot abandon a known session: cancel it instead. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "upload_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id",
+          "upload_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "free_control_plane",
+      "upstream": false,
       "destructive": true
     },
     {
