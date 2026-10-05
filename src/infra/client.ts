@@ -169,11 +169,10 @@ export class Infrastructure {
     preview: (resourceId: string, args: Omit<InfrastructureInput<'workspace.preview'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.preview', resourceId, args, options),
   }
   readonly mail = {
-    subscription: {
-      quote: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.subscription.quote', resourceId, {}, options),
-      status: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.subscription.status', resourceId, {}, options),
-      activate: (resourceId: string, args: Omit<InfrastructureInput<'mail.subscription.activate'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.subscription.activate', resourceId, args, options),
-    },
+    pricing: (options: InfrastructureRequestOptions = {}) => this.call('mail.pricing', {}, options),
+    createInbox: (args: InfrastructureInput<'mail.inbox.create'>, options: InfrastructureRequestOptions = {}) => this.call('mail.inbox.create', args, options),
+    renewInbox: (resourceId: string, args: Omit<InfrastructureInput<'mail.inbox.renew'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox.renew', resourceId, args, options),
+    billing: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.billing.status', resourceId, {}, options),
     metrics: {
       usage: (resourceId: string, args: Omit<InfrastructureInput<'mail.metrics.usage'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.metrics.usage', resourceId, args, options),
       events: (resourceId: string, args: Omit<InfrastructureInput<'mail.metrics.events'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.metrics.events', resourceId, args, options),

@@ -35,9 +35,9 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 
 ## Agent infrastructure
 
-This source branch prepares infrastructure helpers for the platform release;
-these additions are not yet published on npm. The platform must enable the
+Version 0.2.0 adds infrastructure helpers. The platform must enable the
 capabilities and the owner must assign a product, agent and permissions.
+Installing the SDK does not enable the platform feature.
 All five providers, owner workflows and captured billing policies are implemented. Orbio pays upstream providers, charges a default 15% surcharge on supported allocations and absorbs unmetered costs. Tests, type/build and package checks pass; native workflow evidence and coordinated rollout steps are in [HANDOFF.md](HANDOFF.md). Provider credentials alone do not activate the feature.
 
 ```ts
@@ -107,8 +107,8 @@ connection with explicit `infra` consent to one product and stable agent.
 The SDK accepts that token and never connects the user's upstream providers
 itself. Provider account connection and assignment belong in owner setup.
 Each key/connection is scoped by the server; knowing a provider ID grants nothing.
-Resources and operations use Orbio UUIDs. One inbox per stable agent is manually
-created/assigned by the owner, never automatically by an agent.
+Resources and operations use Orbio UUIDs. An agent with `mail.manage` can explicitly
+create its one inbox; rotating its key does not create another.
 
 `infra.call(name, args, { signal })` preserves the shared result without the
 legacy tools' transformation. Known helpers have generated types; generic calls
@@ -153,7 +153,8 @@ workload actions require active funding. These contracts require coordinated pla
 Mail writes include `mail.drafts.create/update/send/delete`,
 `mail.messages.delete/labels` and `mail.threads.labels`. Creating a reply/forward
 draft never sends it. Inspect recipients/content before a separate send call;
-uncertain sends are not replayed. The owner manually assigns the agent’s one inbox.
+uncertain sends are not replayed. `mail.createInbox` explicitly creates the agent’s
+one inbox, and `mail.renewInbox` prepays another calendar month.
 Every mutation helper requires caller-saved `idempotency_key` and `max_cost`;
 no helper generates keys, repeats mutations, raises ceilings or waits implicitly.
 An operation can succeed while its bill stays held. Provider credentials never
@@ -173,8 +174,8 @@ operation IDs. After pausing, wait for the previous funding window to close befo
 explicitly approving a new resume if it returns `resource_busy`.
 
 A manually supplied AgentMail inbox key needs `inbox_read`, `metrics_read`, and
-`inbox_update`, plus the chosen draft/message permissions. Capacity checks use
-that inbox key. Root provider keys never belong in the SDK configuration.
+`inbox_update`, plus the chosen draft/message permissions. Content and pause/resume use
+that inbox key; prepaid capacity is recorded in Orbio. Root provider keys never belong in the SDK configuration.
 
 Infrastructure money fields remain exact bounded integer micro-USD numbers in
 the shared wire result, at most `1_000_000_000_000`; convert with `BigInt()` when
@@ -375,7 +376,7 @@ decoded; combined draft fields fit 192 KiB serialized. Remote attachment URLs
 are not accepted. Keep the original request/key; a lost upload reply is never
 repeated automatically. mail.labelEvents(resourceId, {limit, cursor}) reads a
 page of label-change audit events, not delivery or incoming-mail notifications.
-These contracts are covered by SDK tests and remain unpublished.
+These contracts are covered by SDK tests and require platform capability enablement.
 
 
 Fly worker workflows also expose workers.volumes.list/get/create/extend/delete,
@@ -384,8 +385,7 @@ before Machines and mount one from the assigned app/region. Machine http enables
 explicit 80/443 ingress after app IP allocation; proxy autostart stays disabled.
 Updates preserve omitted HTTP and disable it with null; mounts and regions cannot
 change in-place. Logs are private text; truncated pages have no advancing cursor
-because that would skip omitted native entries. All additions remain unpublished
-pending coordinated platform activation; see [HANDOFF.md](HANDOFF.md).
+because that would skip omitted native entries. These additions require coordinated platform activation; see [HANDOFF.md](HANDOFF.md).
 
 
 Assigned Supabase storage helpers are available in the draft source as
@@ -399,7 +399,7 @@ uses exact selected paths, and nonempty bucket deletion is refused. Signed
 links last 30–300 seconds; anyone holding them can download until expiry even
 after an Orbio grant revoke. Preserve the original mutation/key/ceiling and read
 its operation; no uncertain upload retry or automatic link refresh occurs.
-Unmetered storage/egress costs are absorbed by Orbio; bootstrap verification is required before application access. These SDK additions are unpublished; see [HANDOFF.md](HANDOFF.md).
+Unmetered storage/egress costs are absorbed by Orbio; bootstrap verification is required before application access. These SDK additions require platform enablement; see [HANDOFF.md](HANDOFF.md).
 
 
 Database allocation acceptance is separate from readiness. After create, read
@@ -410,7 +410,7 @@ new public tables and disabled implicit browser privileges. Application migratio
 must grant table/function access and add RLS policies deliberately. Background
 funding sweeps do not reset later application policies. Unknown initial setup
 never authorizes another SQL dispatch or project creation; owner inspection and
-pause/delete remain available. The bootstrap passed disposable-project native smoke; this SDK source remains unpublished.
+pause/delete remain available. The bootstrap passed disposable-project native smoke; the platform must enable these capabilities.
 
 Vercel/Fly/Supabase funded continuity is explicit:
 `infra.deployments.renew(resourceId, args)`, `infra.workers.renew(resourceId, args)`
@@ -428,7 +428,7 @@ nullable native cost/charge and shutdown policy. Use `next_cursor` as `before`;
 pages order by UUID, not time. Financial records remain readable after resource
 deletion within the same product/agent. Null cost is pending, not zero; settled
 funding does not prove every other bill ended. No private proof/root credential
-is returned, and these reads never renew compute or settle bills. Customer closure and absorbed costs follow the captured provider policy; native supplier finality remains independent. This SDK source remains unpublished.
+is returned, and these reads never renew compute or settle bills. Customer closure and absorbed costs follow the captured provider policy; native supplier finality remains independent. The platform must enable these capabilities.
 
 `infra.deployments.resume(resourceId, args)` prepays a fresh nonoverlapping window
 before restoring verified paused production traffic. Unpause can restore existing
@@ -452,7 +452,7 @@ protective high-water amount may exceed a later credited report; approved upstre
 capacity is not your available account balance. `billing_final:false` means this
 is not a final invoice or customer charge. The platform requests production
 pause at observed capacity, but previews/storage can continue billing.
-Fly/Supabase sampled allocations and mail capacity use funding/subscription reads described below; this SDK source remains unpublished.
+Fly/Supabase sampled allocations and mail capacity use funding and `mail.billing` reads described below.
 
 `infra.workers.images.inspect(resourceId, image)` verifies an immutable image's
 native digest and compressed size inside the assigned Fly app/organization.
@@ -481,9 +481,9 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-The current source fixture has 132 contracts / 59 provider mutations. Unknown native steps are not repeated; unmetered retention is absorbed by Orbio. See the platform
+The current source fixture has 133 contracts / 60 provider mutations. Unknown native steps are not repeated; unmetered retention is absorbed by Orbio. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
-Native blob upload/manifest publication/read/delete passed; this SDK remains unpublished.
+Native blob upload/manifest publication/read/delete passed; these capabilities require platform enablement.
 
 Draft infrastructure delivery helpers: `infra.mail.delivery.status(resourceId)`,
 `infra.mail.delivery.list(resourceId, { limit: 10 })` and
@@ -492,7 +492,7 @@ recorded after the owner connects an inbox-scoped AgentMail webhook. Pass the
 returned cursor unchanged with the same optional message filter. Records expire
 after 30 days; sent is not delivered and a missing event is unknown. These reads
 require `mail.read` for the assigned inbox and never expose callback secrets or
-email bodies. Owner setup remains in the Orbio dashboard. This SDK remains unpublished; production callback delivery is a rollout check.
+email bodies. Owner setup remains in the Orbio dashboard. The platform must enable these capabilities; production callback delivery is a rollout check.
 
 Fly upload closure: each upload UUID equals its original begin operation UUID.
 Recorded upload pages sort by UUID; pass next_cursor as before. This does not
@@ -558,7 +558,7 @@ operation can be cancelled before dispatch; other states and their holds stay
 intact. No new key, ceiling or operation is created. After a lost reply, read
 that original operation or explicitly repeat cancellation for that same UUID.
 Local wait abort/timeout never requests cancellation automatically. Use the
-resource's explicit stop/delete action for dispatched work. This addition is covered by SDK and platform tests; publication remains pending.
+resource's explicit stop/delete action for dispatched work. This addition is covered by SDK and platform tests; platform activation remains a separate step.
 
 ### Toolkit surcharge policy
 
@@ -572,50 +572,41 @@ a resource quote, finalized invoice or proof that billing is ready. Unknown supp
 ### Included management API requests
 
 New reviewed Vercel/Fly/Supabase/AgentMail operations capture their included
-standard management request tariff before dispatch. Use max_cost:"0" for the API
-action, except create/resume/renew, which still needs a positive separate lifetime
+standard management request tariff before dispatch. Use max_cost:"0" for included
+API actions. Mail sends cost a fixed 0.05 CREDIT; inbox creation/renewal prepays a
+calendar month. Other provider create/resume/renew actions need a positive lifetime
 budget. A confirmed outcome can settle only the request charge at zero. Build,
 compute, storage, egress and mail capacity remain separately billable. Unknown
 outcomes and older uncaptured bills are not backfilled or replayed. Generated
 MCP/HTTP descriptions state these terms for each reviewed action. See [HANDOFF.md](HANDOFF.md) for verification and rollout.
 
-### Platform inbox ownership
+### Agent inboxes
 
-The toolkit operator manually creates an inbox in the dedicated platform
-AgentMail organization and supplies its ID and inbox-scoped key. The owner
-connects it; users need no whole-organization access. Setup verifies the native
-parent organization and privately saves reported subscription metadata. Runtime
-reads/writes and webhook setup continue using only that inbox key, rechecking
-its parent against saved evidence. A foreign organization is refused; older
-unverified connections need explicit same-inbox reconnect. Public resource
-metadata contains only ownership/time/subscription-presence flags, never billing
-IDs. Those flags do not prove a price, paid quota, final invoice or settlement;
-explicit subscription quotes and activation below add customer billing in these unpublished additions.
+Use `infra.mail.pricing()` to read prices. `infra.mail.createInbox({name,
+max_cost:"2.30", idempotency_key})` creates one inbox for the assigned stable agent
+with one calendar month included (at 15% surcharge). `infra.mail.renewInbox(id,
+{max_cost:"2.30", idempotency_key})` adds one month from the paid end or now when
+expired. `infra.mail.billing(id)` shows prepaid time. There is no automatic
+renewal, provider billing-date setup, recipient/storage allowance or separate
+activation step. Creation/renewal need `mail.manage` and `infra.read`.
 
-Mail capacity is purchased explicitly: `infra.mail.subscription.quote(resourceId)`,
-then `activate(resourceId, {quote_hash, max_cost, idempotency_key})` with the saved
-quote and sufficient decimal CREDIT ceiling, then `status(resourceId)` to read
-the customer charge and remaining capacity. The full period allocation plus
-captured surcharge is charged once, even mid-period; no automatic renewal,
-proration or unused-capacity refund. Each draft-send attempt reserves its validated recipient count (1–20);
-refused/uncertain attempts after reservation retain those units. `infra.mail.pause` and
-`resume` explicitly change native sending/receiving; resume needs paid capacity.
-Owner-only `deleteInbox` permanently removes the inbox/mail, retaining charges.
-Approval authorizes native inbox pause at expiry unless newer paid capacity
-covers it. Toolkit sends stop immediately; status reports native pause confirmation
-or uncertainty. Pause blocks incoming mail without replay after resume. Stored
-mail remains and retained provider bills can continue. Version 2 quotes include
-`storage_capacity_bytes`, `on_storage_exhaustion: 'pause_inbox'`,
-`storage_billing: 'included_allocation'` and `after_expiry_customer_charge: 'none'`.
-Orbio absorbs quota overrun/delayed pause and retention after expiry. Draft writes,
-sends and resume require a current native sample below the paid allowance.
-Status includes the latest storage bytes/timestamp and observed quota state;
-`active` means a paid window, not native health. Delete stored messages/drafts
-for cleanup, then explicitly resume after native metrics fall below the limit.
-No automatic resume or deletion occurs. The worker samples every five minutes,
-so quota enforcement can lag.
-No automatic provisioning/send or broad provider key is added. Direct provider
-activity is outside this ledger. These contracts remain unpublished pending coordinated platform rollout.
+`infra.mail.drafts.send(id, {draft_id, max_cost:"0.05", idempotency_key})` costs a
+fixed **0.05 CREDIT per send action**, covering 1–20 inspected recipients with
+no extra surcharge. Reads, drafts, labels and cleanup stay free. The server
+creates and encrypts an inbox-scoped provider key; only the assigned product and
+agent can operate that inbox. Native organization keys never reach the client.
+One live inbox per agent is enforced atomically. Existing grants gain no new
+permission automatically. Owner same-inbox reconnection is available for key
+rotation/recovery; existing manual inbox retention stays sponsored until renewal.
+
+Prepaid expiry requests a native pause; incoming mail while paused is not
+replayed. Stored mail stays. Renew, then `infra.mail.resume` if paused;
+`infra.mail.deleteInbox` permanently deletes only the assigned inbox, requiring
+`mail.delete`. No unused-time refund or automatic deletion. Preserve the original
+request/key and poll the operation: uncertain sends are never replayed. Unknown
+outcomes keep their original hold. These are retail prices, not finalized supplier
+invoices; Orbio absorbs unused subscription capacity, unpriced storage/inbound and
+retention after expiry at launch. Platform feature activation remains a separate rollout step.
 
 Database funding (`infra.databases.create`, `resume`, `renew`) requires explicit
 `on_expiry: 'delete'`. This authorizes irreversible project/database/storage
@@ -664,7 +655,7 @@ supplier invoice finality. `resources.spending` exposes `closure_policy`,
 `native_absent_since`, `customer_closed_at`, `corrections_until`,
 `corrections_complete_at` and sanitized `correction_error_code`. Funding reads
 preserve original closure amounts separately from net accrued amounts after
-credits. This SDK source remains unpublished. See the platform
+credits. The platform must enable these capabilities. See the platform
 [deployment closure guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_DEPLOYMENT_CLOSURE.md).
 
 
@@ -676,7 +667,7 @@ successor protects it; explicit Machine stop alone never permits early deletion.
 Keep independent backups and renew before expiry. Existing null-expiry contracts
 stay stop-only. Recovery observes uncertain deletion without replay; app absence
 does not settle prior charges. See the [worker expiry contract](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_WORKER_EXPIRY.md).
-Verification is recorded in [HANDOFF.md](HANDOFF.md); this SDK source remains unpublished.
+Verification is recorded in [HANDOFF.md](HANDOFF.md); the platform must enable these capabilities.
 
 
 ### Sampled worker and database allocations

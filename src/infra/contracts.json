@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "0c2e298a331cd0af0b0f481a03ecb87ca68d32f6be53e60e652be9f85331dabb",
+  "schemaRevision": "5a03c858901f2ec4d6e5c344ca9c517e888f5e70248a83f8bd839be22916898c",
   "tools": [
     {
       "name": "infra.status",
@@ -130,6 +130,127 @@
                   "permissions",
                   "providers",
                   "setup_url"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "mail.pricing",
+      "description": "Read mail retail rates before creating an inbox, extending its prepaid month or sending. 1 CREDIT equals 1 USD: inbox base 2 CREDIT per month and send price 0.05 CREDIT per action (1–20 recipients); inbox allocation adds the captured surcharge. No operator billing dates or allowance configuration. First month is included in creation. Storage/inbound and unused provider blocks are absorbed at launch, not itemized supplier usage. Reads, drafts and cleanup are free.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "const": "retail_allocation"
+                  },
+                  "margin_bps": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "inbox_monthly_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "send_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "automatic_renewal": {
+                    "const": false
+                  },
+                  "on_expiry": {
+                    "const": "pause_inbox"
+                  },
+                  "storage_and_inbound": {
+                    "const": "included_launch_subsidy"
+                  },
+                  "supplier_invoice_final": {
+                    "const": false
+                  }
+                },
+                "required": [
+                  "version",
+                  "model",
+                  "margin_bps",
+                  "inbox_monthly_micro_usd",
+                  "send_micro_usd",
+                  "automatic_renewal",
+                  "on_expiry",
+                  "storage_and_inbound",
+                  "supplier_invoice_final"
                 ],
                 "additionalProperties": false
               }
@@ -5828,8 +5949,8 @@
       "destructive": true
     },
     {
-      "name": "mail.subscription.quote",
-      "description": "Read the current configured platform subscription-capacity quote for this assigned inbox. Free broker read with no native request; no capacity is reserved. Public terms show the full period allocation, captured surcharge and total customer charge, plus recipient and storage allowances and the authorized native inbox pause at the storage limit or expiry. Storage is included in the fixed allocation; overrun and retention after expiry create no extra customer charge. Pausing blocks incoming mail; missed mail is not replayed. Pass quote_hash unchanged to mail.subscription.activate with a sufficient max_cost. Quotes may expire or change before admission. Missing operator allocation or a mismatched saved subscription is refused; no plan rate is guessed. The full period charge applies even if activated mid-period; no proration or automatic renewal. Provider organization/customer/subscription IDs stay private.",
+      "name": "mail.billing.status",
+      "description": "Read prepaid inbox capacity and current retail pricing. paid_until is the purchased end time; compare it to the current time because worker state may lag. No automatic renewal. billing:null means operator-sponsored retention; sends still incur the fixed action tariff. This read never purchases capacity, resumes mail or contacts the provider.",
       "permission": "mail.read",
       "inputSchema": {
         "type": "object",
@@ -5853,188 +5974,60 @@
               "result": {
                 "type": "object",
                 "properties": {
-                  "resource_id": {
-                    "type": "string",
-                    "format": "uuid"
+                  "pricing": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "string"
+                      },
+                      "model": {
+                        "const": "retail_allocation"
+                      },
+                      "margin_bps": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "inbox_monthly_micro_usd": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "send_micro_usd": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "automatic_renewal": {
+                        "const": false
+                      },
+                      "on_expiry": {
+                        "const": "pause_inbox"
+                      },
+                      "storage_and_inbound": {
+                        "const": "included_launch_subsidy"
+                      },
+                      "supplier_invoice_final": {
+                        "const": false
+                      }
+                    },
+                    "required": [
+                      "version",
+                      "model",
+                      "margin_bps",
+                      "inbox_monthly_micro_usd",
+                      "send_micro_usd",
+                      "automatic_renewal",
+                      "on_expiry",
+                      "storage_and_inbound",
+                      "supplier_invoice_final"
+                    ],
+                    "additionalProperties": false
                   },
-                  "project_id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "agent_id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "quote_hash": {
-                    "type": "string",
-                    "pattern": "^[a-f0-9]{64}$"
-                  },
-                  "window_start": {
-                    "type": "string"
-                  },
-                  "funded_until": {
-                    "type": "string"
-                  },
-                  "base_micro_usd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "margin_bps": {
-                    "type": "integer",
-                    "minimum": 1000,
-                    "maximum": 2000
-                  },
-                  "charged_micro_usd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "send_capacity": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "maximum_recipients_per_send": {
-                    "const": 20
-                  },
-                  "reservation_basis": {
-                    "const": "validated_draft_recipients"
-                  },
-                  "storage_capacity_bytes": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "on_storage_exhaustion": {
-                    "const": "pause_inbox"
-                  },
-                  "storage_billing": {
-                    "const": "included_allocation"
-                  },
-                  "after_expiry_customer_charge": {
-                    "const": "none"
-                  },
-                  "on_expiry": {
-                    "const": "pause_inbox"
-                  },
-                  "automatic_renewal": {
-                    "const": false
-                  },
-                  "supplier_invoice_final": {
-                    "const": false
-                  },
-                  "full_period_charge": {
-                    "const": true
-                  }
-                },
-                "required": [
-                  "resource_id",
-                  "project_id",
-                  "agent_id",
-                  "quote_hash",
-                  "window_start",
-                  "funded_until",
-                  "base_micro_usd",
-                  "margin_bps",
-                  "charged_micro_usd",
-                  "send_capacity",
-                  "maximum_recipients_per_send",
-                  "reservation_basis",
-                  "storage_capacity_bytes",
-                  "on_storage_exhaustion",
-                  "storage_billing",
-                  "after_expiry_customer_charge",
-                  "on_expiry",
-                  "automatic_renewal",
-                  "supplier_invoice_final",
-                  "full_period_charge"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "result"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "error": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string"
-                  },
-                  "message": {
-                    "type": "string"
-                  },
-                  "retryable": {
+                  "sponsored_retention": {
                     "type": "boolean"
-                  }
-                },
-                "required": [
-                  "code",
-                  "message",
-                  "retryable"
-                ],
-                "additionalProperties": false
-              },
-              "retry_after_seconds": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "minimum": 0
-              },
-              "setup_url": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "error",
-              "retry_after_seconds",
-              "setup_url"
-            ],
-            "additionalProperties": false
-          }
-        ]
-      },
-      "readOnly": true,
-      "costBasis": "free_control_plane",
-      "upstream": false
-    },
-    {
-      "name": "mail.subscription.status",
-      "description": "Read the latest purchased capacity window for this assigned inbox. Free broker metadata; subscription:null means no purchase recorded. Shows separate customer charge, period, active status, permanently reserved versus remaining recipient capacity, and the latest storage sample/allowance. active describes the paid window, not native health or permission to send. storage_limit_reached describes storage_observed_at, not a live measurement. Each send reserves its validated draft recipient count (1–20); refused/uncertain attempts after reservation keep those units. Draft writes, sends and resume require an active window and a fresh native sample below its storage allowance. Quota exhaustion or expiry schedules the authorized native pause; deletion for cleanup remains available. expiry_state and native_paused_at report its observation, not guaranteed pause timing. Pausing blocks incoming mail without replay on resume; stored mail and provider subscription costs remain, but Orbio absorbs retention beyond the approved customer allocation. This is not a finalized supplier invoice or proof of provider health; direct provider sends are outside this ledger.",
-      "permission": "mail.read",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "resource_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "resource_id"
-        ],
-        "additionalProperties": false
-      },
-      "outputSchema": {
-        "type": "object",
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "result": {
-                "type": "object",
-                "properties": {
-                  "subscription": {
+                  },
+                  "billing": {
                     "oneOf": [
                       {
                         "type": "null"
@@ -6042,112 +6035,42 @@
                       {
                         "type": "object",
                         "properties": {
-                          "operation_id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
                           "resource_id": {
                             "type": "string",
                             "format": "uuid"
                           },
-                          "project_id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "agent_id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "window_start": {
-                            "type": "string"
-                          },
-                          "funded_until": {
-                            "type": "string"
-                          },
-                          "base_micro_usd": {
+                          "monthly_micro_usd": {
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 1000000000000
                           },
                           "margin_bps": {
                             "type": "integer",
-                            "minimum": 1000,
-                            "maximum": 2000
-                          },
-                          "charged_micro_usd": {
-                            "type": "integer",
                             "minimum": 0,
                             "maximum": 1000000000000
                           },
-                          "send_capacity": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 1000000000000
+                          "paid_until": {
+                            "type": "string"
                           },
-                          "send_reserved": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 1000000000000
-                          },
-                          "send_remaining": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 1000000000000
-                          },
-                          "active": {
-                            "type": "boolean"
-                          },
-                          "automatic_renewal": {
-                            "const": false
-                          },
-                          "supplier_invoice_final": {
-                            "const": false
-                          },
-                          "storage_capacity_bytes": {
-                            "type": [
-                              "integer",
-                              "null"
-                            ],
-                            "minimum": 0,
-                            "maximum": 1000000000000
-                          },
-                          "storage_observed_bytes": {
-                            "type": [
-                              "integer",
-                              "null"
-                            ],
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          "storage_observed_at": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "storage_limit_reached": {
-                            "type": [
-                              "boolean",
-                              "null"
-                            ]
-                          },
-                          "expiry_state": {
+                          "state": {
                             "enum": [
-                              "scheduled",
-                              "pausing",
-                              "unknown",
-                              "paused",
-                              "superseded",
-                              "deleted"
+                              "active",
+                              "balance_due",
+                              "closed"
                             ]
                           },
-                          "expiry_error_code": {
+                          "total_renewal_micro_usd": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1000000000000
+                          },
+                          "last_error": {
                             "type": [
                               "string",
                               "null"
                             ]
                           },
-                          "native_paused_at": {
+                          "pause_attempted_at": {
                             "type": [
                               "string",
                               "null"
@@ -6155,28 +6078,14 @@
                           }
                         },
                         "required": [
-                          "operation_id",
                           "resource_id",
-                          "project_id",
-                          "agent_id",
-                          "window_start",
-                          "funded_until",
-                          "base_micro_usd",
+                          "monthly_micro_usd",
                           "margin_bps",
-                          "charged_micro_usd",
-                          "send_capacity",
-                          "send_reserved",
-                          "send_remaining",
-                          "active",
-                          "automatic_renewal",
-                          "supplier_invoice_final",
-                          "storage_capacity_bytes",
-                          "storage_observed_bytes",
-                          "storage_observed_at",
-                          "storage_limit_reached",
-                          "expiry_state",
-                          "expiry_error_code",
-                          "native_paused_at"
+                          "paid_until",
+                          "state",
+                          "total_renewal_micro_usd",
+                          "last_error",
+                          "pause_attempted_at"
                         ],
                         "additionalProperties": false
                       }
@@ -6184,7 +6093,9 @@
                   }
                 },
                 "required": [
-                  "subscription"
+                  "pricing",
+                  "sponsored_retention",
+                  "billing"
                 ],
                 "additionalProperties": false
               }
@@ -6792,7 +6703,7 @@
     },
     {
       "name": "mail.inbox",
-      "description": "Read the inbox manually connected by the owner, at most one per stable agent. The toolkit operator manually creates it in the dedicated platform AgentMail organization and supplies only its inbox-scoped key. Owner setup verifies organization ownership; operational access rechecks the saved organization using that inbox key, with no organization-key fallback. Existing unverified connections require reconnecting the same inbox. No inbox creation, organization enumeration, price inference or invoice finalization.",
+      "description": "Read the inbox assigned to this stable agent. Create it with mail.inbox.create; at most one live inbox per agent. Operational access uses only its saved inbox-scoped key and verified toolkit organization. Root credentials never reach agents or provide a runtime fallback.",
       "permission": "mail.read",
       "inputSchema": {
         "type": "object",
@@ -14637,6 +14548,432 @@
       "destructive": true
     },
     {
+      "name": "mail.inbox.create",
+      "permission": "mail.manage",
+      "description": "Create one inbox for this stable agent with one prepaid calendar month included. Read mail.pricing first: at the default 15% surcharge creation costs 2.30 CREDIT. No provider billing dates, subscription activation or recipient allowance setup. The server creates and encrypts an inbox-scoped key; agents never receive provider credentials. One live inbox per agent, including concurrent calls. Save the original idempotency key. At expiry Orbio requests a native pause, blocking incoming mail without replay; stored mail remains. Use mail.inbox.renew before expiry to extend capacity, or delete the inbox. No automatic renewal or unused-time refund. Sending costs 0.05 CREDIT per action separately. Unknown provisioning is never replayed; a lost one-time provider key may require owner reconnection. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "provider_metered",
+      "upstream": true,
+      "createsResource": true,
+      "destructive": false
+    },
+    {
+      "name": "mail.inbox.renew",
+      "permission": "mail.manage",
+      "description": "Buy one additional calendar month of inbox capacity at mail.pricing.inbox_monthly_micro_usd (2.30 CREDIT at 15%). Starts at the existing paid end, or now if expired; never tied to provider billing dates. max_cost covers this one purchase. No automatic renewal, recipient quota or storage allowance configuration. Maximum one year prepaid. Inspect mail.billing.status for paid_until. This does not send mail or automatically resume a paused inbox; explicitly resume after renewal. Expiry requests a native pause, retaining stored mail; unused time is not refunded. Existing sponsored inboxes can opt into this policy. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "max_cost": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "max_cost",
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resource_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "queued",
+                      "dispatched",
+                      "running",
+                      "reconciling",
+                      "succeeded",
+                      "failed",
+                      "cancelled"
+                    ]
+                  },
+                  "billing_state": {
+                    "enum": [
+                      "held",
+                      "settled",
+                      "released"
+                    ]
+                  },
+                  "reserved_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "charged_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "upstream_micro_usd": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "provider_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "error_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "completed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result": {},
+                  "retry_after_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "project_id",
+                  "agent_id",
+                  "resource_id",
+                  "action",
+                  "permission",
+                  "state",
+                  "billing_state",
+                  "reserved_micro_usd",
+                  "charged_micro_usd",
+                  "upstream_micro_usd",
+                  "provider_id",
+                  "error_code",
+                  "created_at",
+                  "updated_at",
+                  "completed_at",
+                  "retry_after_seconds"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": false,
+      "costBasis": "provider_metered",
+      "upstream": true,
+      "destructive": false
+    },
+    {
       "name": "mail.inbox.pause",
       "permission": "mail.write",
       "description": "Pause the assigned inbox’s native sending and receiving explicitly. Incoming mail while paused will not be delivered after resume. This does not delete retained messages, cancel the provider subscription, refund the prepaid period or prove zero storage cost. Read mail.inbox for native state. An uncertain pause is read back without replay. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
@@ -14851,7 +15188,7 @@
     {
       "name": "mail.inbox.resume",
       "permission": "mail.send",
-      "description": "Resume native sending and receiving for the assigned inbox only after explicitly purchasing an active mail.subscription window and confirming storage below its allowance. If storage reached the allowance, delete stored mail before explicitly resuming; cleanup never resumes automatically. This does not buy or extend capacity, replay mail missed while paused, or send any email. Native active state is read back on uncertain responses; no automatic replay. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Resume sending and receiving on the assigned inbox. Created inboxes need unexpired prepaid time; use mail.inbox.renew to buy another month. No operator billing dates or storage/recipient allowance configuration. This does not send mail or replay messages missed while paused. Readback never replays an uncertain mutation. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15063,7 +15400,7 @@
     {
       "name": "mail.inbox.delete",
       "permission": "mail.delete",
-      "description": "Owner-only permanent deletion of the assigned manual inbox and its retained mail. Agents cannot dispatch this action even with mail.delete. Existing charges and send reservations are not refunded. A lost native deletion response remains uncertain because the inbox key may be revoked with the resource; no organization-key fallback or deletion replay. A confirmed reply marks this resource deleted. New inboxes still require manual operator provisioning and owner connection. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Permanently delete this agent’s assigned inbox and retained mail. Requires mail.delete; agents may delete only their own inbox. Existing prepaid charges are not refunded. Deletion uses server-only control authority after verifying the saved inbox ownership, revokes its recorded scoped key, then removes the inbox. Other native dependent keys may require operator cleanup. Uncertain deletion is resolved only by native absence readback; never replay the mutation automatically. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15271,223 +15608,6 @@
       "costBasis": "provider_metered",
       "upstream": true,
       "destructive": true
-    },
-    {
-      "name": "mail.subscription.activate",
-      "permission": "mail.send",
-      "description": "Explicitly buy the current quoted AgentMail subscription-capacity window for this assigned platform inbox. Read mail.subscription.quote first and pass its quote_hash with max_cost covering charged_micro_usd in decimal CREDIT. The full quoted period allocation plus captured surcharge is charged once, even when bought mid-period; there is no proration, automatic renewal or refund for unused capacity. Atomic balance, product budget, provider capacity and nonoverlap checks protect activation. The quote is captured when queued; funds/capacity are charged atomically when its worker activates it. Recovery returns the original subscription without charging twice. Mail sends require this active window and each attempt permanently reserves its validated draft recipient count (1–20); status shows remaining capacity. Approval authorizes native pause at the quoted storage allowance or expiry unless a newer paid period covers expiry. Storage is included in the fixed allocation; delayed pause or retention after expiry creates no additional customer charge. Draft writes, sends and resume require a fresh below-limit native sample. Expiry immediately blocks toolkit sends; the cleanup worker requests pause and reports confirmation or uncertainty. Paused inboxes stop receiving; missed mail is not replayed. Existing mail remains until owner deletion. Orbio absorbs provider retention costs outside the approved allocation. Customer subscription charge is separate from the operation API fee and is not a finalized supplier invoice. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "idempotency_key": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200
-          },
-          "max_cost": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,6})?$"
-          },
-          "resource_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quote_hash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          }
-        },
-        "required": [
-          "idempotency_key",
-          "max_cost",
-          "resource_id",
-          "quote_hash"
-        ],
-        "additionalProperties": false
-      },
-      "outputSchema": {
-        "type": "object",
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "result": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "project_id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "agent_id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "resource_id": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "format": "uuid"
-                  },
-                  "action": {
-                    "type": "string"
-                  },
-                  "permission": {
-                    "type": "string"
-                  },
-                  "state": {
-                    "enum": [
-                      "queued",
-                      "dispatched",
-                      "running",
-                      "reconciling",
-                      "succeeded",
-                      "failed",
-                      "cancelled"
-                    ]
-                  },
-                  "billing_state": {
-                    "enum": [
-                      "held",
-                      "settled",
-                      "released"
-                    ]
-                  },
-                  "reserved_micro_usd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "charged_micro_usd": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "upstream_micro_usd": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "minimum": 0,
-                    "maximum": 1000000000000
-                  },
-                  "provider_id": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "error_code": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "created_at": {
-                    "type": "string"
-                  },
-                  "updated_at": {
-                    "type": "string"
-                  },
-                  "completed_at": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "result": {},
-                  "retry_after_seconds": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "minimum": 0
-                  }
-                },
-                "required": [
-                  "id",
-                  "project_id",
-                  "agent_id",
-                  "resource_id",
-                  "action",
-                  "permission",
-                  "state",
-                  "billing_state",
-                  "reserved_micro_usd",
-                  "charged_micro_usd",
-                  "upstream_micro_usd",
-                  "provider_id",
-                  "error_code",
-                  "created_at",
-                  "updated_at",
-                  "completed_at",
-                  "retry_after_seconds"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "result"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "error": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string"
-                  },
-                  "message": {
-                    "type": "string"
-                  },
-                  "retryable": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "code",
-                  "message",
-                  "retryable"
-                ],
-                "additionalProperties": false
-              },
-              "retry_after_seconds": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "minimum": 0
-              },
-              "setup_url": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "error",
-              "retry_after_seconds",
-              "setup_url"
-            ],
-            "additionalProperties": false
-          }
-        ]
-      },
-      "readOnly": false,
-      "costBasis": "prepaid_compute",
-      "upstream": true,
-      "destructive": false
     },
     {
       "name": "deployment.configure",
@@ -23503,7 +23623,7 @@
     {
       "name": "mail.draft.create",
       "permission": "mail.draft",
-      "description": "Create an unsent draft only in the manually owner-assigned inbox. Requires a paid active mail subscription and a fresh native storage sample below its allowance. For a reply, supply in_reply_to and optional reply_all; for a forward, supply forward_of. Sources are mutually exclusive and verified in that inbox. Inline base64 attachments allow 10 files, 64 KiB per file and 96 KiB decoded total; all draft fields together fit 192 KiB serialized. No remote attachment URLs, send, scheduling or inbox provisioning. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Create an unsent draft only in the assigned inbox. For a reply, supply in_reply_to and optional reply_all; for a forward, supply forward_of. Sources are mutually exclusive and verified in that inbox. Inline base64 attachments allow 10 files, 64 KiB per file and 96 KiB decoded total; all draft fields together fit 192 KiB serialized. No remote attachment URLs, send, scheduling or inbox provisioning. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -23809,7 +23929,7 @@
     {
       "name": "mail.draft.update",
       "permission": "mail.draft",
-      "description": "Update an unscheduled draft verified in the assigned inbox. Requires a paid active mail subscription and a fresh native storage sample below its allowance. Provide at least one content field; null clears scalar/recipient fields. add_attachments uses bounded inline base64; remove_attachments contains IDs verified in this draft. Total serialized content fits 192 KiB. Lost attachment upload replies cannot be inferred from metadata and are never repeated. No send, scheduling or source-message change. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Update an unscheduled draft verified in the assigned inbox. Provide at least one content field; null clears scalar/recipient fields. add_attachments uses bounded inline base64; remove_attachments contains IDs verified in this draft. Total serialized content fits 192 KiB. Lost attachment upload replies cannot be inferred from metadata and are never repeated. No send, scheduling or source-message change. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -24145,7 +24265,7 @@
     {
       "name": "mail.draft.send",
       "permission": "mail.send",
-      "description": "Send an existing draft verified in the owner-assigned inbox, with 1 to 20 total recipients. Inspect recipients and body first. Requires a paid active mail.subscription window with enough recipient units for this draft and a fresh native storage sample below its allowance. Immediately before native send, reserve the validated to/cc/bcc recipient count (1–20). Refusals or uncertain replies after reservation keep those units; read mail.subscription.status for capacity. Toolkit draft writes are limited to 20 recipients, but direct provider activity is outside this ledger. Sending is irreversible and does not prove delivery. An unknown send outcome is never automatically repeated. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Send an inspected draft from the assigned inbox to 1–20 validated recipients. Charge is a fixed 0.05 CREDIT per send action, covering 1–20 recipients with no extra surcharge; use max_cost:\"0.05\". The actual charge is settled after a confirmed send response; an uncertain send keeps its hold and is never replayed. If max_cost is below 0.05 CREDIT, admission is refused before sending. Created inboxes need prepaid time; read mail.billing.status and use mail.inbox.renew when expired. No separate recipient quota purchase or billing-date configuration. Sending does not prove delivery. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {

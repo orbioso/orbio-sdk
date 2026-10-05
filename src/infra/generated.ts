@@ -1,8 +1,9 @@
-/** Generated from the platform catalogue. Schema revision: 0c2e298a331cd0af0b0f481a03ecb87ca68d32f6be53e60e652be9f85331dabb. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 5a03c858901f2ec4d6e5c344ca9c517e888f5e70248a83f8bd839be22916898c. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
     'infra.status': Record<string, never>
+    'mail.pricing': Record<string, never>
     'infra.pricing': Record<string, never>
     'resource.list': {
       limit?: number
@@ -150,10 +151,7 @@ export interface InfrastructureContracts {
       resource_id: string
       command_operation_id: string
     }
-    'mail.subscription.quote': {
-      resource_id: string
-    }
-    'mail.subscription.status': {
+    'mail.billing.status': {
       resource_id: string
     }
     'mail.delivery.status': {
@@ -574,6 +572,16 @@ export interface InfrastructureContracts {
        */
       on_expiry: 'delete'
     }
+    'mail.inbox.create': {
+      idempotency_key: string
+      max_cost: string
+      name: string
+    }
+    'mail.inbox.renew': {
+      idempotency_key: string
+      max_cost: string
+      resource_id: string
+    }
     'mail.inbox.pause': {
       idempotency_key: string
       max_cost: string
@@ -588,12 +596,6 @@ export interface InfrastructureContracts {
       idempotency_key: string
       max_cost: string
       resource_id: string
-    }
-    'mail.subscription.activate': {
-      idempotency_key: string
-      max_cost: string
-      resource_id: string
-      quote_hash: string
     }
     'deployment.configure': {
       idempotency_key: string
@@ -5000,6 +5002,17 @@ export interface InfrastructureContracts {
       }
       setup_url: string
     }
+    'mail.pricing': {
+      version: string
+      model: 'retail_allocation'
+      margin_bps: number
+      inbox_monthly_micro_usd: number
+      send_micro_usd: number
+      automatic_renewal: false
+      on_expiry: 'pause_inbox'
+      storage_and_inbound: 'included_launch_subsidy'
+      supplier_invoice_final: false
+    }
     'infra.pricing': {
       version: 1
       model: 'provider_rates_plus_surcharge'
@@ -5514,52 +5527,28 @@ export interface InfrastructureContracts {
       result?: unknown
       retry_after_seconds: number | null
     }
-    'mail.subscription.quote': {
-      resource_id: string
-      project_id: string
-      agent_id: string
-      quote_hash: string
-      window_start: string
-      funded_until: string
-      base_micro_usd: number
-      margin_bps: number
-      charged_micro_usd: number
-      send_capacity: number
-      maximum_recipients_per_send: 20
-      reservation_basis: 'validated_draft_recipients'
-      storage_capacity_bytes: number
-      on_storage_exhaustion: 'pause_inbox'
-      storage_billing: 'included_allocation'
-      after_expiry_customer_charge: 'none'
-      on_expiry: 'pause_inbox'
-      automatic_renewal: false
-      supplier_invoice_final: false
-      full_period_charge: true
-    }
-    'mail.subscription.status': {
-      subscription: null | {
-        operation_id: string
-        resource_id: string
-        project_id: string
-        agent_id: string
-        window_start: string
-        funded_until: string
-        base_micro_usd: number
+    'mail.billing.status': {
+      pricing: {
+        version: string
+        model: 'retail_allocation'
         margin_bps: number
-        charged_micro_usd: number
-        send_capacity: number
-        send_reserved: number
-        send_remaining: number
-        active: boolean
+        inbox_monthly_micro_usd: number
+        send_micro_usd: number
         automatic_renewal: false
+        on_expiry: 'pause_inbox'
+        storage_and_inbound: 'included_launch_subsidy'
         supplier_invoice_final: false
-        storage_capacity_bytes: number | null
-        storage_observed_bytes: number | null
-        storage_observed_at: string | null
-        storage_limit_reached: boolean | null
-        expiry_state: 'scheduled' | 'pausing' | 'unknown' | 'paused' | 'superseded' | 'deleted'
-        expiry_error_code: string | null
-        native_paused_at: string | null
+      }
+      sponsored_retention: boolean
+      billing: null | {
+        resource_id: string
+        monthly_micro_usd: number
+        margin_bps: number
+        paid_until: string
+        state: 'active' | 'balance_due' | 'closed'
+        total_renewal_micro_usd: number
+        last_error: string | null
+        pause_attempted_at: string | null
       }
     }
     'mail.delivery.status': {
@@ -6572,6 +6561,46 @@ export interface InfrastructureContracts {
       result?: unknown
       retry_after_seconds: number | null
     }
+    'mail.inbox.create': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
+    'mail.inbox.renew': {
+      id: string
+      project_id: string
+      agent_id: string
+      resource_id: string | null
+      action: string
+      permission: string
+      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
+      billing_state: 'held' | 'settled' | 'released'
+      reserved_micro_usd: number
+      charged_micro_usd: number | null
+      upstream_micro_usd: number | null
+      provider_id: string | null
+      error_code: string | null
+      created_at: string
+      updated_at: string
+      completed_at: string | null
+      result?: unknown
+      retry_after_seconds: number | null
+    }
     'mail.inbox.pause': {
       id: string
       project_id: string
@@ -6613,26 +6642,6 @@ export interface InfrastructureContracts {
       retry_after_seconds: number | null
     }
     'mail.inbox.delete': {
-      id: string
-      project_id: string
-      agent_id: string
-      resource_id: string | null
-      action: string
-      permission: string
-      state: 'queued' | 'dispatched' | 'running' | 'reconciling' | 'succeeded' | 'failed' | 'cancelled'
-      billing_state: 'held' | 'settled' | 'released'
-      reserved_micro_usd: number
-      charged_micro_usd: number | null
-      upstream_micro_usd: number | null
-      provider_id: string | null
-      error_code: string | null
-      created_at: string
-      updated_at: string
-      completed_at: string | null
-      result?: unknown
-      retry_after_seconds: number | null
-    }
-    'mail.subscription.activate': {
       id: string
       project_id: string
       agent_id: string
@@ -7581,5 +7590,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '0c2e298a331cd0af0b0f481a03ecb87ca68d32f6be53e60e652be9f85331dabb'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = '5a03c858901f2ec4d6e5c344ca9c517e888f5e70248a83f8bd839be22916898c'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","mail.pricing","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.billing.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
