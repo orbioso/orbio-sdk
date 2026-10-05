@@ -1,5 +1,42 @@
 # Scoped infrastructure SDK continuation
 
+## Mail subscription capacity and lifecycle, 2026-10-05
+
+Current source implements captured, operator-configured AgentMail period quotes,
+explicit prepaid activation and a separate customer charge/capacity ledger.
+Shared SQL finance mutex checks exact leased operation, current subject/grant/
+Orbio OAuth assignment, encrypted credential CAS, balance, product budget,
+nonoverlap and shared purchased inbox/recipient capacity. Original recovery
+cannot charge twice. No default plan/rate or finalized supplier invoice is
+invented; server-only ORBIO_TOOLKIT_AGENTMAIL_RATE_CARD must capture actual
+purchased terms/allocation. Full-period price applies even mid-period, with no
+proration, automatic renewal or unused-capacity refund. See [mail billing](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_MAIL_BILLING.md)
+for all fields, public workflow and limitations.
+
+Each toolkit send requires an active paid window and permanently reserves 20
+recipient units once per original operation before native send, including refused
+or uncertain attempts. This conservative broker capacity is not a provider send
+meter, and direct provider edits/use are outside its guarantee. Native inbox
+pause/resume and owner-only deletion are exposed; resume requires paid capacity,
+pause blocks native sending/receiving with no later replay of missed incoming
+mail, and deletion retains charges/history. Uncertain native calls are never
+replayed or recovered with an organization-wide key.
+
+The owner has an explicit quote/approval/capacity card with saved original-intent
+recovery, no automatic purchase/send, and exact subject/resource response checks.
+Catalogue, HTTP/MCP, generic workbench, SDK helpers/types and rendered/Markdown
+guide share 132 contracts /59 provider mutations plus broker cancellation.
+Migration 20261005024000 is unapplied. Source is unverified; only contract export
+and type generation ran, no tests/checks/CI/native smoke/email/secret reads.
+No production configuration, package publication, deployment or merge.
+
+The full goal remains active. Retained mail can still incur provider storage/
+subscription cost after toolkit expiry; there is no automatic native pause/delete.
+Other-provider ongoing billing/retention/spend controls and final all-provider
+regression/SQL/UI/packed-SDK/live/adversarial verification remain required. Older
+126-contract and ownership-only summaries below describe earlier source.
+
+
 Platform work: [orbioso/orbio PR #318](https://github.com/orbioso/orbio/pull/318).
 Complete builder-stack acceptance and provider smoke context live in its
 `docs/TOOLKIT_INFRA_HANDOFF.md` and `docs/TOOLKIT_IMPLEMENTATION.md`.

@@ -169,6 +169,11 @@ export class Infrastructure {
     preview: (resourceId: string, args: Omit<InfrastructureInput<'workspace.preview'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('workspace.preview', resourceId, args, options),
   }
   readonly mail = {
+    subscription: {
+      quote: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.subscription.quote', resourceId, {}, options),
+      status: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.subscription.status', resourceId, {}, options),
+      activate: (resourceId: string, args: Omit<InfrastructureInput<'mail.subscription.activate'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.subscription.activate', resourceId, args, options),
+    },
     metrics: {
       usage: (resourceId: string, args: Omit<InfrastructureInput<'mail.metrics.usage'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.metrics.usage', resourceId, args, options),
       events: (resourceId: string, args: Omit<InfrastructureInput<'mail.metrics.events'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.metrics.events', resourceId, args, options),
@@ -178,6 +183,9 @@ export class Infrastructure {
       list: (resourceId: string, args: Omit<InfrastructureInput<'mail.delivery.event.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.event.list', resourceId, args, options),
       get: (resourceId: string, args: Omit<InfrastructureInput<'mail.delivery.event.get'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.delivery.event.get', resourceId, args, options),
     },
+    pause: (resourceId: string, args: Omit<InfrastructureInput<'mail.inbox.pause'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox.pause', resourceId, args, options),
+    resume: (resourceId: string, args: Omit<InfrastructureInput<'mail.inbox.resume'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox.resume', resourceId, args, options),
+    deleteInbox: (resourceId: string, args: Omit<InfrastructureInput<'mail.inbox.delete'>, 'resource_id'>, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox.delete', resourceId, args, options),
     inbox: (resourceId: string, options: InfrastructureRequestOptions = {}) => this.scoped('mail.inbox', resourceId, {}, options),
     labelEvents: (resourceId: string, args: Omit<InfrastructureInput<'mail.label.event.list'>, 'resource_id'> = {}, options: InfrastructureRequestOptions = {}) => this.scoped('mail.label.event.list', resourceId, args, options),
     messages: {
