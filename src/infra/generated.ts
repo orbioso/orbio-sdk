@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 8fa2b1cea6edd100026478e2bc69bf3d861c83c28b92fd20d85a860b4dc28e12. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 17cec8f9d7ade20d04a23dfe89225291ddee1ef9c8574caa6cb141f81f82ea48. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -609,6 +609,7 @@ export interface InfrastructureContracts {
       idempotency_key: string
       max_cost: string
       resource_id: string
+      target?: 'preview' | 'production'
       /**
        * @minItems 1
        * @maxItems 100
@@ -5005,7 +5006,7 @@ export interface InfrastructureContracts {
       margin_bps: number
       agentmail_subscription_payer: 'orbio'
       captured_at_admission: true
-      unknown_cost_policy: 'retain_original_reservation'
+      unknown_cost_policy: 'provider_specific_captured_terms'
       supplier_invoice_finality: 'separate_from_customer_charge'
     }
     'resource.list': {
@@ -5150,7 +5151,12 @@ export interface InfrastructureContracts {
         billing_state: 'held' | 'settled' | 'released'
         upstream_micro_usd: number | null
         charged_micro_usd: number | null
-        billing_policy: 'resource_report_v1' | null
+        billing_policy: 'resource_report_v1' | 'sampled_capacity_v1' | null
+        metered_micro_usd: number
+        metered_ms: number
+        meter_observed_at: string | null
+        meter_error: 'unavailable' | null
+        cleanup_pending: boolean
         accrued_upstream_micro_usd: number
         accrued_charged_micro_usd: number
         usage_ended_at: string | null
@@ -5179,7 +5185,12 @@ export interface InfrastructureContracts {
       billing_state: 'held' | 'settled' | 'released'
       upstream_micro_usd: number | null
       charged_micro_usd: number | null
-      billing_policy: 'resource_report_v1' | null
+      billing_policy: 'resource_report_v1' | 'sampled_capacity_v1' | null
+      metered_micro_usd: number
+      metered_ms: number
+      meter_observed_at: string | null
+      meter_error: 'unavailable' | null
+      cleanup_pending: boolean
       accrued_upstream_micro_usd: number
       accrued_charged_micro_usd: number
       usage_ended_at: string | null
@@ -7562,5 +7573,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '8fa2b1cea6edd100026478e2bc69bf3d861c83c28b92fd20d85a860b4dc28e12'
+export const INFRA_SCHEMA_REVISION = '17cec8f9d7ade20d04a23dfe89225291ddee1ef9c8574caa6cb141f81f82ea48'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

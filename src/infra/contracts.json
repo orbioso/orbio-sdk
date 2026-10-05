@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "8fa2b1cea6edd100026478e2bc69bf3d861c83c28b92fd20d85a860b4dc28e12",
+  "schemaRevision": "17cec8f9d7ade20d04a23dfe89225291ddee1ef9c8574caa6cb141f81f82ea48",
   "tools": [
     {
       "name": "infra.status",
@@ -225,7 +225,7 @@
                     "const": true
                   },
                   "unknown_cost_policy": {
-                    "const": "retain_original_reservation"
+                    "const": "provider_specific_captured_terms"
                   },
                   "supplier_invoice_finality": {
                     "const": "separate_from_customer_charge"
@@ -1528,7 +1528,7 @@
     },
     {
       "name": "funding.list",
-      "description": "List lifetime funding windows for one resource UUID belonging to this product and agent, including retained billing after resource deletion. Free broker metadata; no provider calls or secret decryption. Pass next_cursor as before; pages sort by UUID, not time. Future windows are prepaid authority, not proof of current running state. reserved_micro_usd is the original ceiling. With billing_policy:resource_report_v1, accrued_charged_micro_usd is the net customer charge including corrections, and a held window still reserves ceiling minus accrued charge. accrued_upstream_micro_usd is its attributed base. Other policies use charged_micro_usd at closure; null is unknown. Each lifetime reserve is separate from its operation reserve.",
+      "description": "List lifetime funding windows for one resource UUID belonging to this product and agent, including retained billing after resource deletion. Free broker metadata; no provider calls or secret decryption. Pass next_cursor as before; pages sort by UUID, not time. Future windows are prepaid authority, not proof of current running state. reserved_micro_usd is the original ceiling. With billing_policy:resource_report_v1, accrued_charged_micro_usd is the net customer charge including corrections, and a held window still reserves ceiling minus accrued charge. accrued_upstream_micro_usd is its attributed base. sampled_capacity_v1 uses metered_micro_usd as a sampled tariff estimate and charges it with the saved surcharge at funded_until; gaps and other supplier costs are absorbed by Orbio. metered_ms and meter_observed_at describe coverage; meter_error means unavailable, not zero cost. cleanup_pending can remain true after the customer hold is released. Other policies use charged_micro_usd at closure; null is unknown. Each lifetime reserve is separate from its operation reserve.",
       "permission": "infra.read",
       "inputSchema": {
         "type": "object",
@@ -1638,8 +1638,33 @@
                         "billing_policy": {
                           "enum": [
                             "resource_report_v1",
+                            "sampled_capacity_v1",
                             null
                           ]
+                        },
+                        "metered_micro_usd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "metered_ms": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "meter_observed_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "meter_error": {
+                          "enum": [
+                            "unavailable",
+                            null
+                          ]
+                        },
+                        "cleanup_pending": {
+                          "type": "boolean"
                         },
                         "accrued_upstream_micro_usd": {
                           "type": "integer",
@@ -1713,6 +1738,11 @@
                         "upstream_micro_usd",
                         "charged_micro_usd",
                         "billing_policy",
+                        "metered_micro_usd",
+                        "metered_ms",
+                        "meter_observed_at",
+                        "meter_error",
+                        "cleanup_pending",
                         "accrued_upstream_micro_usd",
                         "accrued_charged_micro_usd",
                         "usage_ended_at",
@@ -1893,8 +1923,33 @@
                   "billing_policy": {
                     "enum": [
                       "resource_report_v1",
+                      "sampled_capacity_v1",
                       null
                     ]
+                  },
+                  "metered_micro_usd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "metered_ms": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "meter_observed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "meter_error": {
+                    "enum": [
+                      "unavailable",
+                      null
+                    ]
+                  },
+                  "cleanup_pending": {
+                    "type": "boolean"
                   },
                   "accrued_upstream_micro_usd": {
                     "type": "integer",
@@ -1968,6 +2023,11 @@
                   "upstream_micro_usd",
                   "charged_micro_usd",
                   "billing_policy",
+                  "metered_micro_usd",
+                  "metered_ms",
+                  "meter_observed_at",
+                  "meter_error",
+                  "cleanup_pending",
                   "accrued_upstream_micro_usd",
                   "accrued_charged_micro_usd",
                   "usage_ended_at",
@@ -15670,7 +15730,7 @@
     {
       "name": "deployment.upload",
       "permission": "deployment.manage",
-      "description": "Create a preview deployment from at most 100 unique relative files, at most 128 KiB total decoded content. Supply canonical base64 bytes. Requires an active funded lifetime. The response proves submission, not a successful build; inspect deployment.get/logs. Production requires a separate promotion. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Create a deployment from at most 100 unique relative files and 128 KiB total decoded content. Supply canonical base64 bytes. Target defaults to preview, but Vercel automatically makes the first deployment production. Set target:production to build with production environment variables and publish production traffic. Requires active funding. Submission does not prove a successful build; inspect deployment.get/logs and its actual target. Preview builds cannot be directly promoted; upload with target:production instead. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15686,6 +15746,13 @@
           "resource_id": {
             "type": "string",
             "format": "uuid"
+          },
+          "target": {
+            "enum": [
+              "preview",
+              "production"
+            ],
+            "default": "preview"
           },
           "files": {
             "type": "array",
@@ -15902,7 +15969,7 @@
       "readOnly": false,
       "costBasis": "provider_metered",
       "upstream": true,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "deployment.environment.set",
@@ -16364,7 +16431,7 @@
     {
       "name": "deployment.promote",
       "permission": "deployment.manage",
-      "description": "Promote a deployment verified inside the assigned project to production. Requires an active funded lifetime and explicitly changes live production routing. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Point production traffic to an existing ready production-target build verified inside the assigned project. Requires active funding. Preview builds must be uploaded again with target:production to use production environment variables. This action never silently rebuilds. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -16582,7 +16649,7 @@
     {
       "name": "deployment.rollback",
       "permission": "deployment.manage",
-      "description": "Roll production back to a deployment verified in the assigned project. Requires active funding; confirm the target and application health separately. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Roll production back to a ready production-target deployment verified in the assigned project. Requires active funding; confirm the target and application health separately. Preview builds cannot be rollback targets. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {

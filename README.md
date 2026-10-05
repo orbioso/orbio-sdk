@@ -38,9 +38,7 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 This source branch prepares infrastructure helpers for the platform release;
 these additions are not yet published on npm. The platform must enable the
 capabilities and the owner must assign a product, agent and permissions.
-Source helpers cover all five providers and owner workflows. Ongoing
-usage/subscription/retention billing and spend controls remain under development;
-full-stack verification is deferred until engineering is complete. Do not treat provider credential presence as readiness.
+All five providers, owner workflows and captured billing policies are implemented. Orbio pays upstream providers, charges a default 15% surcharge on supported allocations and absorbs unmetered costs. Tests, type/build and package checks pass; native workflow evidence and coordinated rollout steps are in [HANDOFF.md](HANDOFF.md). Provider credentials alone do not activate the feature.
 
 ```ts
 import { createInfrastructure, InfrastructureWaitTimeout } from '@orbiodotso/sdk'
@@ -147,12 +145,10 @@ Provider writes use the same explicit admission pattern and return an operation:
 `deployments.create/configure/upload/promote/rollback/remove/delete`,
 `deployments.setEnvironment/removeEnvironment`, `workers.create/delete/execute`,
 `workers.machines.create/update/start/stop/restart/delete`, and
-`databases.create/resume/pause/delete/write/applyMigration`. Vercel uploads create
-previews; promotion to production is separate. Fly Machines require immutable
+`databases.create/resume/pause/delete/write/applyMigration`. Vercel makes the first project upload production. Later uploads default to preview; explicitly set `target:"production"` for a production build. Preview builds cannot be promoted directly. Production-target uploads can update live traffic. Fly Machines require immutable
 container digests. SQL writes/migrations require `database.write`, distinct from
 read access. Provider allocations require an approved positive lifetime ceiling;
-workload actions require active funding. These contracts remain part of the
-disabled, unfinished platform release until native accounting is complete.
+workload actions require active funding. These contracts require coordinated platform activation and SDK publication.
 
 Mail writes include `mail.drafts.create/update/send/delete`,
 `mail.messages.delete/labels` and `mail.threads.labels`. Creating a reply/forward
@@ -342,7 +338,7 @@ Use the SDK when you are writing code, MCP when a model is driving.
 | --- | --- |
 | `createOrbio(options)` | Make a client. Fetches addresses and the catalogue. |
 | `orbio.tools` | `list`, `describe`, `priceOf`, `call`, and named helpers |
-| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait`, workspace lifecycle/files/commands/output/preview, scoped `mail`, `deployments`, `workers`, `databases` reads |
+| `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait`, workspace lifecycle/files/commands/output/preview, scoped `mail`, `deployments`, `workers`, `databases` reads and explicit writes |
 | `orbio.account` | `key`, `balance`, `models` |
 | `orbio.credit` | `balanceOf`, `activate`, `feeExempt` |
 | `orbio.staking` | `stake`, `unstake`, `claim`, `positionOf`, `settledOf` |
@@ -362,7 +358,7 @@ decoded; combined draft fields fit 192 KiB serialized. Remote attachment URLs
 are not accepted. Keep the original request/key; a lost upload reply is never
 repeated automatically. mail.labelEvents(resourceId, {limit, cursor}) reads a
 page of label-change audit events, not delivery or incoming-mail notifications.
-These new source contracts remain unverified and unpublished.
+These contracts are covered by SDK tests and remain unpublished.
 
 
 Fly worker workflows also expose workers.volumes.list/get/create/extend/delete,
@@ -372,7 +368,7 @@ explicit 80/443 ingress after app IP allocation; proxy autostart stays disabled.
 Updates preserve omitted HTTP and disable it with null; mounts and regions cannot
 change in-place. Logs are private text; truncated pages have no advancing cursor
 because that would skip omitted native entries. All additions remain unpublished
-and unverified; native spending/accounting are platform release requirements.
+pending coordinated platform activation; see [HANDOFF.md](HANDOFF.md).
 
 
 Assigned Supabase storage helpers are available in the draft source as
@@ -386,8 +382,7 @@ uses exact selected paths, and nonempty bucket deletion is refused. Signed
 links last 30–300 seconds; anyone holding them can download until expiry even
 after an Orbio grant revoke. Preserve the original mutation/key/ceiling and read
 its operation; no uncertain upload retry or automatic link refresh occurs.
-Native storage/egress costs and bootstrap/spend verification remain platform
-release requirements. These SDK additions are unpublished and unverified.
+Unmetered storage/egress costs are absorbed by Orbio; bootstrap verification is required before application access. These SDK additions are unpublished; see [HANDOFF.md](HANDOFF.md).
 
 
 Database allocation acceptance is separate from readiness. After create, read
@@ -398,7 +393,7 @@ new public tables and disabled implicit browser privileges. Application migratio
 must grant table/function access and add RLS policies deliberately. Background
 funding sweeps do not reset later application policies. Unknown initial setup
 never authorizes another SQL dispatch or project creation; owner inspection and
-pause/delete remain available. Current bootstrap source is unverified/unpublished.
+pause/delete remain available. The bootstrap passed disposable-project native smoke; this SDK source remains unpublished.
 
 Vercel/Fly/Supabase funded continuity is explicit:
 `infra.deployments.renew(resourceId, args)`, `infra.workers.renew(resourceId, args)`
@@ -416,9 +411,7 @@ nullable native cost/charge and shutdown policy. Use `next_cursor` as `before`;
 pages order by UUID, not time. Financial records remain readable after resource
 deletion within the same product/agent. Null cost is pending, not zero; settled
 funding does not prove every other bill ended. No private proof/root credential
-is returned, and these reads never renew compute or settle bills. Native finality/
-spending/retention and final workflow verification remain unfinished; this source
-is unpublished and unverified.
+is returned, and these reads never renew compute or settle bills. Customer closure and absorbed costs follow the captured provider policy; native supplier finality remains independent. This SDK source remains unpublished.
 
 `infra.deployments.resume(resourceId, args)` prepays a fresh nonoverlapping window
 before restoring verified paused production traffic. Unpause can restore existing
@@ -431,9 +424,7 @@ include nullable `paused`; missing native status is unknown.
 its Machines are verified stopped/created/destroyed. No Machine starts implicitly;
 follow with `infra.workers.machines.start` or explicit creation under that active
 funding. Both fresh resume paths require positive max_cost and refuse overlapping
-windows. Pausing early does not invent a refund or erase the old window. All
-current additions remain unverified/unpublished; full native billing/spending
-controls and final all-provider workflow checks remain required.
+windows. Pausing early does not invent a refund or erase the old window. See [HANDOFF.md](HANDOFF.md) for verification and coordinated rollout.
 
 `infra.resources.spending(resourceId)` reads recorded native cost without a
 provider call. It stays subject-scoped even after resource deletion. Vercel
@@ -444,8 +435,7 @@ protective high-water amount may exceed a later credited report; approved upstre
 capacity is not your available account balance. `billing_final:false` means this
 is not a final invoice or customer charge. The platform requests production
 pause at observed capacity, but previews/storage can continue billing.
-Other provider billing and final full-stack verification remain unfinished; this
-source is unpublished and unverified.
+Fly/Supabase sampled allocations and mail capacity use funding/subscription reads described below; this SDK source remains unpublished.
 
 `infra.workers.images.inspect(resourceId, image)` verifies an immutable image's
 native digest and compressed size inside the assigned Fly app/organization.
@@ -456,8 +446,7 @@ holds and again at dispatch; starts/restarts also refuse foreign private images.
 The helper returns no image bytes/manifest/provider credential and does not
 build, push or start compute. `deployment_performed:false` describes the read,
 not a Machine's existing image history. Compressed size is not billable rootfs
-usage. Brokered artifact publishing helpers are described below; native accounting,
-retention and final workflow verification remain unfinished.
+usage. Brokered artifact publishing helpers are described below; unmetered retention is absorbed by Orbio.
 
 
 infra.workers.images.blob(resourceId, digest) checks exact native blob presence.
@@ -475,11 +464,9 @@ images.publish(resourceId, args) submits exact canonical-base64 OCI/Docker schem
 manifest bytes and their sha256. The platform verifies every assigned-repository
 blob digest/size, then returns an immutable image reference without starting a
 Machine. Inspect it and explicitly create/update a funded Machine separately.
-The current source fixture has 125 contracts / 55 provider writes. Unknown native
-steps are not repeated; native cost/retention and ambiguous-session cleanup still need
-completion before release. See the platform
+The current source fixture has 132 contracts / 59 provider mutations. Unknown native steps are not repeated; unmetered retention is absorbed by Orbio. See the platform
 [Fly image guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_IMAGES.md).
-Current additions remain unverified/unpublished; no checks or provider smoke ran.
+Native blob upload/manifest publication/read/delete passed; this SDK remains unpublished.
 
 Draft infrastructure delivery helpers: `infra.mail.delivery.status(resourceId)`,
 `infra.mail.delivery.list(resourceId, { limit: 10 })` and
@@ -488,8 +475,7 @@ recorded after the owner connects an inbox-scoped AgentMail webhook. Pass the
 returned cursor unchanged with the same optional message filter. Records expire
 after 30 days; sent is not delivered and a missing event is unknown. These reads
 require `mail.read` for the assigned inbox and never expose callback secrets or
-email bodies. Owner setup remains in the Orbio dashboard. This draft SDK is
-unpublished and still requires final validation.
+email bodies. Owner setup remains in the Orbio dashboard. This SDK remains unpublished; production callback delivery is a rollout check.
 
 Fly upload closure: each upload UUID equals its original begin operation UUID.
 Recorded upload pages sort by UUID; pass next_cursor as before. This does not
@@ -505,8 +491,7 @@ The platform separately limits active executions (32 per account, plus eight
 slots for allowlisted zero-reserve cleanup) and held billing backlog (10,000 for
 normal admissions). Terminal-but-held outcomes preserve their monetary holds
 without occupying execution slots. Rate/grant/budget/resource checks still apply.
-These changes remain unverified and unpublished; complete native accounting and
-full-stack final checks remain release requirements.
+Verification is recorded in [HANDOFF.md](HANDOFF.md); publication remains a rollout step.
 
 Recorded Vercel spending includes periods_expected and period_coverage_complete.
 These report whether every UTC month from resource creation through the current
@@ -536,8 +521,7 @@ invoices. Native usage remains null and cleanup/finality false. Cancel, abandon,
 expiry and app deletion do not reclaim them. A local capacity refusal occurs
 before native requests and returns capacity_exceeded in the failed original
 operation, releasing only its no-dispatch hold. Do not automatically create a
-new key/account or raise the ceiling to evade the limit. Native cleanup resolution
-and full verification remain required before this draft release is ready.
+new key/account or raise the ceiling to evade the limit. Unmetered retention is absorbed by Orbio; technical quotas remain enforced.
 
 Explicit Fly manifest cleanup: infra.workers.images.delete(resourceId, args)
 accepts digest and the ordinary saved idempotency_key/max_cost. max_cost:"0" uses
@@ -547,7 +531,7 @@ Machine create/update/start/restart for the same digest; stop/delete remain
 available. Recovery never repeats DELETE. Success records manifest absence at
 observation time, blob_cleanup:not_requested, artifact_capacity_reclaimed:false
 and billing_final:false. It does not establish blob/layer removal, reclaimed
-capacity or a final bill. Native Fly DELETE compatibility is unverified; see the
+capacity or a final bill. Native Fly manifest DELETE and readback passed; see the
 [cleanup guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_FLY_RETENTION.md).
 
 Explicit queued cancellation: infra.operations.cancel(operationId) makes no
@@ -557,8 +541,7 @@ operation can be cancelled before dispatch; other states and their holds stay
 intact. No new key, ceiling or operation is created. After a lost reply, read
 that original operation or explicitly repeat cancellation for that same UUID.
 Local wait abort/timeout never requests cancellation automatically. Use the
-resource's explicit stop/delete action for dispatched work. This source addition
-is unpublished and unverified; see the platform API/handoff.
+resource's explicit stop/delete action for dispatched work. This addition is covered by SDK and platform tests; publication remains pending.
 
 ### Toolkit surcharge policy
 
@@ -567,10 +550,7 @@ provider rates plus a configured 10–20% surcharge (15% default). pricing() rea
 current policy without native requests or supplier credentials. New admission
 captures the rate; existing operations/recovery keep their original terms.
 funding.list/get exposes margin_bps for each saved window. A policy read is not
-a resource quote, finalized invoice or proof that billing is ready. Unknown
-amounts keep their original reservations. Subscription entitlement/allocation,
-ongoing retained-resource accounting and final checks remain unfinished in these
-unpublished additions. Legacy tools retain their existing pricing configuration.
+a resource quote, finalized invoice or proof that billing is ready. Unknown supplier costs stay explicitly unknown. New Fly/Supabase allocations close at the funded deadline using verified samples; unmetered costs are absorbed. Vercel and mail follow their captured policies described below. Legacy tools retain their existing pricing configuration.
 
 ### Included management API requests
 
@@ -580,8 +560,7 @@ action, except create/resume/renew, which still needs a positive separate lifeti
 budget. A confirmed outcome can settle only the request charge at zero. Build,
 compute, storage, egress and mail capacity remain separately billable. Unknown
 outcomes and older uncaptured bills are not backfilled or replayed. Generated
-MCP/HTTP descriptions state these terms for each reviewed action. Current source
-is unverified; ongoing billing and final full-stack checks remain unfinished.
+MCP/HTTP descriptions state these terms for each reviewed action. See [HANDOFF.md](HANDOFF.md) for verification and rollout.
 
 ### Platform inbox ownership
 
@@ -619,8 +598,7 @@ for cleanup, then explicitly resume after native metrics fall below the limit.
 No automatic resume or deletion occurs. The worker samples every five minutes,
 so quota enforcement can lag.
 No automatic provisioning/send or broad provider key is added. Direct provider
-activity is outside this ledger. These contracts remain unreleased/unverified
-until the coordinated platform and SDK final gates.
+activity is outside this ledger. These contracts remain unpublished pending coordinated platform rollout.
 
 Database funding (`infra.databases.create`, `resume`, `renew`) requires explicit
 `on_expiry: 'delete'`. This authorizes irreversible project/database/storage
@@ -649,9 +627,7 @@ reservation is ceiling minus accrued charge; closed windows reserve zero. Origin
 terminal upstream/charged fields preserve the closure record. Null-policy rows
 retain their existing settlement behavior. Supplier invoice finality is separate.
 
-This source is unverified/unpublished. Terminal closure and independent post-closure observation now have source
-implementations under the newly captured terms described below. Verification
-and other-provider accounting remain required. See the platform
+Terminal closure and independent post-closure observation use the captured terms described below. Local ledger tests exercise caps, credit corrections and time boundaries; short native smoke does not establish 72-hour/90-day behavior. See the platform
 [customer billing guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_NATIVE_BILLING.md).
 
 ### Deployment expiry and billing closure
@@ -671,7 +647,7 @@ supplier invoice finality. `resources.spending` exposes `closure_policy`,
 `native_absent_since`, `customer_closed_at`, `corrections_until`,
 `corrections_complete_at` and sanitized `correction_error_code`. Funding reads
 preserve original closure amounts separately from net accrued amounts after
-credits. Full source remains unverified/unpublished. See the platform
+credits. This SDK source remains unpublished. See the platform
 [deployment closure guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_DEPLOYMENT_CLOSURE.md).
 
 
@@ -683,4 +659,11 @@ successor protects it; explicit Machine stop alone never permits early deletion.
 Keep independent backups and renew before expiry. Existing null-expiry contracts
 stay stop-only. Recovery observes uncertain deletion without replay; app absence
 does not settle prior charges. See the [worker expiry contract](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_WORKER_EXPIRY.md).
-Current source is unverified and unpublished.
+Verification is recorded in [HANDOFF.md](HANDOFF.md); this SDK source remains unpublished.
+
+
+### Sampled worker and database allocations
+
+New Fly and Supabase funding captures `sampled_capacity_v1`, a fixed Orbio allocation tariff with the saved surcharge. Matching native capacity observations no more than two minutes apart accrue supported Fly shared CPU/memory/volumes or healthy Supabase micro compute; missing/changed/unsupported observations are unmetered and absorbed by Orbio. This does not claim a complete native invoice. Regional differences, registry/storage/egress, paused retention and quota overrun are absorbed.
+
+`funding.list/get` exposes `metered_micro_usd`, `metered_ms`, `meter_observed_at`, `meter_error` and `cleanup_pending`. Charges are capped by the original approved hold and accumulated before one final rounding. At the funded deadline, the customer charge closes and the unused hold releases even when native cleanup is uncertain. Cleanup remains independently scheduled under the original deletion consent; a current paid successor protects the resource. Reconnecting clients never reopen a closed charge or extend funding.
