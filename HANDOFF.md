@@ -1,5 +1,25 @@
 # Scoped infrastructure SDK continuation
 
+## Paid database expiry, 2026-10-05
+
+Current Supabase documentation requires moving paid projects to a Free organization
+before pause. New database create/resume/renew requests therefore require explicit
+`on_expiry: delete`; the owner UI marks them destructive and requires acknowledgement.
+Funding rows expose this consent and bind it to the encrypted original contract.
+The worker deletes only the assigned project after finite funding ends, budget
+exhaustion, subject archival or selected stop-on-revocation; a current paid successor
+prevents deletion. An explicit pause alone never authorizes early deletion. There
+is no automatic backup/export or renewal. Existing contracts gain no deletion
+permission. A resource-unique SQL dispatch marker prevents native DELETE replay;
+recovery observes absence without asserting a final bill or physical backup purge.
+
+Migration 20261005026000 is unapplied. Shared schema remains 132 contracts /59
+provider mutations; generated SDK arguments and funding results, owner controls,
+public guide and continuity docs match. Current source is unverified; no tests,
+CI inspection, live provider calls, secret reads, migration application, deployment,
+publishing or merge. Full cost/retention settlement and final all-provider gates
+remain required. See [database expiry](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_DATABASE_EXPIRY.md).
+
 ## Mail recipient allowance and authorized expiry, 2026-10-05
 
 Current source supersedes the earlier flat 20-unit send reservation and

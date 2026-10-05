@@ -612,3 +612,13 @@ mail remains and retained subscription/storage bills can continue.
 No automatic provisioning/send or broad provider key is added. Direct provider
 activity is outside this ledger. These contracts remain unreleased/unverified
 until the coordinated platform and SDK final gates.
+
+Database funding (`infra.databases.create`, `resume`, `renew`) requires explicit
+`on_expiry: 'delete'`. This authorizes irreversible project/database/storage
+deletion when finite funding ends, budget is exhausted, the subject is archived,
+or the selected stop-on-revocation policy applies. A current paid successor
+protects the resource: renew before expiry and maintain independent backups.
+There is no automatic export, backup or renewal. Paid Supabase projects cannot
+rely on pause; an explicit pause request alone does not authorize early deletion.
+Read the captured policy through `infra.funding.get/list`. Existing saved
+contracts with `on_expiry: null` gain no automatic deletion authority.
