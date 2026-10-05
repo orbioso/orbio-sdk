@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "3dc28eb62dac41c7cc2fa096a5130742cf731aab76a8d1633b07470e98336d44",
+  "schemaRevision": "aea5df12166bc219352280446384e542991a2a96f2fd38ccbafc001fb333e8e8",
   "tools": [
     {
       "name": "infra.status",
@@ -667,7 +667,7 @@
     },
     {
       "name": "resource.spending",
-      "description": "Read recorded native spending for one assigned resource, including retained observations after deletion. Free broker metadata; no provider calls or credentials. Currently Vercel calendar-period reports only; other providers or missing evidence return available:false and null amounts, never invented zero. Amounts are decimal micro-USD strings. periods_expected and period_coverage_complete show whether every month since resource creation has a recorded report, including months after funding expiry. Complete period coverage does not prove freshness or invoice finality. Reports are delayed and non-final: billing_final is always false, high-water protection can exceed a later credited report, and approved capacity is not your available account balance. The guard requests production pause at observed capacity; previews and retained storage may still bill. Read funding.list/get for customer accrual and remaining holds; the guard excludes recorded excess cost absorbed by Orbio.",
+      "description": "Read recorded native spending for one assigned resource, including retained observations after deletion. Free broker metadata; no provider calls or credentials. Currently Vercel calendar-period reports only; other providers or missing evidence return available:false and null amounts, never invented zero. Amounts are decimal micro-USD strings. periods_expected and period_coverage_complete show whether every month since resource creation has a recorded report, including months after funding expiry. Complete period coverage does not prove freshness or invoice finality. Reports are delayed and non-final: billing_final is always false, high-water protection can exceed a later credited report, and approved capacity is not your available account balance. At observed capacity the worker follows the captured expiry policy: explicit on_expiry:delete permits project/deployment deletion; old contracts retain production pause with possible preview/retained costs. closure_policy, native_absent_since, customer_closed_at, corrections_until and corrections_complete_at describe customer closure and correction observation, independently of supplier invoice finality. Read funding.list/get for customer accrual and remaining holds; the guard excludes recorded excess cost absorbed by Orbio.",
       "permission": "infra.read",
       "inputSchema": {
         "type": "object",
@@ -759,6 +759,44 @@
                       "null"
                     ]
                   },
+                  "closure_policy": {
+                    "enum": [
+                      "native_absence_72h_credits_90d",
+                      null
+                    ]
+                  },
+                  "native_absent_since": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "customer_closed_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "corrections_until": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "corrections_complete_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "correction_error_code": {
+                    "enum": [
+                      "upstream_unavailable",
+                      "not_configured",
+                      "outcome_unknown",
+                      null
+                    ]
+                  },
                   "billing_final": {
                     "const": false
                   },
@@ -782,6 +820,12 @@
                   "periods_expected",
                   "period_coverage_complete",
                   "captured_at",
+                  "closure_policy",
+                  "native_absent_since",
+                  "customer_closed_at",
+                  "corrections_until",
+                  "corrections_complete_at",
+                  "correction_error_code",
                   "billing_final",
                   "budget_exhausted"
                 ],
@@ -1754,7 +1798,7 @@
     },
     {
       "name": "funding.get",
-      "description": "Read one lifetime funding UUID belonging to this product and agent. Free broker metadata, still available after deleting its resource. on_expiry:delete records explicit irreversible database/storage deletion consent at finite funding end; null adds no deletion authority. For resource_report_v1, read accrued_charged_micro_usd and accrued_upstream_micro_usd for current net amounts; charged_micro_usd/upstream_micro_usd preserve the original closure record. While held, remaining reservation is reserved_micro_usd minus accrued_charged_micro_usd. Inspect window_start/funded_until, shutdown policy and billing_state separately from resource readiness and operation status. Null cost is unknown; closed means that funding settled, not that every bill or retained resource ended. No upstream calls, credential values or private evidence.",
+      "description": "Read one lifetime funding UUID belonging to this product and agent. Free broker metadata, still available after deleting its resource. on_expiry:delete records explicit irreversible native project deletion consent at finite funding end (deployment code/configuration or database/storage, according to the resource); null adds no deletion authority. For resource_report_v1, read accrued_charged_micro_usd and accrued_upstream_micro_usd for current net amounts; charged_micro_usd/upstream_micro_usd preserve the original closure record. While held, remaining reservation is reserved_micro_usd minus accrued_charged_micro_usd. Inspect window_start/funded_until, shutdown policy and billing_state separately from resource readiness and operation status. Null cost is unknown; closed means that funding settled, not that every bill or retained resource ended. No upstream calls, credential values or private evidence.",
       "permission": "infra.read",
       "inputSchema": {
         "type": "object",
@@ -12371,7 +12415,7 @@
     {
       "name": "deployment.create",
       "permission": "deployment.manage",
-      "description": "Allocate one assigned Vercel project under a finite lifetime. Approve a positive max_cost for the separate lifetime hold. Creation does not deploy code or connect GitHub. Expiry requests provider shutdown; retained storage and previously incurred usage can still bill. This approval captures resource_report_v1: complete native project reports are charged against this resource’s activated budgets oldest first, with each budget’s captured surcharge. Reports can include retained usage and later corrections; daily costs are not prorated into hourly windows. Charges stay within each approved ceiling; recorded excess is absorbed by Orbio and never recovered from a later top-up. Provider credits first reduce absorbed excess, then refund actual customer charges. Open-window refunds restore its hold; no automatic renewal or restart. Read funding.list/get for accrued charges and remaining reservations. Supplier invoice finality is separate. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Allocate one assigned Vercel project under a finite lifetime. Approve a positive max_cost for the separate lifetime hold. Creation does not deploy code or connect GitHub. Expiry requests provider shutdown; retained storage and previously incurred usage can still bill. Requires explicit on_expiry:delete, authorizing project/deployment deletion at expiry or budget exhaustion, subject archival or selected stop-on-revocation. A current paid successor protects the project; an explicit pause alone cannot authorize early deletion. Keep source and configuration backups and renew before expiry. New approvals also capture native_absence_72h_credits_90d: unused holds can release after confirmed native absence for 72 hours plus fresh complete reports. A read-only observer then reconciles corrections for 90 days after customer closure, completing a final refresh even if retries delay it. Late increases after closure are absorbed; refunds are bounded by prior actual charges. These are customer reporting terms, not supplier invoice finality. Old contracts gain no deletion or closure authority. This approval captures resource_report_v1: complete native project reports are charged against this resource’s activated budgets oldest first, with each budget’s captured surcharge. Reports can include retained usage and later corrections; daily costs are not prorated into hourly windows. Charges stay within each approved ceiling; recorded excess is absorbed by Orbio and never recovered from a later top-up. Provider credits first reduce absorbed excess, then refund actual customer charges. Open-window refunds restore its hold; no automatic renewal or restart. Read funding.list/get for accrued charges and remaining reservations. Supplier invoice finality is separate. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -12401,12 +12445,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 160
+          },
+          "on_expiry": {
+            "enum": [
+              "delete"
+            ],
+            "description": "Required explicit consent: delete this assigned Vercel project and deployments at finite funding expiry or budget exhaustion. Renew before expiry to keep hosting."
           }
         },
         "required": [
           "idempotency_key",
           "max_cost",
-          "name"
+          "name",
+          "on_expiry"
         ],
         "additionalProperties": false
       },
@@ -12593,7 +12644,7 @@
       "costBasis": "provider_metered",
       "upstream": true,
       "createsResource": true,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "worker.create",
@@ -13297,7 +13348,7 @@
     {
       "name": "deployment.resume",
       "permission": "deployment.manage",
-      "description": "Fund a fresh finite window before unpausing production in this assigned Vercel project. Requires native paused:true and a positive max_cost; overlapping paid windows are refused, so use deployment.renew for live continuity. The native unpause can restore existing production traffic and automatic domain assignment. It does not create a deployment or prove application health; preview usage and retained bills are separate. Save the original intent; recovery reads native paused:false or the saved reply, never repeats unpause. This approval captures resource_report_v1: complete native project reports are charged against this resource’s activated budgets oldest first, with each budget’s captured surcharge. Reports can include retained usage and later corrections; daily costs are not prorated into hourly windows. Charges stay within each approved ceiling; recorded excess is absorbed by Orbio and never recovered from a later top-up. Provider credits first reduce absorbed excess, then refund actual customer charges. Open-window refunds restore its hold; no automatic renewal or restart. Read funding.list/get for accrued charges and remaining reservations. Supplier invoice finality is separate. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Fund a fresh finite window before unpausing production in this assigned Vercel project. Requires native paused:true and a positive max_cost; overlapping paid windows are refused, so use deployment.renew for live continuity. The native unpause can restore existing production traffic and automatic domain assignment. It does not create a deployment or prove application health; preview usage and retained bills are separate. Save the original intent; recovery reads native paused:false or the saved reply, never repeats unpause. Requires explicit on_expiry:delete, authorizing project/deployment deletion at expiry or budget exhaustion, subject archival or selected stop-on-revocation. A current paid successor protects the project; an explicit pause alone cannot authorize early deletion. Keep source and configuration backups and renew before expiry. New approvals also capture native_absence_72h_credits_90d: unused holds can release after confirmed native absence for 72 hours plus fresh complete reports. A read-only observer then reconciles corrections for 90 days after customer closure, completing a final refresh even if retries delay it. Late increases after closure are absorbed; refunds are bounded by prior actual charges. These are customer reporting terms, not supplier invoice finality. Old contracts gain no deletion or closure authority. This approval captures resource_report_v1: complete native project reports are charged against this resource’s activated budgets oldest first, with each budget’s captured surcharge. Reports can include retained usage and later corrections; daily costs are not prorated into hourly windows. Charges stay within each approved ceiling; recorded excess is absorbed by Orbio and never recovered from a later top-up. Provider credits first reduce absorbed excess, then refund actual customer charges. Open-window refunds restore its hold; no automatic renewal or restart. Read funding.list/get for accrued charges and remaining reservations. Supplier invoice finality is separate. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -13326,12 +13377,19 @@
               "stop"
             ],
             "default": "finish_window"
+          },
+          "on_expiry": {
+            "enum": [
+              "delete"
+            ],
+            "description": "Required explicit consent: delete this assigned Vercel project and deployments at finite funding expiry or budget exhaustion. Renew before expiry to keep hosting."
           }
         },
         "required": [
           "idempotency_key",
           "max_cost",
-          "resource_id"
+          "resource_id",
+          "on_expiry"
         ],
         "additionalProperties": false
       },
@@ -13747,7 +13805,7 @@
     {
       "name": "deployment.renew",
       "permission": "deployment.manage",
-      "description": "Prepay one adjacent continuation of an allocated resource that still has an active paid window. Reserve a positive max_cost for 60–86400 additional seconds. The atomic broker transaction checks a continuous paid parent chain, current grant, balance and product budget; concurrent tail changes are refused. No native create, restart, database restore, deployment or timeout call occurs. Funding preserves runtime state and does not promise application health or free usage/storage. Future windows do not trigger early native usage reads. Existing expiry stops compute unless an eligible prepaid successor covers the current time. Save the original request; recovery reads the accepted finance operation without reactivating or extending it. This approval captures resource_report_v1: complete native project reports are charged against this resource’s activated budgets oldest first, with each budget’s captured surcharge. Reports can include retained usage and later corrections; daily costs are not prorated into hourly windows. Charges stay within each approved ceiling; recorded excess is absorbed by Orbio and never recovered from a later top-up. Provider credits first reduce absorbed excess, then refund actual customer charges. Open-window refunds restore its hold; no automatic renewal or restart. Read funding.list/get for accrued charges and remaining reservations. Supplier invoice finality is separate. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Prepay one adjacent continuation of an allocated resource that still has an active paid window. Reserve a positive max_cost for 60–86400 additional seconds. The atomic broker transaction checks a continuous paid parent chain, current grant, balance and product budget; concurrent tail changes are refused. No native create, restart, database restore, deployment or timeout call occurs. Funding preserves runtime state and does not promise application health or free usage/storage. Future windows do not trigger early native usage reads. Existing expiry stops compute unless an eligible prepaid successor covers the current time. Save the original request; recovery reads the accepted finance operation without reactivating or extending it. Requires explicit on_expiry:delete, authorizing project/deployment deletion at expiry or budget exhaustion, subject archival or selected stop-on-revocation. A current paid successor protects the project; an explicit pause alone cannot authorize early deletion. Keep source and configuration backups and renew before expiry. New approvals also capture native_absence_72h_credits_90d: unused holds can release after confirmed native absence for 72 hours plus fresh complete reports. A read-only observer then reconciles corrections for 90 days after customer closure, completing a final refresh even if retries delay it. Late increases after closure are absorbed; refunds are bounded by prior actual charges. These are customer reporting terms, not supplier invoice finality. Old contracts gain no deletion or closure authority. This approval captures resource_report_v1: complete native project reports are charged against this resource’s activated budgets oldest first, with each budget’s captured surcharge. Reports can include retained usage and later corrections; daily costs are not prorated into hourly windows. Charges stay within each approved ceiling; recorded excess is absorbed by Orbio and never recovered from a later top-up. Provider credits first reduce absorbed excess, then refund actual customer charges. Open-window refunds restore its hold; no automatic renewal or restart. Read funding.list/get for accrued charges and remaining reservations. Supplier invoice finality is separate. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -13776,12 +13834,19 @@
               "stop"
             ],
             "default": "finish_window"
+          },
+          "on_expiry": {
+            "enum": [
+              "delete"
+            ],
+            "description": "Required explicit consent: delete this assigned Vercel project and deployments at finite funding expiry or budget exhaustion. Renew before expiry to keep hosting."
           }
         },
         "required": [
           "idempotency_key",
           "max_cost",
-          "resource_id"
+          "resource_id",
+          "on_expiry"
         ],
         "additionalProperties": false
       },
@@ -13967,7 +14032,7 @@
       "readOnly": false,
       "costBasis": "free_control_plane",
       "upstream": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "worker.renew",

@@ -444,7 +444,7 @@ protective high-water amount may exceed a later credited report; approved upstre
 capacity is not your available account balance. `billing_final:false` means this
 is not a final invoice or customer charge. The platform requests production
 pause at observed capacity, but previews/storage can continue billing.
-Terminal retention/closure, post-closure observation and other provider billing remain unfinished; this
+Other provider billing and final full-stack verification remain unfinished; this
 source is unpublished and unverified.
 
 `infra.workers.images.inspect(resourceId, image)` verifies an immutable image's
@@ -640,7 +640,27 @@ reservation is ceiling minus accrued charge; closed windows reserve zero. Origin
 terminal upstream/charged fields preserve the closure record. Null-policy rows
 retain their existing settlement behavior. Supplier invoice finality is separate.
 
-This source is unverified/unpublished. Terminal retention/closure and independent
-post-closure correction observation remain required. The current platform sweep
-observes only while a funding window remains held. See the platform
+This source is unverified/unpublished. Terminal closure and independent post-closure observation now have source
+implementations under the newly captured terms described below. Verification
+and other-provider accounting remain required. See the platform
 [customer billing guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_NATIVE_BILLING.md).
+
+### Deployment expiry and billing closure
+
+Deployment create/resume/renew now requires `on_expiry: 'delete'`. This explicitly
+authorizes deletion of the assigned Vercel project and its deployments, domain
+associations, environment and settings at expiry or budget exhaustion, archival
+or selected stop-on-revocation. A paid current successor protects it; pause alone
+does not authorize early deletion. Renew before expiry and keep source/config
+backups. Old contracts gain no deletion authority.
+
+New captured terms permit unused-hold release after 72 hours of confirmed native
+absence plus fresh complete reports. A separate read-only observer then reconciles
+credits for 90 days after customer closure; final-refresh failures remain
+scheduled. Late increases after closure are absorbed by Orbio. This is not
+supplier invoice finality. `resources.spending` exposes `closure_policy`,
+`native_absent_since`, `customer_closed_at`, `corrections_until`,
+`corrections_complete_at` and sanitized `correction_error_code`. Funding reads
+preserve original closure amounts separately from net accrued amounts after
+credits. Full source remains unverified/unpublished. See the platform
+[deployment closure guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_DEPLOYMENT_CLOSURE.md).

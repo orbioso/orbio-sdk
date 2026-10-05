@@ -1,5 +1,35 @@
 # Scoped infrastructure SDK continuation
 
+## Vercel expiry, closure and independent corrections, 2026-10-05
+
+New deployment create/resume/renew requires explicit `on_expiry: delete`, with
+shared schema/SDK arguments and owner destructive acknowledgement. The worker
+and SQL gate bind original consent, scope, lease, shutdown reason and paid
+successors before one native project DELETE. Uncertain outcomes are observed
+without replay. Legacy null-expiry funding retains production-pause behavior.
+
+New contracts capture `native_absence_72h_credits_90d`: closure needs 72 hours
+since confirmed native absence, a current absence read and fresh complete native
+reports after the grace boundary. It releases only unused holds; already accrued
+charges cannot be charged twice. Future prepaid windows can close as zero-width
+allocation intervals with native absence separately recorded. Once all resource
+funding closes, an independently leased observer continues native report reads
+and scoped credits for 90 days. Late increases after closure are absorbed. Final
+refresh failures remain scheduled; old contracts gain no new closure deadline.
+These are explicit Orbio customer terms, not supplier invoice finality.
+
+Resource spending, owner history and generated SDK expose closure/correction dates
+and sanitized errors. The feature-off sweep includes read-only `native_billing`
+work after expiry/funding hints. See [deployment closure](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_DEPLOYMENT_CLOSURE.md).
+Migration 20261005028000 is unapplied; 132 shared contracts /59 provider mutations.
+Only contract export/type generation ran. No tests/type/lint/build/CI, native
+smoke, credential reads, provider mutations, deployment, publication or merge.
+
+The previous turn’s Vercel terminal/watcher gaps now have source implementations,
+not validation evidence. Full Fly/Supabase metering, retained-mail economics and
+final all-provider scope/concurrency/finance/UI/packed-SDK/live/adversarial gates
+remain required. The full goal is active; the PRs remain draft.
+
 ## Vercel customer usage accrual, 2026-10-05
 
 New deployment create/resume/renew approvals capture `resource_report_v1` in the
