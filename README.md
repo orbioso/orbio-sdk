@@ -608,7 +608,16 @@ Owner-only `deleteInbox` permanently removes the inbox/mail, retaining charges.
 Approval authorizes native inbox pause at expiry unless newer paid capacity
 covers it. Toolkit sends stop immediately; status reports native pause confirmation
 or uncertainty. Pause blocks incoming mail without replay after resume. Stored
-mail remains and retained subscription/storage bills can continue.
+mail remains and retained provider bills can continue. Version 2 quotes include
+`storage_capacity_bytes`, `on_storage_exhaustion: 'pause_inbox'`,
+`storage_billing: 'included_allocation'` and `after_expiry_customer_charge: 'none'`.
+Orbio absorbs quota overrun/delayed pause and retention after expiry. Draft writes,
+sends and resume require a current native sample below the paid allowance.
+Status includes the latest storage bytes/timestamp and observed quota state;
+`active` means a paid window, not native health. Delete stored messages/drafts
+for cleanup, then explicitly resume after native metrics fall below the limit.
+No automatic resume or deletion occurs. The worker samples every five minutes,
+so quota enforcement can lag.
 No automatic provisioning/send or broad provider key is added. Direct provider
 activity is outside this ledger. These contracts remain unreleased/unverified
 until the coordinated platform and SDK final gates.

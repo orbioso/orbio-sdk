@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: dcd9472c8e7bfd669841c0c8fdc9eccfb642e1dc16e850238b49af44631050e0. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 8fa2b1cea6edd100026478e2bc69bf3d861c83c28b92fd20d85a860b4dc28e12. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -5516,6 +5516,10 @@ export interface InfrastructureContracts {
       send_capacity: number
       maximum_recipients_per_send: 20
       reservation_basis: 'validated_draft_recipients'
+      storage_capacity_bytes: number
+      on_storage_exhaustion: 'pause_inbox'
+      storage_billing: 'included_allocation'
+      after_expiry_customer_charge: 'none'
       on_expiry: 'pause_inbox'
       automatic_renewal: false
       supplier_invoice_final: false
@@ -5538,6 +5542,10 @@ export interface InfrastructureContracts {
         active: boolean
         automatic_renewal: false
         supplier_invoice_final: false
+        storage_capacity_bytes: number | null
+        storage_observed_bytes: number | null
+        storage_observed_at: string | null
+        storage_limit_reached: boolean | null
         expiry_state: 'scheduled' | 'pausing' | 'unknown' | 'paused' | 'superseded' | 'deleted'
         expiry_error_code: string | null
         native_paused_at: string | null
@@ -7554,5 +7562,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'dcd9472c8e7bfd669841c0c8fdc9eccfb642e1dc16e850238b49af44631050e0'
+export const INFRA_SCHEMA_REVISION = '8fa2b1cea6edd100026478e2bc69bf3d861c83c28b92fd20d85a860b4dc28e12'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

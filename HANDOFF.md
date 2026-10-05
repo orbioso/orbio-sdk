@@ -1,5 +1,29 @@
 # Scoped infrastructure SDK continuation
 
+## Mail storage capacity, 2026-10-05
+
+Version 2 mail quotes capture per-inbox storage and shared purchased storage
+capacity. Activation allocates it atomically with recipient/inbox capacity and
+charges only the approved fixed allocation plus captured surcharge. Orbio absorbs
+delayed-pause overrun and post-expiry retention; manual owner deletion remains
+explicit. Operators must subtract retained commitments from future purchased
+pool allocations. No invented per-byte tariff or extra retention debit is added.
+
+Draft create/update, send and resume require a current native storage sample below
+the paid allowance. A leased worker observes storage every five minutes and
+requests the captured pause at quota or expiry. Missing samples stay unknown;
+expiry cleanup is independent of metric availability. Deletion for cleanup stays
+available, but never automatically resumes. Original leases/full scope/credential
+CAS and a once-per-explicit-resume pause cycle protect against cross-agent access
+and native replay. Public status, owner approval and generated SDK include the
+allowance, sample timestamp and observed quota state. See [mail storage](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_MAIL_STORAGE.md).
+
+Migration 20261005030000 is unapplied. Source and contract generation only; all
+checks and live smoke remain deferred until engineering is complete. No native
+mutation, secret read, email, deployment, publishing or merge. Full Fly/Supabase
+cost settlement and final all-provider verification/adversarial review remain.
+Pricing is settled: Orbio pays, with 15% default markup. Both PRs remain draft.
+
 ## Fly worker expiry, 2026-10-05
 
 New worker create/resume/renew requires explicit app-deletion consent at finite

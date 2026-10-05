@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "dcd9472c8e7bfd669841c0c8fdc9eccfb642e1dc16e850238b49af44631050e0",
+  "schemaRevision": "8fa2b1cea6edd100026478e2bc69bf3d861c83c28b92fd20d85a860b4dc28e12",
   "tools": [
     {
       "name": "infra.status",
@@ -5769,7 +5769,7 @@
     },
     {
       "name": "mail.subscription.quote",
-      "description": "Read the current configured platform subscription-capacity quote for this assigned inbox. Free broker read with no native request; no capacity is reserved. Public terms show the full period allocation, captured surcharge and total customer charge, plus recipient capacity and the authorized native inbox pause at expiry. Pausing blocks incoming mail; missed mail is not replayed. Pass quote_hash unchanged to mail.subscription.activate with a sufficient max_cost. Quotes may expire or change before admission. Missing operator allocation or a mismatched saved subscription is refused; no plan rate is guessed. The full period charge applies even if activated mid-period; no proration or automatic renewal. Provider organization/customer/subscription IDs stay private.",
+      "description": "Read the current configured platform subscription-capacity quote for this assigned inbox. Free broker read with no native request; no capacity is reserved. Public terms show the full period allocation, captured surcharge and total customer charge, plus recipient and storage allowances and the authorized native inbox pause at the storage limit or expiry. Storage is included in the fixed allocation; overrun and retention after expiry create no extra customer charge. Pausing blocks incoming mail; missed mail is not replayed. Pass quote_hash unchanged to mail.subscription.activate with a sufficient max_cost. Quotes may expire or change before admission. Missing operator allocation or a mismatched saved subscription is refused; no plan rate is guessed. The full period charge applies even if activated mid-period; no proration or automatic renewal. Provider organization/customer/subscription IDs stay private.",
       "permission": "mail.read",
       "inputSchema": {
         "type": "object",
@@ -5841,6 +5841,20 @@
                   "reservation_basis": {
                     "const": "validated_draft_recipients"
                   },
+                  "storage_capacity_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  },
+                  "on_storage_exhaustion": {
+                    "const": "pause_inbox"
+                  },
+                  "storage_billing": {
+                    "const": "included_allocation"
+                  },
+                  "after_expiry_customer_charge": {
+                    "const": "none"
+                  },
                   "on_expiry": {
                     "const": "pause_inbox"
                   },
@@ -5867,6 +5881,10 @@
                   "send_capacity",
                   "maximum_recipients_per_send",
                   "reservation_basis",
+                  "storage_capacity_bytes",
+                  "on_storage_exhaustion",
+                  "storage_billing",
+                  "after_expiry_customer_charge",
                   "on_expiry",
                   "automatic_renewal",
                   "supplier_invoice_final",
@@ -5932,7 +5950,7 @@
     },
     {
       "name": "mail.subscription.status",
-      "description": "Read the latest purchased capacity window for this assigned inbox. Free broker metadata; subscription:null means no purchase recorded. Shows separate customer charge, period, active status and permanently reserved versus remaining recipient capacity. Each send reserves its validated draft recipient count (1–20); refused/uncertain attempts after reservation keep those units. Expiry blocks toolkit sends and schedules the authorized native pause. expiry_state and native_paused_at report its observation, not guaranteed pause timing. Pausing blocks incoming mail without replay on resume; stored mail and subscription costs remain. This is not a finalized supplier invoice or proof of provider health; direct provider sends are outside this ledger.",
+      "description": "Read the latest purchased capacity window for this assigned inbox. Free broker metadata; subscription:null means no purchase recorded. Shows separate customer charge, period, active status, permanently reserved versus remaining recipient capacity, and the latest storage sample/allowance. active describes the paid window, not native health or permission to send. storage_limit_reached describes storage_observed_at, not a live measurement. Each send reserves its validated draft recipient count (1–20); refused/uncertain attempts after reservation keep those units. Draft writes, sends and resume require an active window and a fresh native sample below its storage allowance. Quota exhaustion or expiry schedules the authorized native pause; deletion for cleanup remains available. expiry_state and native_paused_at report its observation, not guaranteed pause timing. Pausing blocks incoming mail without replay on resume; stored mail and provider subscription costs remain, but Orbio absorbs retention beyond the approved customer allocation. This is not a finalized supplier invoice or proof of provider health; direct provider sends are outside this ledger.",
       "permission": "mail.read",
       "inputSchema": {
         "type": "object",
@@ -6025,6 +6043,34 @@
                           "supplier_invoice_final": {
                             "const": false
                           },
+                          "storage_capacity_bytes": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 1000000000000
+                          },
+                          "storage_observed_bytes": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "storage_observed_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "storage_limit_reached": {
+                            "type": [
+                              "boolean",
+                              "null"
+                            ]
+                          },
                           "expiry_state": {
                             "enum": [
                               "scheduled",
@@ -6064,6 +6110,10 @@
                           "active",
                           "automatic_renewal",
                           "supplier_invoice_final",
+                          "storage_capacity_bytes",
+                          "storage_observed_bytes",
+                          "storage_observed_at",
+                          "storage_limit_reached",
                           "expiry_state",
                           "expiry_error_code",
                           "native_paused_at"
@@ -14727,7 +14777,7 @@
     {
       "name": "mail.inbox.resume",
       "permission": "mail.send",
-      "description": "Resume native sending and receiving for the assigned inbox only after explicitly purchasing an active mail.subscription window. This does not buy or extend capacity, replay mail missed while paused, or send any email. Native active state is read back on uncertain responses; no automatic replay. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Resume native sending and receiving for the assigned inbox only after explicitly purchasing an active mail.subscription window and confirming storage below its allowance. If storage reached the allowance, delete stored mail before explicitly resuming; cleanup never resumes automatically. This does not buy or extend capacity, replay mail missed while paused, or send any email. Native active state is read back on uncertain responses; no automatic replay. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -15151,7 +15201,7 @@
     {
       "name": "mail.subscription.activate",
       "permission": "mail.send",
-      "description": "Explicitly buy the current quoted AgentMail subscription-capacity window for this assigned platform inbox. Read mail.subscription.quote first and pass its quote_hash with max_cost covering charged_micro_usd in decimal CREDIT. The full quoted period allocation plus captured surcharge is charged once, even when bought mid-period; there is no proration, automatic renewal or refund for unused capacity. Atomic balance, product budget, provider capacity and nonoverlap checks protect activation. The quote is captured when queued; funds/capacity are charged atomically when its worker activates it. Recovery returns the original subscription without charging twice. Mail sends require this active window and each attempt permanently reserves its validated draft recipient count (1–20); status shows remaining capacity. Approval authorizes a native inbox pause at expiry unless a newer paid period covers it. Expiry immediately blocks toolkit sends; the cleanup worker requests pause and reports confirmation or uncertainty. Paused inboxes stop receiving; missed mail is not replayed. Existing mail remains and retained storage/subscription costs can continue. Customer subscription charge is separate from the operation API fee and is not a finalized supplier invoice. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
+      "description": "Explicitly buy the current quoted AgentMail subscription-capacity window for this assigned platform inbox. Read mail.subscription.quote first and pass its quote_hash with max_cost covering charged_micro_usd in decimal CREDIT. The full quoted period allocation plus captured surcharge is charged once, even when bought mid-period; there is no proration, automatic renewal or refund for unused capacity. Atomic balance, product budget, provider capacity and nonoverlap checks protect activation. The quote is captured when queued; funds/capacity are charged atomically when its worker activates it. Recovery returns the original subscription without charging twice. Mail sends require this active window and each attempt permanently reserves its validated draft recipient count (1–20); status shows remaining capacity. Approval authorizes native pause at the quoted storage allowance or expiry unless a newer paid period covers expiry. Storage is included in the fixed allocation; delayed pause or retention after expiry creates no additional customer charge. Draft writes, sends and resume require a fresh below-limit native sample. Expiry immediately blocks toolkit sends; the cleanup worker requests pause and reports confirmation or uncertainty. Paused inboxes stop receiving; missed mail is not replayed. Existing mail remains until owner deletion. Orbio absorbs provider retention costs outside the approved allocation. Customer subscription charge is separate from the operation API fee and is not a finalized supplier invoice. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -23372,7 +23422,7 @@
     {
       "name": "mail.draft.create",
       "permission": "mail.draft",
-      "description": "Create an unsent draft only in the manually owner-assigned inbox. For a reply, supply in_reply_to and optional reply_all; for a forward, supply forward_of. Sources are mutually exclusive and verified in that inbox. Inline base64 attachments allow 10 files, 64 KiB per file and 96 KiB decoded total; all draft fields together fit 192 KiB serialized. No remote attachment URLs, send, scheduling or inbox provisioning. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Create an unsent draft only in the manually owner-assigned inbox. Requires a paid active mail subscription and a fresh native storage sample below its allowance. For a reply, supply in_reply_to and optional reply_all; for a forward, supply forward_of. Sources are mutually exclusive and verified in that inbox. Inline base64 attachments allow 10 files, 64 KiB per file and 96 KiB decoded total; all draft fields together fit 192 KiB serialized. No remote attachment URLs, send, scheduling or inbox provisioning. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -23678,7 +23728,7 @@
     {
       "name": "mail.draft.update",
       "permission": "mail.draft",
-      "description": "Update an unscheduled draft verified in the assigned inbox. Provide at least one content field; null clears scalar/recipient fields. add_attachments uses bounded inline base64; remove_attachments contains IDs verified in this draft. Total serialized content fits 192 KiB. Lost attachment upload replies cannot be inferred from metadata and are never repeated. No send, scheduling or source-message change. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Update an unscheduled draft verified in the assigned inbox. Requires a paid active mail subscription and a fresh native storage sample below its allowance. Provide at least one content field; null clears scalar/recipient fields. add_attachments uses bounded inline base64; remove_attachments contains IDs verified in this draft. Total serialized content fits 192 KiB. Lost attachment upload replies cannot be inferred from metadata and are never repeated. No send, scheduling or source-message change. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -24014,7 +24064,7 @@
     {
       "name": "mail.draft.send",
       "permission": "mail.send",
-      "description": "Send an existing draft verified in the owner-assigned inbox, with 1 to 20 total recipients. Inspect recipients and body first. Requires a paid active mail.subscription window with enough recipient units for this draft. Immediately before native send, reserve the validated to/cc/bcc recipient count (1–20). Refusals or uncertain replies after reservation keep those units; read mail.subscription.status for capacity. Toolkit draft writes are limited to 20 recipients, but direct provider activity is outside this ledger. Sending is irreversible and does not prove delivery. An unknown send outcome is never automatically repeated. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
+      "description": "Send an existing draft verified in the owner-assigned inbox, with 1 to 20 total recipients. Inspect recipients and body first. Requires a paid active mail.subscription window with enough recipient units for this draft and a fresh native storage sample below its allowance. Immediately before native send, reserve the validated to/cc/bcc recipient count (1–20). Refusals or uncertain replies after reservation keep those units; read mail.subscription.status for capacity. Toolkit draft writes are limited to 20 recipients, but direct provider activity is outside this ledger. Sending is irreversible and does not prove delivery. An unknown send outcome is never automatically repeated. Requires this permission plus infra.read. Save the original arguments and idempotency_key before calling. Returns a durable operation; poll operation.get. Recover lost admission with identical arguments and the same key. Uncertain provider mutations are never replayed. A completed action may remain billing_state:held pending attributable native cost; max_cost is an immutable decimal CREDIT ceiling. The standard management API request is included at zero separate request charge. Compute/build/storage/egress/mail subscription charges are separate and are not waived. Use max_cost:\"0\" for the API action unless it creates/resumes/renews a lifetime window, which needs a positive lifetime budget. Only the captured API tariff can settle the operation charge; uncertain outcomes stay unresolved and older uncaptured bills are not backfilled.",
       "inputSchema": {
         "type": "object",
         "properties": {
