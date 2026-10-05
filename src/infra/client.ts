@@ -346,8 +346,8 @@ export class Infrastructure {
   }
 }
 
-/** Standalone infra client needs no chain manifest, wallet or broad gateway key. */
+/** Standalone infra client needs no chain manifest, wallet or provider key. */
 export const createInfrastructure = (options: InfrastructureOptions = {}): Infrastructure => new Infrastructure(new Http({
   baseUrl: (options.baseUrl ?? process.env.ORBIO_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
-  apiKey: options.apiKey ?? process.env.ORBIO_INFRA_KEY, fetch: options.fetch, timeoutMs: options.timeoutMs ?? 30_000,
+  apiKey: options.apiKey ?? process.env.ORBIO_INFRA_KEY ?? process.env.ORBIO_API_KEY, fetch: options.fetch, timeoutMs: options.timeoutMs ?? 30_000,
 }))

@@ -31,20 +31,18 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 - **Paying for itself.** `topUp()` and `keepFunded()`.
 - **Scoped infrastructure.** Assigned product/agent overview, resource metadata,
   explicit workspace allocation and durable recovery through hosted MCP contracts.
-  An explicit infrastructure grant is required; broad gateway keys gain no authority.
+  Each API credential or infra-approved MCP connection gets its own isolated resources.
 
 ## Agent infrastructure
 
-Version 0.2.0 adds infrastructure helpers. The platform must enable the
-capabilities and the owner must assign a product, agent and permissions.
-Installing the SDK does not enable the platform feature.
+Version 0.2.1 reuses your existing Orbio API key for infrastructure. Orbio automatically creates a separate agent scope for each credential or infra-approved MCP connection. No product setup or provider login is required. Explicit scoped grants still work and retain their permissions.
 All five providers, owner workflows and captured billing policies are implemented. Orbio pays upstream providers, charges a default 15% surcharge on supported allocations and absorbs unmetered costs. Tests, type/build and package checks pass; native workflow evidence and coordinated rollout steps are in [HANDOFF.md](HANDOFF.md). Provider credentials alone do not activate the feature.
 
 ```ts
 import { createInfrastructure, InfrastructureWaitTimeout } from '@orbiodotso/sdk'
 
 // Needs no chain manifest, signer or upstream provider SDK/key.
-const infra = createInfrastructure({ apiKey: process.env.ORBIO_INFRA_KEY })
+const infra = createInfrastructure({ apiKey: process.env.ORBIO_API_KEY })
 const discovery = await infra.catalogue() // public descriptions and schemas
 const overview = await infra.status()    // this grant's product and stable agent
 const pricing = await infra.pricing()    // current surcharge/payer terms, not a quote
@@ -132,7 +130,7 @@ remaining timeout must fit one hour: renew nearer expiry or use a shorter interv
 Reads and reconnection never renew; native execution usage is allocated once
 across the funded windows. Complete native evidence determines any unused refund.
 
-For an existing client, pass `infraKey` to `createOrbio()` and use `orbio.infra`.
+For an existing client, use `orbio.infra`: it reuses the API key by default. Pass `infraKey` or set `ORBIO_INFRA_KEY` only to override infrastructure access with a dedicated scoped key. A new API credential gets a separate agent; reuse the same credential to reconnect to its resources.
 `orbio.tools.refresh()` re-reads the legacy catalogue. `orbio.refresh()` returns
 a refreshed client retaining its original transport, keys and signer.
 Mail read helpers include `mail.threads.list/get` and
