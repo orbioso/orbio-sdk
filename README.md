@@ -411,7 +411,7 @@ hold. Renewal never starts, restores, deploys or promises resource health.
 Lost responses use original-request/operation recovery, never a new request key.
 
 Read `infra.funding.list(resourceId, { limit: 30, before })` and
-`infra.funding.get(fundingId)` for the independent lifetime interval, held maximum,
+`infra.funding.get(fundingId)` for the independent lifetime interval, original approved ceiling,
 nullable native cost/charge and shutdown policy. Use `next_cursor` as `before`;
 pages order by UUID, not time. Financial records remain readable after resource
 deletion within the same product/agent. Null cost is pending, not zero; settled
@@ -444,7 +444,7 @@ protective high-water amount may exceed a later credited report; approved upstre
 capacity is not your available account balance. `billing_final:false` means this
 is not a final invoice or customer charge. The platform requests production
 pause at observed capacity, but previews/storage can continue billing.
-Native finality/allocation and other provider billing remain unfinished; this
+Terminal retention/closure, post-closure observation and other provider billing remain unfinished; this
 source is unpublished and unverified.
 
 `infra.workers.images.inspect(resourceId, image)` verifies an immutable image's
@@ -513,7 +513,7 @@ These report whether every UTC month from resource creation through the current
 month has a recorded report. Missing history can understate actual spend; complete
 coverage proves neither freshness nor final invoices. The platform follows the
 current month beyond funding expiry and one missing/stale historical month per
-claim. Recorded amounts remain non-final and do not settle or refund funding.
+claim. Recorded amounts remain non-final. New report-billed funding accrues and corrects customer charges independently of supplier invoice finality, as described below.
 A failed refresh cannot erase an exhaustion proved by existing saved evidence.
 
 Draft inbox metrics helpers: `infra.mail.metrics.usage(resourceId)` reads cumulative
@@ -622,3 +622,25 @@ There is no automatic export, backup or renewal. Paid Supabase projects cannot
 rely on pause; an explicit pause request alone does not authorize early deletion.
 Read the captured policy through `infra.funding.get/list`. Existing saved
 contracts with `on_expiry: null` gain no automatic deletion authority.
+
+### Vercel customer usage charges
+
+New deployment create/resume/renew approvals capture `resource_report_v1`. Complete
+signed project reports draw from that resource’s activated budgets oldest first,
+with each budget’s saved surcharge. Retained usage can be included; daily reports
+are not prorated into hourly windows. Costs above approved ceilings are absorbed
+by Orbio and cannot be rebilled from later top-ups. Credits first reduce absorbed
+excess, then refund actual prior customer charges. No automatic restart/renewal.
+
+`infra.funding.list/get` exposes `billing_policy`, `accrued_upstream_micro_usd` and
+`accrued_charged_micro_usd`. Accrued amounts are current net base/charge after
+corrections; initialized zero means no attributed charge yet, not known-free
+usage. `reserved_micro_usd` remains the original ceiling. While held, remaining
+reservation is ceiling minus accrued charge; closed windows reserve zero. Original
+terminal upstream/charged fields preserve the closure record. Null-policy rows
+retain their existing settlement behavior. Supplier invoice finality is separate.
+
+This source is unverified/unpublished. Terminal retention/closure and independent
+post-closure correction observation remain required. The current platform sweep
+observes only while a funding window remains held. See the platform
+[customer billing guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_NATIVE_BILLING.md).

@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 82e2a2bd803956953702aa52314c89373e416e0ff00bdfe955c3326d673de1dd. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 3dc28eb62dac41c7cc2fa096a5130742cf731aab76a8d1633b07470e98336d44. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -5120,6 +5120,9 @@ export interface InfrastructureContracts {
         billing_state: 'held' | 'settled' | 'released'
         upstream_micro_usd: number | null
         charged_micro_usd: number | null
+        billing_policy: 'resource_report_v1' | null
+        accrued_upstream_micro_usd: number
+        accrued_charged_micro_usd: number
         usage_ended_at: string | null
         on_grant_revocation: 'finish_window' | 'stop'
         on_expiry: 'delete' | null
@@ -5146,6 +5149,9 @@ export interface InfrastructureContracts {
       billing_state: 'held' | 'settled' | 'released'
       upstream_micro_usd: number | null
       charged_micro_usd: number | null
+      billing_policy: 'resource_report_v1' | null
+      accrued_upstream_micro_usd: number
+      accrued_charged_micro_usd: number
       usage_ended_at: string | null
       on_grant_revocation: 'finish_window' | 'stop'
       on_expiry: 'delete' | null
@@ -7518,5 +7524,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '82e2a2bd803956953702aa52314c89373e416e0ff00bdfe955c3326d673de1dd'
+export const INFRA_SCHEMA_REVISION = '3dc28eb62dac41c7cc2fa096a5130742cf731aab76a8d1633b07470e98336d44'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

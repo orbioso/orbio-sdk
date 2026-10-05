@@ -1,5 +1,36 @@
 # Scoped infrastructure SDK continuation
 
+## Vercel customer usage accrual, 2026-10-05
+
+New deployment create/resume/renew approvals capture `resource_report_v1` in the
+private intent/contract and SQL funding row. Legacy contracts retain null; mixed
+legacy histories cannot silently acquire this policy. Complete signed native
+reports across covered months accrue against the assigned resource’s activated
+budgets oldest first, using each captured margin. Account/project held balances
+fall by the exact charge delta. Credits first reduce Orbio-absorbed excess and
+then refund prior customer allocations. Open refunds restore the hold; closed
+refunds return available balance. Excess is recorded so a later top-up cannot
+rebill it. Every write requires the original exclusive lease, full resource
+scope and finance mutex; private snapshot-linked journals preserve adjustments.
+Accrual and the spending guard commit atomically. Generic closure releases only
+remaining holds and cannot duplicate previous charges.
+
+Public funding reads, the owner history panel and generated SDK expose
+billing_policy/accrued_upstream_micro_usd/accrued_charged_micro_usd. The original
+reserved ceiling and original terminal closure fields remain separate. Shared
+schema stays 132 contracts /59 provider mutations. See
+[customer billing](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_NATIVE_BILLING.md) for precise policy and bounds.
+
+Migration 20261005027000 is unapplied. Engineering only: contract export/type
+generation ran; tests/type/lint/build/CI/native smoke and adversarial review are
+still deferred. No secrets, native mutations, deployment, publishing or merge.
+The full goal remains active. Vercel terminal retention/cleanup and hold release,
+independent post-closure correction observation, Fly/Supabase full metering and
+retained-mail costs remain to implement before final all-provider verification.
+Supplier invoice finality is separate and must not block customer usage charges.
+The current held-funding sweep drives accrual; it is not yet a closed-resource
+billing watcher. Earlier observation-only descriptions below are historical.
+
 ## Paid database expiry, 2026-10-05
 
 Current Supabase documentation requires moving paid projects to a Free organization
