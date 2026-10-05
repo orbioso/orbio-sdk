@@ -89,6 +89,9 @@ const toolsOf = (body: CatalogueBody): ToolDescriptor[] => {
   return []
 }
 
+/** Explicit refresh for long-running clients. Errors are not silently cached as empty. */
+export const loadToolCatalogue = async (http: Http): Promise<ToolDescriptor[]> => toolsOf(await http.get<CatalogueBody>('/api/v1/tools'))
+
 /** What a client knows the moment it is ready, and nothing it had to be told. */
 export type Manifest = {
   status: ProtocolStatus
