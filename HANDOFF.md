@@ -1,3 +1,7 @@
+## 2026-10-05: managed infrastructure credential onboarding (0.2.1)
+
+Use the existing Orbio API key by default for both createOrbio().infra and createInfrastructure(). Explicit infraKey/ORBIO_INFRA_KEY still takes precedence. Backend app PR accompanies this SDK patch: each verified credential or infra-consented MCP connection gets an isolated persisted agent scope. Existing restricted/revoked grants are never elevated or recreated. A new API credential gets new resources; reconnect with the same credential for continuity. No provider keys or manual product setup. Tests cover default auth, overrides, and refresh continuity. Release after the backend credential-scope migration and routes are live.
+
 # Infrastructure SDK handoff
 
 Updated 2026-10-05. Current context for [SDK PR #1](https://github.com/orbioso/orbio-sdk/pull/1), branch `codex/toolkit-infra-sdk`, paired with [platform PR #318](https://github.com/orbioso/orbio/pull/318). Earlier engineering decisions and progress are preserved in [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md); obsolete blockers there are superseded by this file.

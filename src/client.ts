@@ -27,7 +27,7 @@ import { Infrastructure } from './infra/client.js'
 export type OrbioOptions = SignerInput & {
   /** The gateway key. Reads work without one; anything that spends needs it. */
   apiKey?: string | undefined
-  /** Explicit infrastructure grant. Broad gateway keys do not confer resource authority. */
+  /** Optional scoped infrastructure credential. Defaults to the existing Orbio API key. */
   infraKey?: string | undefined
   /** Point somewhere other than production, for a preview or a local stack. */
   baseUrl?: string | undefined
@@ -87,7 +87,7 @@ export class Orbio {
       manifest.status.chainId,
     )
     const infraHttp = new Http({
-      baseUrl: http.baseUrl, apiKey: options.infraKey ?? process.env.ORBIO_INFRA_KEY,
+      baseUrl: http.baseUrl, apiKey: options.infraKey ?? process.env.ORBIO_INFRA_KEY ?? apiKey,
       fetch: options.fetch, timeoutMs: options.timeoutMs ?? 30_000,
     })
     return new Orbio(http, manifest, signer, infraHttp)

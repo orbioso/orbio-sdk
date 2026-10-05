@@ -272,6 +272,25 @@ describe('transport and existing-client refresh', () => {
     expect(fresh.address?.toLowerCase()).toBe(account.address.toLowerCase())
     expect(authorizations).toHaveLength(7)
   })
+  it('uses the existing API key for integrated and standalone infra, with explicit overrides first', async () => {
+    vi.stubEnv('ORBIO_INFRA_KEY', undefined)
+    vi.stubEnv('ORBIO_API_KEY', 'environment-api-key')
+    const seen: string[] = []
+    const fetcher: typeof fetch = async (url, init) => {
+      const path = new URL(String(url)).pathname
+      if (path === '/api/protocol/status') return Response.json({ live: false, chainId: 4663, addresses: null })
+      if (path.startsWith('/api/v1/infra/')) seen.push(new Headers(init?.headers).get('authorization') ?? '')
+      return json({ fixture: true })
+    }
+    await createInfrastructure({ fetch: fetcher }).status()
+    const orbio = await createOrbio({ apiKey: 'explicit-api-key', fetch: fetcher })
+    await orbio.infra.status()
+    await (await orbio.refresh()).infra.status()
+    vi.stubEnv('ORBIO_INFRA_KEY', 'scoped-environment-key')
+    await createInfrastructure({ fetch: fetcher }).status()
+    await createInfrastructure({ apiKey: 'explicit-infra-key', fetch: fetcher }).status()
+    expect(seen).toEqual(['Bearer environment-api-key', 'Bearer explicit-api-key', 'Bearer explicit-api-key', 'Bearer scoped-environment-key', 'Bearer explicit-infra-key'])
+  })
   it('preserves typed SDK errors for callers branching on setup and retry policy', () => {
     const error = new OrbioError('unknown send outcome', { code: 'outcome_unknown', status: 503 })
     expect(error.retryable).toBe(false)
