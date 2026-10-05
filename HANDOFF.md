@@ -1,5 +1,23 @@
 # Scoped infrastructure SDK continuation
 
+## Fly worker expiry, 2026-10-05
+
+New worker create/resume/renew requires explicit app-deletion consent at finite
+funding expiry. This covers the assigned app's Machines, volumes, snapshots, IPs,
+secrets and images. The worker and private one-time SQL dispatch gate verify
+scope, original consent/lease, shutdown reason and paid successors. Recovery
+observes uncertain deletion without replay. Legacy contracts stay stop-only;
+explicit Machine stop does not permit early deletion. Discovered native identity
+is persisted before cleanup. HTTP/MCP, owner acknowledgement, generated SDK and
+funding descriptions match. See [worker expiry](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_WORKER_EXPIRY.md).
+
+Migration 20261005029000 is unapplied. Contract/type generation is the only
+executed generation step; tests/type/lint/build/CI and live smoke remain deferred.
+No native resources, credentials, deployments, publishing or merge were touched.
+Full Fly/Supabase usage billing, retained-mail economics and final all-provider
+verification/adversarial review remain required. Payer and 15% default surcharge
+are settled decisions, not operator blockers. Both PRs remain draft.
+
 ## Vercel expiry, closure and independent corrections, 2026-10-05
 
 New deployment create/resume/renew requires explicit `on_expiry: delete`, with

@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: aea5df12166bc219352280446384e542991a2a96f2fd38ccbafc001fb333e8e8. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: dcd9472c8e7bfd669841c0c8fdc9eccfb642e1dc16e850238b49af44631050e0. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -491,6 +491,10 @@ export interface InfrastructureContracts {
       lifetime_seconds?: number
       on_grant_revocation?: 'finish_window' | 'stop'
       name: string
+      /**
+       * Required explicit consent: destroy this assigned Fly app, Machines, volumes, snapshots, IPs, secrets and images when funding expires. Renew before expiry and keep independent backups.
+       */
+      on_expiry: 'delete'
     }
     'database.create': {
       idempotency_key: string
@@ -532,6 +536,10 @@ export interface InfrastructureContracts {
       resource_id: string
       lifetime_seconds?: number
       on_grant_revocation?: 'finish_window' | 'stop'
+      /**
+       * Required explicit consent: destroy this assigned Fly app, Machines, volumes, snapshots, IPs, secrets and images when funding expires. Renew before expiry and keep independent backups.
+       */
+      on_expiry: 'delete'
     }
     'deployment.renew': {
       idempotency_key: string
@@ -550,6 +558,10 @@ export interface InfrastructureContracts {
       resource_id: string
       lifetime_seconds?: number
       on_grant_revocation?: 'finish_window' | 'stop'
+      /**
+       * Required explicit consent: destroy this assigned Fly app, Machines, volumes, snapshots, IPs, secrets and images when funding expires. Renew before expiry and keep independent backups.
+       */
+      on_expiry: 'delete'
     }
     'database.renew': {
       idempotency_key: string
@@ -7542,5 +7554,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'aea5df12166bc219352280446384e542991a2a96f2fd38ccbafc001fb333e8e8'
+export const INFRA_SCHEMA_REVISION = 'dcd9472c8e7bfd669841c0c8fdc9eccfb642e1dc16e850238b49af44631050e0'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

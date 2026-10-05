@@ -404,7 +404,7 @@ Vercel/Fly/Supabase funded continuity is explicit:
 `infra.deployments.renew(resourceId, args)`, `infra.workers.renew(resourceId, args)`
 and `infra.databases.renew(resourceId, args)`. Save the exact original arguments
 and idempotency key first, with positive `max_cost`, `lifetime_seconds` (60–86400)
-and optional `on_grant_revocation`. The platform atomically prepays the next
+and required `on_expiry: 'delete'`, plus optional `on_grant_revocation`. The platform atomically prepays the next
 adjacent window only while a continuous current paid window exists. The broker
 API operation costs zero; native compute/storage remains a separate lifetime
 hold. Renewal never starts, restores, deploys or promises resource health.
@@ -664,3 +664,14 @@ supplier invoice finality. `resources.spending` exposes `closure_policy`,
 preserve original closure amounts separately from net accrued amounts after
 credits. Full source remains unverified/unpublished. See the platform
 [deployment closure guide](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_DEPLOYMENT_CLOSURE.md).
+
+
+New `infra.workers.create`, `resume` and `renew` require `on_expiry: 'delete'`.
+This authorizes destroying the assigned Fly app and its Machines, volumes,
+snapshots, IPs, secrets and images when funding expires, or earlier on budget
+exhaustion, subject archival or selected stop-on-revocation. A current paid
+successor protects it; explicit Machine stop alone never permits early deletion.
+Keep independent backups and renew before expiry. Existing null-expiry contracts
+stay stop-only. Recovery observes uncertain deletion without replay; app absence
+does not settle prior charges. See the [worker expiry contract](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_WORKER_EXPIRY.md).
+Current source is unverified and unpublished.
