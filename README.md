@@ -582,3 +582,16 @@ compute, storage, egress and mail capacity remain separately billable. Unknown
 outcomes and older uncaptured bills are not backfilled or replayed. Generated
 MCP/HTTP descriptions state these terms for each reviewed action. Current source
 is unverified; ongoing billing and final full-stack checks remain unfinished.
+
+### Platform inbox ownership
+
+The toolkit operator manually creates an inbox in the dedicated platform
+AgentMail organization and supplies its ID and inbox-scoped key. The owner
+connects it; users need no whole-organization access. Setup verifies the native
+parent organization and privately saves reported subscription metadata. Runtime
+reads/writes and webhook setup continue using only that inbox key, rechecking
+its parent against saved evidence. A foreign organization is refused; older
+unverified connections need explicit same-inbox reconnect. Public resource
+metadata contains only ownership/time/subscription-presence flags, never billing
+IDs. Those flags do not prove a price, paid quota, final invoice or settlement;
+prepaid subscription billing remains engineering in these unpublished additions.

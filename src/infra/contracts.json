@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "04b63ed28a0060d0d23f1e9770b4a513f546f5e9abd36a46e5f960b4064e995f",
+  "schemaRevision": "92e8621c194d822f5c570028ab0ba0f825af114df2cbeda939f6fb25c78e9077",
   "tools": [
     {
       "name": "infra.status",
@@ -6219,7 +6219,7 @@
     },
     {
       "name": "mail.inbox",
-      "description": "Read the inbox manually assigned by the owner, at most one per stable agent. No inbox creation or organization enumeration. Uses only an introspected inbox-scoped key.",
+      "description": "Read the inbox manually connected by the owner, at most one per stable agent. The toolkit operator manually creates it in the dedicated platform AgentMail organization and supplies only its inbox-scoped key. Owner setup verifies organization ownership; operational access rechecks the saved organization using that inbox key, with no organization-key fallback. Existing unverified connections require reconnecting the same inbox. No inbox creation, organization enumeration, price inference or invoice finalization.",
       "permission": "mail.read",
       "inputSchema": {
         "type": "object",

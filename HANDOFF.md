@@ -25,6 +25,45 @@ stay draft, platform migrations unapplied, feature disabled and SDK unpublished.
 No checks, native mutations, publication or merge accompanied this increment.
 Earlier pending-question records below are historical and superseded.
 
+## Platform inbox billing ownership, 2026-10-05
+
+The Orbio-payer decision now has a native ownership gate. An owner first passes
+Privy/current product/agent checks and the one-inbox identity rule. The supplied
+key is introspected as exactly that inbox and records its parent organization.
+A separate server-only AgentMailBilling verifier uses only the dedicated toolkit
+organization key for GET auth/me and GET organizations, requires organization
+scope and exact parent identity, and privately captures reported subscription,
+billing-customer/type metadata. A foreign organization or ambiguous verification
+is refused before storing a connection. No inbox/key creation or native mutation.
+
+The signed resource credential box contains this binding beside the inbox key;
+public metadata contains only platform_owned_inbox, capture time, whether the
+provider reported a subscription identifier, and invoice_final:false. IDs/plan
+metadata never become public. Subscription presence is not a price, measured
+consumption, paid capacity, invoice or settlement proof; missing metadata is
+unknown rather than a free bill. Operational reads/mutations and owner webhook
+setup share connectPlatformInbox: they use only the saved inbox key and compare
+its current parent organization against authenticated saved evidence. They never
+construct/use the organization verifier or fall back to its root key. Older
+connections missing evidence require explicit same-inbox reconnect; no silent
+migration, identity reassignment or key creation occurs.
+
+Manual fulfillment stays explicit: the toolkit operator manually creates one
+platform-org inbox and its scoped key; the owner connects it. End users should
+not be invited into the whole provider organization or given a broad credential.
+Owner copy, shared mail.inbox description and SDK generated docs now explain this
+flow. Root verifier consumes the existing ORBIO_TOOLKIT_AGENTMAIL_API_KEY; no new
+variable, secret read, provider call or production configuration change. Native
+ownership is a prerequisite, not completed subscription billing: captured rate/
+allocation, prepaid windows, send-capacity enforcement and retained-mail charging
+remain engineering, followed by all-provider final tests/smokes/adversarial review.
+Current source is unverified and the feature disabled; no migration, native
+mutation, email, deploy, merge or publication in this increment. Final fixtures
+must add native organization_id, private binding data, owner verifier HTTP mocks,
+foreign/root-scope mismatch, missing/changed subscription metadata, encrypted
+privacy and same-inbox rotation/reconnect cases. Source contracts remain 126 /55
+provider mutations plus broker cancellation.
+
 ## Included control API settlement, 2026-10-05
 
 New operations for the explicit 55 Vercel/Fly/Supabase/AgentMail action names
