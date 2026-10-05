@@ -1,5 +1,24 @@
 # Scoped infrastructure SDK continuation
 
+## Billing API access and pending coverage choice, 2026-10-05
+
+Dedicated toolkit read-only capability requests established: Supabase organization
+read succeeds (HTTP 200), but its dashboard upcoming-invoice endpoint rejects the
+configured PAT (HTTP 401). Fly live Organization introspection has billable/status
+fields but no complete cost report. Public API/schema research does not establish
+full resource-attributed billing access. See [API evidence](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_BILLING_API_EVIDENCE.md).
+
+Payer and 15% markup remain settled. A user question is pending: use captured
+manual tariffs for measurable compute/storage and have Orbio absorb unmetered
+costs, or require complete provider exports before release. This is a cost-coverage
+choice, not another surcharge decision. Neither policy is silently selected.
+No invoice is fabricated, missing cost is not zero, and no release is claimed.
+
+The Supabase logs helper now uses the current ClickHouse endpoint after the old
+logs.all removal; it still has no public catalogue entry. No new capability or
+SDK schema change. Final tests/CI/live workflows remain deferred. No provider
+mutation, email, deployment, publication, migration application or merge occurred.
+
 ## Mail storage capacity, 2026-10-05
 
 Version 2 mail quotes capture per-inbox storage and shared purchased storage
