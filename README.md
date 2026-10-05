@@ -594,18 +594,21 @@ its parent against saved evidence. A foreign organization is refused; older
 unverified connections need explicit same-inbox reconnect. Public resource
 metadata contains only ownership/time/subscription-presence flags, never billing
 IDs. Those flags do not prove a price, paid quota, final invoice or settlement;
-prepaid subscription billing remains engineering in these unpublished additions.
+explicit subscription quotes and activation below add customer billing in these unpublished additions.
 
 Mail capacity is purchased explicitly: `infra.mail.subscription.quote(resourceId)`,
 then `activate(resourceId, {quote_hash, max_cost, idempotency_key})` with the saved
 quote and sufficient decimal CREDIT ceiling, then `status(resourceId)` to read
 the customer charge and remaining capacity. The full period allocation plus
 captured surcharge is charged once, even mid-period; no automatic renewal,
-proration or unused-capacity refund. Each draft-send attempt permanently reserves
-20 recipient units, including refused/uncertain attempts. `infra.mail.pause` and
+proration or unused-capacity refund. Each draft-send attempt reserves its validated recipient count (1–20);
+refused/uncertain attempts after reservation retain those units. `infra.mail.pause` and
 `resume` explicitly change native sending/receiving; resume needs paid capacity.
 Owner-only `deleteInbox` permanently removes the inbox/mail, retaining charges.
-Expiry blocks toolkit sends without stopping native incoming/retained bills.
+Approval authorizes native inbox pause at expiry unless newer paid capacity
+covers it. Toolkit sends stop immediately; status reports native pause confirmation
+or uncertainty. Pause blocks incoming mail without replay after resume. Stored
+mail remains and retained subscription/storage bills can continue.
 No automatic provisioning/send or broad provider key is added. Direct provider
 activity is outside this ledger. These contracts remain unreleased/unverified
 until the coordinated platform and SDK final gates.

@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: cbd2e84700a39e60bfeb2971efc9202f7c4248a42544fadb271927514ad8cfdc. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 9bc60ccc949d51b628b0d3dd7c3f111dbb06f2c82a52e4e62c40efdd24214156. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -5464,7 +5464,9 @@ export interface InfrastructureContracts {
       margin_bps: number
       charged_micro_usd: number
       send_capacity: number
-      send_reservation_per_attempt: 20
+      maximum_recipients_per_send: 20
+      reservation_basis: 'validated_draft_recipients'
+      on_expiry: 'pause_inbox'
       automatic_renewal: false
       supplier_invoice_final: false
       full_period_charge: true
@@ -5486,6 +5488,9 @@ export interface InfrastructureContracts {
         active: boolean
         automatic_renewal: false
         supplier_invoice_final: false
+        expiry_state: 'scheduled' | 'pausing' | 'unknown' | 'paused' | 'superseded' | 'deleted'
+        expiry_error_code: string | null
+        native_paused_at: string | null
       }
     }
     'mail.delivery.status': {
@@ -7499,5 +7504,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'cbd2e84700a39e60bfeb2971efc9202f7c4248a42544fadb271927514ad8cfdc'
+export const INFRA_SCHEMA_REVISION = '9bc60ccc949d51b628b0d3dd7c3f111dbb06f2c82a52e4e62c40efdd24214156'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

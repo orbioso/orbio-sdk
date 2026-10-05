@@ -1,5 +1,26 @@
 # Scoped infrastructure SDK continuation
 
+## Mail recipient allowance and authorized expiry, 2026-10-05
+
+Current source supersedes the earlier flat 20-unit send reservation and
+explicit-pause-only expiry descriptions below. Sends reserve the validated native
+draft recipient count (1–20) immediately before native dispatch. Mail mutations,
+recovery, credential rotation and expiry serialize on the assigned inbox through
+database leases. Reconnection preserves the last observed resource state.
+Purchase quotes capture `on_expiry: pause_inbox`; expiry blocks toolkit sends and
+the worker requests native pause unless a newer paid period covers the inbox.
+A one-time dispatch marker prevents replay after uncertain transport. Recovery
+observes only; public status and the owner card show confirmation or uncertainty.
+Paused inboxes reject incoming mail without replay after resume; stored mail can
+still incur provider cost. No deletion, renewal, send or organization-key fallback.
+
+The shared 132-contract catalogue, owner quote/approval UI and generated SDK types
+carry recipient-count terms and expiry observations. The minute sweep discovers
+expired subscriptions even when new admissions are off. New migration
+20261005025000 is unapplied. Current source is unverified; tests, CI, SQL, UI,
+packed SDK and native smoke/adversarial gates remain deferred until engineering
+is complete. Full cross-provider cost/retention work remains in scope.
+
 ## Mail subscription capacity and lifecycle, 2026-10-05
 
 Current source implements captured, operator-configured AgentMail period quotes,
@@ -13,9 +34,9 @@ purchased terms/allocation. Full-period price applies even mid-period, with no
 proration, automatic renewal or unused-capacity refund. See [mail billing](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_MAIL_BILLING.md)
 for all fields, public workflow and limitations.
 
-Each toolkit send requires an active paid window and permanently reserves 20
-recipient units once per original operation before native send, including refused
-or uncertain attempts. This conservative broker capacity is not a provider send
+Each toolkit send requires an active paid window and reserves the validated draft
+recipient count (1–20) once per original operation immediately before native send.
+Refused or uncertain attempts after reservation retain those units. This conservative broker capacity is not a provider send
 meter, and direct provider edits/use are outside its guarantee. Native inbox
 pause/resume and owner-only deletion are exposed; resume requires paid capacity,
 pause blocks native sending/receiving with no later replay of missed incoming
@@ -26,12 +47,13 @@ The owner has an explicit quote/approval/capacity card with saved original-inten
 recovery, no automatic purchase/send, and exact subject/resource response checks.
 Catalogue, HTTP/MCP, generic workbench, SDK helpers/types and rendered/Markdown
 guide share 132 contracts /59 provider mutations plus broker cancellation.
-Migration 20261005024000 is unapplied. Source is unverified; only contract export
+Migrations 20261005024000 and 20261005025000 are unapplied. Source is unverified; only contract export
 and type generation ran, no tests/checks/CI/native smoke/email/secret reads.
 No production configuration, package publication, deployment or merge.
 
 The full goal remains active. Retained mail can still incur provider storage/
-subscription cost after toolkit expiry; there is no automatic native pause/delete.
+subscription cost after toolkit expiry. Current quotes authorize native inbox
+pause at expiry; there is no automatic deletion or renewal.
 Other-provider ongoing billing/retention/spend controls and final all-provider
 regression/SQL/UI/packed-SDK/live/adversarial verification remain required. Older
 126-contract and ownership-only summaries below describe earlier source.
