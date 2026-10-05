@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: a469e7a283dfb7be3a3a1a1520b85b3fb9b211ea7ef691892d560e65ad0cf3d0. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 04b63ed28a0060d0d23f1e9770b4a513f546f5e9abd36a46e5f960b4064e995f. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -7357,5 +7357,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = 'a469e7a283dfb7be3a3a1a1520b85b3fb9b211ea7ef691892d560e65ad0cf3d0'
+export const INFRA_SCHEMA_REVISION = '04b63ed28a0060d0d23f1e9770b4a513f546f5e9abd36a46e5f960b4064e995f'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

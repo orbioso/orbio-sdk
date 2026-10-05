@@ -25,6 +25,41 @@ stay draft, platform migrations unapplied, feature disabled and SDK unpublished.
 No checks, native mutations, publication or merge accompanied this increment.
 Earlier pending-question records below are historical and superseded.
 
+## Included control API settlement, 2026-10-05
+
+New operations for the explicit 55 Vercel/Fly/Supabase/AgentMail action names
+capture a versioned standard control-API tariff in the encrypted admission
+envelope. Their management API request has zero separate per-request charge;
+builds, compute, storage, egress and mailbox/subscription capacity are excluded.
+The operator's 10–20% surcharge applies to the separate attributable provider
+charges, not to an invented fee for an included request. Published standard-plan
+sources are linked in platform docs/TOOLKIT_CONTROL_API_PRICING.md; this classification is an
+inference from the providers' listed charge dimensions and requires those terms
+at activation. It does not prove a zero total resource bill or a final invoice.
+
+Runtime decorates only reviewed action names. New names do not inherit a tariff
+from a provider prefix. The operation reserve is zero; create/resume/renew still
+requires and atomically reserves a positive separate lifetime budget before its
+native mutation. New terminal outcomes or their exact saved response receipt can
+settle only the included API charge through the existing scoped atomic checkpoint
+and finish ledger. Local refusal proofs remain intact. Uncertain outcomes do not
+become success/failure, and neither native actions nor their uncertain steps replay.
+Old operations without admission-captured terms keep their existing billing state;
+current policy cannot retroactively manufacture a free bill. Original tariff,
+action, provider, scope and fee are revalidated before recovery. No lifetime
+settlement or retained-resource cost release is performed by this API proof.
+
+Shared descriptions now explain max_cost:"0" for these API actions, except the
+positive lifetime window actions, without widening grants/cleanup allowlists or
+native scope. HTTP/MCP/owner discovery and SDK generated descriptions match;
+contracts remain 126 / 55 provider mutations plus broker cancellation. Current
+source is unverified. No tests, CI inspection, provider calls, secret reads,
+production migrations/configuration, publication, deployment or merge. Full
+ongoing billing/retention and spend engineering, then final all-provider checks
+and adversarial review remain. Final fixtures should cover tariff/action/provider
+binding, original-terms recovery, legacy unknown holds, response-checkpoint crash
+recovery, zero API versus positive lifetime holds and scope/duplicate settlement.
+
 Implemented: standalone `createInfrastructure()` and `orbio.infra`, distinct
 explicit grant credential, public discovery/cache/refresh, typed status/resource/
 operation helpers and bounded operation polling. Local abort/timeout never sends

@@ -571,3 +571,14 @@ a resource quote, finalized invoice or proof that billing is ready. Unknown
 amounts keep their original reservations. Subscription entitlement/allocation,
 ongoing retained-resource accounting and final checks remain unfinished in these
 unpublished additions. Legacy tools retain their existing pricing configuration.
+
+### Included management API requests
+
+New reviewed Vercel/Fly/Supabase/AgentMail operations capture their included
+standard management request tariff before dispatch. Use max_cost:"0" for the API
+action, except create/resume/renew, which still needs a positive separate lifetime
+budget. A confirmed outcome can settle only the request charge at zero. Build,
+compute, storage, egress and mail capacity remain separately billable. Unknown
+outcomes and older uncaptured bills are not backfilled or replayed. Generated
+MCP/HTTP descriptions state these terms for each reviewed action. Current source
+is unverified; ongoing billing and final full-stack checks remain unfinished.
