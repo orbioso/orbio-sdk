@@ -110,6 +110,9 @@ export class Infrastructure {
   }
   /** Cheap assigned product/agent overview; provider presence is not a health probe. */
   status(options: InfrastructureRequestOptions = {}) { return this.call('infra.status', {}, options) }
+  /** Current toolkit surcharge/payer policy, not a resource quote or invoice.
+   * Existing operations/funding retain the rate captured at admission. */
+  pricing(options: InfrastructureRequestOptions = {}) { return this.call('infra.pricing', {}, options) }
 
   private scoped<K extends InfrastructureToolName>(name: K, resourceId: string,
     args: Omit<InfrastructureInput<K>, 'resource_id'>, options: InfrastructureRequestOptions) {

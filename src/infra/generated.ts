@@ -1,8 +1,9 @@
-/** Generated from the platform catalogue. Schema revision: 82901e3a1e847203c9add7292edd35dd5ce6a7d3108a704c409599b06a4b4796. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: a469e7a283dfb7be3a3a1a1520b85b3fb9b211ea7ef691892d560e65ad0cf3d0. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
     'infra.status': Record<string, never>
+    'infra.pricing': Record<string, never>
     'resource.list': {
       limit?: number
       before?: string
@@ -4935,6 +4936,15 @@ export interface InfrastructureContracts {
       }
       setup_url: string
     }
+    'infra.pricing': {
+      version: 1
+      model: 'provider_rates_plus_surcharge'
+      margin_bps: number
+      agentmail_subscription_payer: 'orbio'
+      captured_at_admission: true
+      unknown_cost_policy: 'retain_original_reservation'
+      supplier_invoice_finality: 'separate_from_customer_charge'
+    }
     'resource.list': {
       items: {
         id: string
@@ -5066,6 +5076,7 @@ export interface InfrastructureContracts {
         window_start: string
         funded_until: string
         reserved_micro_usd: number
+        margin_bps: number
         state: 'prepared' | 'active' | 'stopping' | 'unknown' | 'closed'
         billing_state: 'held' | 'settled' | 'released'
         upstream_micro_usd: number | null
@@ -5090,6 +5101,7 @@ export interface InfrastructureContracts {
       window_start: string
       funded_until: string
       reserved_micro_usd: number
+      margin_bps: number
       state: 'prepared' | 'active' | 'stopping' | 'unknown' | 'closed'
       billing_state: 'held' | 'settled' | 'released'
       upstream_micro_usd: number | null
@@ -7345,5 +7357,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '82901e3a1e847203c9add7292edd35dd5ce6a7d3108a704c409599b06a4b4796'
-export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
+export const INFRA_SCHEMA_REVISION = 'a469e7a283dfb7be3a3a1a1520b85b3fb9b211ea7ef691892d560e65ad0cf3d0'
+export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])

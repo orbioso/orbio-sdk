@@ -38,9 +38,9 @@ const { result, chargedMicroUsd } = await orbio.tools.xPosts(
 This source branch prepares infrastructure helpers for the platform release;
 these additions are not yet published on npm. The platform must enable the
 capabilities and the owner must assign a product, agent and permissions.
-Workspace quote/create/resume/pause/delete helpers are implemented here. Full
-billing, files/processes, other provider workflows and owner resource controls
-remain under development. Do not treat provider credential presence as readiness.
+Source helpers cover all five providers and owner workflows. Ongoing
+usage/subscription/retention billing and spend controls remain under development;
+full-stack verification is deferred until engineering is complete. Do not treat provider credential presence as readiness.
 
 ```ts
 import { createInfrastructure, InfrastructureWaitTimeout } from '@orbiodotso/sdk'
@@ -49,6 +49,7 @@ import { createInfrastructure, InfrastructureWaitTimeout } from '@orbiodotso/sdk
 const infra = createInfrastructure({ apiKey: process.env.ORBIO_INFRA_KEY })
 const discovery = await infra.catalogue() // public descriptions and schemas
 const overview = await infra.status()    // this grant's product and stable agent
+const pricing = await infra.pricing()    // current surcharge/payer terms, not a quote
 const page = await infra.resources.list({ limit: 10 })
 // Pass page.next_cursor as before to read the next page.
 
@@ -558,3 +559,15 @@ that original operation or explicitly repeat cancellation for that same UUID.
 Local wait abort/timeout never requests cancellation automatically. Use the
 resource's explicit stop/delete action for dispatched work. This source addition
 is unpublished and unverified; see the platform API/handoff.
+
+### Toolkit surcharge policy
+
+Orbio pays the providers, including AgentMail, and rebills customers using
+provider rates plus a configured 10–20% surcharge (15% default). pricing() reads
+current policy without native requests or supplier credentials. New admission
+captures the rate; existing operations/recovery keep their original terms.
+funding.list/get exposes margin_bps for each saved window. A policy read is not
+a resource quote, finalized invoice or proof that billing is ready. Unknown
+amounts keep their original reservations. Subscription entitlement/allocation,
+ongoing retained-resource accounting and final checks remain unfinished in these
+unpublished additions. Legacy tools retain their existing pricing configuration.

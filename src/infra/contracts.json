@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "82901e3a1e847203c9add7292edd35dd5ce6a7d3108a704c409599b06a4b4796",
+  "schemaRevision": "a469e7a283dfb7be3a3a1a1520b85b3fb9b211ea7ef691892d560e65ad0cf3d0",
   "tools": [
     {
       "name": "infra.status",
@@ -130,6 +130,115 @@
                   "permissions",
                   "providers",
                   "setup_url"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              "retry_after_seconds": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "setup_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "retry_after_seconds",
+              "setup_url"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "readOnly": true,
+      "costBasis": "free_control_plane"
+    },
+    {
+      "name": "infra.pricing",
+      "description": "Read current builder infrastructure pricing policy. Orbio pays the providers, including the AgentMail subscription, and rebills attributable usage or captured provider rates with the configured 10–20% surcharge. This free broker read makes no native request. New quotes/admissions capture the current surcharge; existing operations and funding keep their original rate. It is not a resource quote, a finalized supplier invoice or proof that billing is ready. Unknown costs keep their original reservation; poll operation.get and funding.get for recorded charges.",
+      "permission": "infra.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "const": 1
+                  },
+                  "model": {
+                    "const": "provider_rates_plus_surcharge"
+                  },
+                  "margin_bps": {
+                    "type": "integer",
+                    "minimum": 1000,
+                    "maximum": 2000
+                  },
+                  "agentmail_subscription_payer": {
+                    "const": "orbio"
+                  },
+                  "captured_at_admission": {
+                    "const": true
+                  },
+                  "unknown_cost_policy": {
+                    "const": "retain_original_reservation"
+                  },
+                  "supplier_invoice_finality": {
+                    "const": "separate_from_customer_charge"
+                  }
+                },
+                "required": [
+                  "version",
+                  "model",
+                  "margin_bps",
+                  "agentmail_subscription_payer",
+                  "captured_at_admission",
+                  "unknown_cost_policy",
+                  "supplier_invoice_finality"
                 ],
                 "additionalProperties": false
               }
@@ -1445,6 +1554,11 @@
                           "minimum": 0,
                           "maximum": 1000000000000
                         },
+                        "margin_bps": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
                         "state": {
                           "enum": [
                             "prepared",
@@ -1527,6 +1641,7 @@
                         "window_start",
                         "funded_until",
                         "reserved_micro_usd",
+                        "margin_bps",
                         "state",
                         "billing_state",
                         "upstream_micro_usd",
@@ -1668,6 +1783,11 @@
                     "minimum": 0,
                     "maximum": 1000000000000
                   },
+                  "margin_bps": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
                   "state": {
                     "enum": [
                       "prepared",
@@ -1750,6 +1870,7 @@
                   "window_start",
                   "funded_until",
                   "reserved_micro_usd",
+                  "margin_bps",
                   "state",
                   "billing_state",
                   "upstream_micro_usd",

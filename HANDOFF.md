@@ -12,15 +12,18 @@ Package version remains `0.1.0` while work is in progress; select/bump the new
 release version only after the provider helpers/contracts are finalized.
 No publish, tag, release workflow or main push has been performed.
 
-Continuation dependency (2026-10-05): app source f97348b / SDK source 442dc3a
-are pushed. Remaining accounting/spending engineering is blocked on unanswered
-customer-pricing (declared Orbio rates versus actual supplier costs with invoice
-imports) and manual AgentMail subscription-payer (customer direct versus Orbio
-rebill) decisions. These select financial contracts, not routine implementation
-preferences. Do not infer prices, shared-plan allocations or zero bills. Answers
-are pending in this chat; canonical app handoff records the stopping point.
-Full goal is incomplete. Keep source unverified and both PRs draft; no checks,
-smoke, native mutations, publish or merge at this point.
+Billing decision resolved (2026-10-05): the human confirmed Orbio pays the
+providers, including AgentMail, and rebills with a 10–20% surcharge. Platform
+uses configurable 15% default for new admissions; original captured margins
+remain immutable. Do not ask these choices again. Current increment adds shared
+infra.pricing and SDK pricing(), plus funding.margin_bps visibility. Generated
+source now mirrors 126 contracts / 55 provider mutations and broker cancellation.
+See platform docs/TOOLKIT_PRICING.md. The selected policy does not finish ongoing
+subscription/usage/retention billing or spend controls. Those remain engineering,
+then final tests/smokes/adversarial review. Current source is unverified, both PRs
+stay draft, platform migrations unapplied, feature disabled and SDK unpublished.
+No checks, native mutations, publication or merge accompanied this increment.
+Earlier pending-question records below are historical and superseded.
 
 Implemented: standalone `createInfrastructure()` and `orbio.infra`, distinct
 explicit grant credential, public discovery/cache/refresh, typed status/resource/
