@@ -24,6 +24,25 @@ Money stays integer micro-USD, bounded by the original approval. E2B uses measur
 
 40 SDK tests pass. Typecheck, build, reproducible contract generation, `publint --strict`, packed CJS/ESM declarations and `attw --pack` pass. Platform verification includes 1,261 Node tests (eight skipped), full disposable Postgres migrations/financial/scope checks, build/type/lint and representative live workflows on all five providers. See the [platform verification record](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_VERIFICATION.md) for exact coverage and limitations. This is not a claim that every API permutation or a production rollout was tested.
 
+## Fresh user-path QA follow-up
+
+Real SDK and MCP requests were exercised through the platform HTTP routes, durable
+store/runner and a disposable local control database, with real native providers.
+The SDK held only an Orbio scoped key. Next.js creation/build/private preview,
+reconnection/pause/resume, public Vercel deployment, public Fly HTTP server,
+Supabase SQL/RLS/storage, AgentMail capacity/draft/send/read/delete and sibling
+agent denial passed. Temporary resources and test keys were removed. One first
+Supabase migration receipt remained uncertain and was not replayed; a separate
+migration succeeded. The original test project was then deleted.
+
+Contracts now expose Vercel deployment aliases. README explains generated URL
+protection, the bounded Next.js build recipe, pause/funding timing and mail-key
+permissions. Platform fixes and desktop/mobile dashboard checks are documented
+in [user journey evidence](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_USER_JOURNEY.md).
+This does not cover production Privy/OAuth sign-in, hosted scheduling, native invoice
+periods or independent external email delivery. The operator confirms Developer
+AgentMail; production rate-card renewal timestamps remain rollout configuration.
+
 ## Generation and rollout
 
 Export the platform's shared catalogue to `src/infra/contracts.json`, then run `pnpm generate:infra`; `pnpm check:infra` verifies reproducibility. Do not hand-edit generated declarations or installed packages. Known helpers use generated types; `infra.call` can use future discovered names without silently transforming their responses.

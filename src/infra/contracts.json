@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "schemaRevision": "17cec8f9d7ade20d04a23dfe89225291ddee1ef9c8574caa6cb141f81f82ea48",
+  "schemaRevision": "0c2e298a331cd0af0b0f481a03ecb87ca68d32f6be53e60e652be9f85331dabb",
   "tools": [
     {
       "name": "infra.status",
@@ -9338,6 +9338,13 @@
                         "url": {
                           "type": "string"
                         },
+                        "aliases": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 100
+                        },
                         "state": {
                           "type": "string"
                         },
@@ -9440,7 +9447,7 @@
     },
     {
       "name": "deployment.get",
-      "description": "Read one deployment after verifying it belongs to the assigned Vercel project. Native deployment ID is a nested target, not authority.",
+      "description": "Read one deployment after verifying it belongs to the assigned Vercel project. Returns native assigned alias hostnames as well as the generated URL, which may require Vercel authentication even for production. Aliases do not guarantee public access; retain project protection settings. Native deployment ID is a nested target, not authority.",
       "permission": "deployment.manage",
       "inputSchema": {
         "type": "object",
@@ -9478,6 +9485,13 @@
                   },
                   "url": {
                     "type": "string"
+                  },
+                  "aliases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100
                   },
                   "state": {
                     "type": "string"

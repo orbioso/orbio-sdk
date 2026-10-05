@@ -159,6 +159,23 @@ no helper generates keys, repeats mutations, raises ceilings or waits implicitly
 An operation can succeed while its bill stays held. Provider credentials never
 belong in these arguments; only application environment values use secret inputs.
 
+For a ready Vercel deployment, `deployments.get(resourceId, deploymentId)` returns
+`aliases` when the platform provides them. Use the production alias for the public
+app; a generated immutable deployment URL can still require Vercel authentication.
+This does not disable deployment protection or return a bypass credential.
+
+The standard E2B base sandbox is small. Our Next.js user journey built successfully
+with `next build --webpack`, `NODE_OPTIONS=--max-old-space-size=256`, and
+`experimental: { cpus: 1, webpackBuildWorker: false }` in `next.config.mjs`.
+The default Turbopack build exceeded its memory. These are example workload
+settings, not changes to the SDK. Reconnect using the original resource and command
+operation IDs. After pausing, wait for the previous funding window to close before
+explicitly approving a new resume if it returns `resource_busy`.
+
+A manually supplied AgentMail inbox key needs `inbox_read`, `metrics_read`, and
+`inbox_update`, plus the chosen draft/message permissions. Capacity checks use
+that inbox key. Root provider keys never belong in the SDK configuration.
+
 Infrastructure money fields remain exact bounded integer micro-USD numbers in
 the shared wire result, at most `1_000_000_000_000`; convert with `BigInt()` when
 doing wider arithmetic rather than treating CREDIT as floating point dollars.

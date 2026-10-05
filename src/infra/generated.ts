@@ -1,4 +1,4 @@
-/** Generated from the platform catalogue. Schema revision: 17cec8f9d7ade20d04a23dfe89225291ddee1ef9c8574caa6cb141f81f82ea48. Do not edit. */
+/** Generated from the platform catalogue. Schema revision: 0c2e298a331cd0af0b0f481a03ecb87ca68d32f6be53e60e652be9f85331dabb. Do not edit. */
 
 export interface InfrastructureContracts {
   inputs: {
@@ -6168,6 +6168,10 @@ export interface InfrastructureContracts {
         deployment_id: string
         project_id: string
         url: string
+        /**
+         * @maxItems 100
+         */
+        aliases?: string[]
         state: string
         target: string | null
         created_at: number | null
@@ -6178,6 +6182,10 @@ export interface InfrastructureContracts {
       deployment_id: string
       project_id: string
       url: string
+      /**
+       * @maxItems 100
+       */
+      aliases?: string[]
       state: string
       target: string | null
       created_at: number | null
@@ -7573,5 +7581,5 @@ export type InfrastructureResult<K extends InfrastructureToolName> = Infrastruct
 export type InfrastructureOverview = InfrastructureResult<'infra.status'>
 export type InfrastructureResource = InfrastructureResult<'resource.get'>
 export type InfrastructureOperation = InfrastructureResult<'operation.get'>
-export const INFRA_SCHEMA_REVISION = '17cec8f9d7ade20d04a23dfe89225291ddee1ef9c8574caa6cb141f81f82ea48'
+export const INFRA_SCHEMA_REVISION = '0c2e298a331cd0af0b0f481a03ecb87ca68d32f6be53e60e652be9f85331dabb'
 export const READ_ONLY_INFRASTRUCTURE_TOOLS: readonly string[] = Object.freeze(["infra.status","infra.pricing","resource.list","resource.get","resource.spending","operation.list","operation.get","funding.list","funding.get","workspace.quote","workspace.file.read","workspace.file.list","workspace.file.stat","workspace.process.list","workspace.command.output","workspace.preview","mail.subscription.quote","mail.subscription.status","mail.delivery.status","mail.delivery.event.list","mail.delivery.event.get","mail.inbox","mail.metrics.usage","mail.metrics.events","mail.label.event.list","mail.message.list","mail.message.get","mail.draft.list","mail.draft.get","mail.thread.list","mail.thread.get","mail.message.attachment","mail.draft.attachment","deployment.project","deployment.list","deployment.get","deployment.logs","deployment.environment.list","worker.app","worker.image.retention","worker.image.upload.list","worker.image.upload.get","worker.image.blob.inspect","worker.image.inspect","worker.volume.list","worker.volume.get","worker.ip.list","worker.logs","worker.machine.list","worker.machine.get","worker.machine.events","database.project","database.query","database.migration.list","database.bucket.list","database.bucket.get","database.object.list","database.object.read","database.connection"])
