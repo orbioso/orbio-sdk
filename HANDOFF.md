@@ -48,3 +48,17 @@ AgentMail. The new self-service journey passed pricing/create/renew/free drafts/
 Export the platform's shared catalogue to `src/infra/contracts.json`, then run `pnpm generate:infra`; `pnpm check:infra` verifies reproducibility. Do not hand-edit generated declarations or installed packages. Known helpers use generated types; `infra.call` can use future discovered names without silently transforming their responses.
 
 Review latest-head CI for both PRs. Coordinate platform migrations/configuration and scheduled workers with authenticated SDK publication and feature activation. The platform feature remains off and production migrations unapplied. The user explicitly authorized SDK publication and completed npm CLI authentication as `orbiodotso`. Publish 0.2.0 after checks, verify the registry and record its result here. App merge/production activation remain coordinated release actions. Main operational continuation document: [platform handoff](https://github.com/orbioso/orbio/blob/codex/toolkit-infra-handoff/docs/TOOLKIT_INFRA_HANDOFF.md).
+
+
+## Publication checkpoint
+
+Source commit `3d0bac0` passed SDK CI and every prepublish check (40 tests,
+contract parity, type/build and package declarations). npm identity is `orbiodotso`.
+The user authorized publication and completed login. The publish command now
+awaits npm's separate browser authorization; it is not published merely because
+login succeeded. A task-local terminal publish session is waiting. After approval,
+verify `npm view @orbiodotso/sdk@0.2.0 version dist.integrity` and installed exports,
+then replace this checkpoint with the actual registry receipt. Do not republish
+an existing immutable version. The initial provenance-enabled attempt failed
+before upload because this local shell is not a supported CI provider; the pending
+attempt uses `--provenance=false`, without changing npm account security settings.
