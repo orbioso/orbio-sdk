@@ -6,11 +6,13 @@ import {
   type Account,
   type Address,
   type Chain,
+  type Hex,
   type PublicClient,
+  type TransactionReceipt,
   type WalletClient,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { NoSignerError, OrbioError } from '../errors.js'
+import { NoSignerError, OrbioError, type OrbioErrorCode } from '../errors.js'
 
 /**
  * Who signs, and where the transactions go.
@@ -126,4 +128,22 @@ export const makeSigner = (input: SignerInput, chainId: number): Signer | null =
 export const requireSigner = (signer: Signer | null, action: string): Signer => {
   if (!signer) throw new NoSignerError(action)
   return signer
+}
+
+/**
+ * Wait for a transaction and throw if it reverted.
+ *
+ * viem's `waitForTransactionReceipt` resolves for a reverted transaction as
+ * well as a successful one; the outcome is only in `receipt.status`. Every
+ * write goes through here so that a revert is never handed back as a hash.
+ */
+export const mined = async (
+  signer: Signer,
+  hash: Hex,
+  what: string,
+  code: OrbioErrorCode = 'unknown',
+): Promise<TransactionReceipt> => {
+  const receipt = await signer.public.waitForTransactionReceipt({ hash })
+  if (receipt.status !== 'success') throw new OrbioError(`${what} reverted`, { code, status: 502 })
+  return receipt
 }

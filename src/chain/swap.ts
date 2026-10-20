@@ -1,7 +1,7 @@
 import type { Address, Hex } from 'viem'
 import type { Http } from '../http.js'
 import { OrbioError } from '../errors.js'
-import { requireSigner, type Signer } from './signer.js'
+import { mined, requireSigner, type Signer } from './signer.js'
 
 /**
  * Buying CREDIT, through Uniswap.
@@ -108,7 +108,7 @@ export class Swap {
         data: quote.approval.data,
         value: BigInt(quote.approval.value || '0'),
       })
-      await signer.public.waitForTransactionReceipt({ hash: approvalHash })
+      await mined(signer, approvalHash, 'the Permit2 approval', 'swap_failed')
     }
 
     // Permit2 is a signature, not a transaction: it authorises the router to
