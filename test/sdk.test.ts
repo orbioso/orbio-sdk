@@ -135,6 +135,12 @@ describe('money is integers, and formatting truncates', () => {
     expect(parseUnits('1.5', 6)).toBe(1_500_000n)
     expect(() => parseUnits('1.5555555', 6)).toThrow(TypeError)
   })
+
+  it('parses a token with no decimals as whole units', () => {
+    expect(parseUnits('42', 0)).toBe(42n)
+    expect(parseUnits(7, 0)).toBe(7n)
+    expect(() => parseUnits('1.5', 0)).toThrow(TypeError)
+  })
 })
 
 describe('a client knows nothing until it has asked', () => {
