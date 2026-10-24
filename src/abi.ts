@@ -37,6 +37,9 @@ export const stakingAbi = parseAbi([
   'function positionOf(address account) view returns (uint256 orbioWei)',
   'function settledOf(address account) view returns (uint256 creditAtoms)',
   'function MIN_POSITION() view returns (uint256)',
+  'function MAX_PERIODS_PER_CALL() view returns (uint256)',
+  'function lastRewardId() view returns (uint256)',
+  'function rewardOf(address account, uint256 rewardId) view returns (uint256 creditAtoms, bool settled)',
 ])
 
 export const agentVaultAbi = parseAbi([

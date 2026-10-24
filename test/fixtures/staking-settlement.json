@@ -1,0 +1,83 @@
+{
+  "chainId": 4663,
+  "proxy": "0xe0710011278bfb63e57c5f227e5980984b1eddca",
+  "implementation": "0x3b101009b6ac17c8aba3801720d19713B835aE0B",
+  "source": "https://robinhoodchain.blockscout.com/api/v2/smart-contracts/0x3b101009b6ac17c8aba3801720d19713B835aE0B",
+  "capturedAt": "2026-10-24",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MAX_PERIODS_PER_CALL",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastRewardId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "rewardId",
+          "type": "uint256"
+        }
+      ],
+      "name": "rewardOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "creditAtoms",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "settled",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "rewardIds",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "settle",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "creditAtoms",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}

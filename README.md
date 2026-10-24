@@ -246,6 +246,26 @@ would be a dependency you never agreed to.
 Asking for a signature without a wallet raises `NoSignerError` naming the
 action, rather than failing somewhere deeper.
 
+## Settling staking rewards
+
+`claim()` only mints rewards already settled to your wallet. Settle the finalized
+periods you want to collect first; a successful claim with no settled balance
+mints nothing. For example, to collect the latest finalized period:
+
+```ts
+const latest = await orbio.staking.lastRewardId()
+if (latest > 0n) {
+  const reward = await orbio.staking.rewardOf(latest)
+  if (!reward.settled) await orbio.staking.settle([latest])
+}
+await orbio.staking.claim()
+```
+
+Older rewards require their own IDs. Pass a strictly increasing batch to
+`settle`; the SDK reads the contract's batch limit and rejects unfinalized IDs.
+Already-settled IDs are harmless to include. Settlement and claiming are
+separate transactions; settlement waits for a successful receipt.
+
 ## Paying for itself
 
 ```ts
@@ -363,7 +383,7 @@ Use the SDK when you are writing code, MCP when a model is driving.
 | `orbio.infra` / `createInfrastructure(options)` | `catalogue`, `refresh`, `status`, `call`, `resources.list/get`, `operations.list/get/wait`, workspace lifecycle/files/commands/output/preview, scoped `mail`, `deployments`, `workers`, `databases` reads and explicit writes |
 | `orbio.account` | `key`, `balance`, `models` |
 | `orbio.credit` | `balanceOf`, `activate`, `feeExempt` |
-| `orbio.staking` | `stake`, `unstake`, `claim`, `positionOf`, `settledOf` |
+| `orbio.staking` | `stake`, `unstake`, `settle`, `claim`, `lastRewardId`, `rewardOf`, `positionOf`, `settledOf` |
 | `orbio.swap` | `quote`, `buy` |
 | `orbio.agents` | `list`, `get`, `launch`, `harvest`, `claimCredit`, and the rest |
 | `orbio.topUp` / `orbio.keepFunded` | Pay for itself |

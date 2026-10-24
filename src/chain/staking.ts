@@ -123,7 +123,53 @@ export class Staking {
     return hash
   }
 
-  /** Mint the CREDIT already settled to this wallet. */
+  /** Latest finalized reward period. Zero means none have finalized yet. */
+  async lastRewardId(): Promise<bigint> {
+    const signer = requireSigner(this.signer, 'reading finalized rewards')
+    return await signer.public.readContract({
+      address: this.addresses.staking, abi: stakingAbi, functionName: 'lastRewardId',
+    })
+  }
+
+  /** A finalized period's reward and whether it has already been settled. */
+  async rewardOf(rewardId: bigint, address?: Address): Promise<{ creditAtoms: bigint; settled: boolean }> {
+    const signer = requireSigner(this.signer, 'reading a reward')
+    if (rewardId <= 0n) throw new OrbioError('use a positive finalized reward ID', { code: 'invalid_request' })
+    const [creditAtoms, settled] = await signer.public.readContract({
+      address: this.addresses.staking, abi: stakingAbi, functionName: 'rewardOf',
+      args: [address ?? signer.address, rewardId],
+    })
+    return { creditAtoms, settled }
+  }
+
+  /** Settle selected finalized periods before claiming. IDs must be strictly increasing. */
+  async settle(rewardIds: readonly bigint[]): Promise<Hex> {
+    const signer = requireSigner(this.signer, 'settling rewards')
+    const ids = [...rewardIds]
+    if (ids.length === 0) throw new OrbioError('select at least one reward period', { code: 'invalid_request' })
+    let previous = 0n
+    for (const id of ids) {
+      if (id <= previous) throw new OrbioError('reward IDs must be positive and strictly increasing', { code: 'invalid_request' })
+      previous = id
+    }
+    const [maximum, latest] = await Promise.all([
+      signer.public.readContract({ address: this.addresses.staking, abi: stakingAbi, functionName: 'MAX_PERIODS_PER_CALL' }),
+      this.lastRewardId(),
+    ])
+    if (BigInt(ids.length) > maximum) {
+      throw new OrbioError(`settle at most ${maximum} reward periods per call`, { code: 'invalid_request' })
+    }
+    if (previous > latest) throw new OrbioError(`reward periods are finalized only through ${latest}`, { code: 'invalid_request' })
+    const hash = await signer.wallet.writeContract({
+      account: signer.account, chain: signer.chain,
+      address: this.addresses.staking, abi: stakingAbi, functionName: 'settle', args: [ids],
+    })
+    const receipt = await signer.public.waitForTransactionReceipt({ hash })
+    if (receipt.status !== 'success') throw new OrbioError('the reward settlement reverted', { code: 'unknown', status: 502 })
+    return hash
+  }
+
+  /** Mint already-settled CREDIT. Call settle(rewardIds) first for unsettled periods. */
   async claim(): Promise<Hex> {
     const signer = requireSigner(this.signer, 'claiming rewards')
     const hash = await signer.wallet.writeContract({
