@@ -80,7 +80,9 @@ const accountFrom = (input: SignerInput): Account | null => {
  * moment somebody asks for a signature, naming the action they wanted.
  */
 export const makeSigner = (input: SignerInput, chainId: number): Signer | null => {
-  const account = accountFrom(input)
+  // A supplied wallet owns the signing identity, including when an unused
+  // account came from ORBIO_PRIVATE_KEY. Do not parse that fallback key.
+  const account = input.walletClient ? null : accountFrom(input)
   if (!account && !input.walletClient) return null
 
   const rpcUrl = input.rpcUrl ?? process.env.ORBIO_RPC_URL
