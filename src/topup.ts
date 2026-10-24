@@ -14,21 +14,25 @@ import { formatCredit, parseCredit } from './money.js'
  *
  * Two steps, and the second is the one that goes wrong quietly. Buying gets
  * you CREDIT the token. Activating burns it and credits an Orbio account with
- * the same face value of inference. If the beneficiary is not the account your
- * API key spends from, the swap succeeds, the activation succeeds, and the
- * balance you are watching never moves. So `topUp` reads the balance before
- * and after, and says so plainly when it did not change.
+ * its face value less any activation fee. The activation receipt identifies
+ * that amount. Gateway balance changes can include concurrent usage and other
+ * deposits, so they cannot confirm settlement of this particular activation.
  */
 
 export type TopUpResult = {
   /** What the gateway balance was before, and is now. Exact. */
   beforeMicroUsd: bigint
   afterMicroUsd: bigint
-  /** What actually landed. Zero is the wiring failure described above. */
+  /** Net amount authorized by the activation receipt, not a balance delta. */
   creditedMicroUsd: bigint
+  activationId: bigint
+  /** Observed account movement, including concurrent usage and deposits. */
+  balanceChangeMicroUsd: bigint
+  /** Account balance reads cannot identify settlement of a particular receipt. */
+  gatewayConfirmed: false
   swapHash: Hex
   activateHash: Hex
-  /** Set when the balance did not move, naming the likely cause. */
+  /** An observation warning; null does not confirm gateway settlement. */
   warning: string | null
 }
 
@@ -39,19 +43,15 @@ export type TopUpOptions = {
   /** Where the inference balance lands. Defaults to the signing wallet. */
   beneficiary?: Address | Hex
   slippageBps?: number
-  /** How long to wait for the gateway to see the activation. */
+  /** How long to observe the gateway balance for an increase. */
   confirmMs?: number
 }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
- * Swap for CREDIT and activate it, then prove the balance moved.
- *
- * The confirmation loop exists because the gateway learns about an activation
- * from an indexer following the chain, so the balance lags the receipt by a
- * few seconds. Waiting is the difference between "it worked" and "it worked,
- * probably".
+ * Swap for CREDIT, read its activation receipt, and observe the gateway balance.
+ * Indexing can lag the transaction; these reads do not identify settlement.
  */
 export const topUp = async (
   deps: { swap: Swap; credit: Credit; account: Account },
@@ -88,16 +88,20 @@ export const topUp = async (
     if (after.availableMicroUsd > before.availableMicroUsd) break
   }
 
-  const credited = after.availableMicroUsd - before.availableMicroUsd
+  const balanceChangeMicroUsd = after.availableMicroUsd - before.availableMicroUsd
   return {
     beforeMicroUsd: before.availableMicroUsd,
     afterMicroUsd: after.availableMicroUsd,
-    creditedMicroUsd: credited,
+    creditedMicroUsd: activated.creditedMicroUsd,
+    activationId: activated.activationId,
+    balanceChangeMicroUsd,
+    gatewayConfirmed: false,
     swapHash: bought.hash,
     activateHash: activated.hash,
-    warning: credited > 0n ? null
-      : 'the CREDIT was activated but this key\'s balance did not change. The beneficiary is probably '
-        + 'not the account this key spends from: check which account the key belongs to, and activate to that.',
+    warning: balanceChangeMicroUsd > 0n ? null
+      : 'activation confirmed onchain, but no gateway balance increase was observed. '
+        + 'Indexing delay, concurrent spending, or an account mismatch can explain this; '
+        + 'reconcile the activation before purchasing again.',
   }
 }
 

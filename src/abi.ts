@@ -22,10 +22,12 @@ export const erc20Abi = parseAbi([
 ])
 
 export const creditAbi = parseAbi([
-  /** Burns CREDIT and credits `beneficiary` with the same face value of inference. */
+  /** Burns CREDIT; the credited amount excludes any activation fee. */
   'function activate(uint256 amount, bytes32 beneficiary) returns (uint256 activationId)',
   'function balanceOf(address account) view returns (uint256)',
   'function activationFeeExempt(address account) view returns (bool)',
+  'event Activated(uint256 indexed activationId, address indexed from, bytes32 indexed beneficiary, uint256 amount)',
+  'event ActivationFeeCharged(uint256 indexed activationId, uint256 feeAtoms)',
 ])
 
 export const stakingAbi = parseAbi([

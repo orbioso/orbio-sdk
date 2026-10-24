@@ -251,15 +251,20 @@ action, rather than failing somewhere deeper.
 ```ts
 const result = await orbio.topUp({ token: 'USDG', amount: '20' })
 
+console.log(`activated ${formatCredit(result.creditedMicroUsd)} CREDIT after fees`)
 if (result.warning) console.warn(result.warning)
-else console.log(`credited ${formatCredit(result.creditedMicroUsd)} CREDIT`)
 ```
 
-Two steps happen, and the second goes wrong quietly. Buying gets you CREDIT the
-token. **Activating** burns it and credits an Orbio account with the same face
-value of inference. If the beneficiary is not the account your API key spends
-from, both succeed and the balance you are watching never moves. So `topUp`
-reads the balance before and after and tells you when it did not change.
+Buying gets you CREDIT tokens. **Activating** burns them; the amount authorized
+for gateway balance is the burned amount less any activation fee. `creditedMicroUsd`
+comes from that transaction's `Activated` and matching `ActivationFeeCharged`
+events. `activationId` identifies the receipt within its chain and CREDIT contract.
+
+`balanceChangeMicroUsd` reports the observed account balance change separately.
+Concurrent spending or deposits can change it independently of this activation.
+`gatewayConfirmed` remains false: account balance reads cannot prove settlement of
+an individual receipt, even when the balance increases and `warning` is null.
+Verify settlement before repeating an uncertain purchase.
 
 To keep a floor:
 

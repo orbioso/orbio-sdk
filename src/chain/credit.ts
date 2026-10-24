@@ -1,4 +1,4 @@
-import type { Address, Hex } from 'viem'
+import { parseEventLogs, type Address, type Hex } from 'viem'
 import { creditAbi } from '../abi.js'
 import type { ProtocolAddresses } from '../config.js'
 import { OrbioError } from '../errors.js'
@@ -10,9 +10,8 @@ import { requireSigner, type Signer } from './signer.js'
  *
  * These are two different things and the difference matters. CREDIT is an
  * ERC-20 you can hold, sell or trade. **Activating** burns it and credits an
- * Orbio account with the same face value of inference. Until it is activated
- * it is worth a dollar to somebody; once activated it is a dollar of API
- * balance and cannot come back.
+ * Orbio account with its face value less any activation fee. The resulting
+ * API balance cannot be transferred back into tokens.
  *
  * Activation names a `beneficiary`, which is where the balance lands. That is
  * the one thing worth getting right: activating to the wrong beneficiary
@@ -24,6 +23,11 @@ export type ActivateResult = {
   /** Base units burned. What lands as balance is this less any activation fee. */
   amountMicroUsd: bigint
   beneficiary: Hex
+  /** Identifies this activation together with its chain and CREDIT contract. */
+  activationId: bigint
+  /** Net amount authorized by the receipt; gateway indexing may still be pending. */
+  creditedMicroUsd: bigint
+  feeMicroUsd: bigint
 }
 
 export class Credit {
@@ -45,7 +49,7 @@ export class Credit {
   }
 
   /**
-   * Burn CREDIT and credit an Orbio account with the same face value.
+   * Burn CREDIT and return the net amount authorized by its activation receipt.
    *
    * `beneficiary` defaults to the signing wallet, which is right when that
    * wallet is the Orbio account spending the balance. It is deliberately not
@@ -83,7 +87,36 @@ export class Credit {
     if (receipt.status !== 'success') {
       throw new OrbioError('the activation reverted', { code: 'unknown', status: 502 })
     }
-    return { hash, amountMicroUsd: opts.amountMicroUsd, beneficiary }
+    const events = parseEventLogs({
+      abi: creditAbi,
+      logs: receipt.logs.filter(log => log.address.toLowerCase() === this.addresses.credit.toLowerCase()),
+      strict: true,
+    })
+    const activations = events.filter(event => event.eventName === 'Activated'
+      && event.args.from.toLowerCase() === signer.address.toLowerCase()
+      && event.args.beneficiary.toLowerCase() === beneficiary.toLowerCase()
+      && event.args.amount === opts.amountMicroUsd)
+    const activation = activations[0]
+    if (activations.length !== 1 || !activation || activation.eventName !== 'Activated') {
+      throw new OrbioError(`activation ${hash} succeeded but its receipt could not be identified; do not resubmit`, {
+        code: 'outcome_unknown', status: 502,
+      })
+    }
+    const fees = events.filter(event => event.eventName === 'ActivationFeeCharged'
+      && event.args.activationId === activation.args.activationId)
+    const fee = fees[0]
+    const feeMicroUsd = fee?.eventName === 'ActivationFeeCharged' ? fee.args.feeAtoms : 0n
+    if (fees.length > 1 || feeMicroUsd > activation.args.amount) {
+      throw new OrbioError(`activation ${hash} succeeded but its fee receipt is inconsistent; do not resubmit`, {
+        code: 'outcome_unknown', status: 502,
+      })
+    }
+    return {
+      hash, amountMicroUsd: activation.args.amount, beneficiary,
+      activationId: activation.args.activationId,
+      creditedMicroUsd: activation.args.amount - feeMicroUsd,
+      feeMicroUsd,
+    }
   }
 
   /** Whether an address pays the activation fee. The agent vault does not. */
