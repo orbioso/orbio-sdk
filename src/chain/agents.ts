@@ -26,15 +26,42 @@ import { requireSigner, type Signer } from './signer.js'
  * hold what the agent needs rather than everything its author owns.
  */
 
-export type AgentSummary = {
-  agentId: string
+type DirectoryToken = {
   token: Address
+  name: string | null
+  symbol: string | null
+}
+
+export type AgentSummary = DirectoryToken & {
+  kind: 'agent'
+  agentId: string
   owner: Address
   agentWallet: Address
-  beneficiary: Hex
+  /** Included on detail reads; absent from directory rows. */
+  beneficiary?: Hex
   feeBps: number
-  stakeWei: string
-  creditOwedAtoms: string
+  /** Null means unavailable, never zero. */
+  stake: { orbioWei: string | null }
+  credit: { owedAtoms: string | null }
+}
+
+/** A token listed in the directory without a vault position. */
+export type ListedTokenSummary = DirectoryToken & { kind: 'listed' }
+export type AgentDirectoryItem = AgentSummary | ListedTokenSummary
+export type AgentPage = {
+  live: boolean
+  data: AgentDirectoryItem[]
+  /** Present on paginated directory responses. */
+  page?: { limit: number; offset: number; total: number; search: string | null }
+  truncated?: boolean
+}
+export type AgentListOptions = {
+  /** Page size, from 1 to 200. The gateway defaults to 60. */
+  limit?: number
+  offset?: number
+  /** Defaults to market capitalization. */
+  sort?: 'cap' | 'newest'
+  search?: string
 }
 
 export type LaunchParams = {
@@ -74,22 +101,37 @@ export class Agents {
   // wallet, and they read through the gateway rather than the RPC so a client
   // with no `rpcUrl` can still browse.
 
-  /** Every agent, newest first, priced. */
-  async list(): Promise<{ live: boolean; data: AgentSummary[] }> {
-    return await this.http.get('/api/protocol/agents')
+  /** One page of agents and listed tokens, ranked by market cap unless requested otherwise. */
+  async list(options: AgentListOptions = {}): Promise<AgentPage> {
+    const query = new URLSearchParams()
+    if (options.limit !== undefined) {
+      if (!Number.isSafeInteger(options.limit) || options.limit < 1 || options.limit > 200) {
+        throw new OrbioError('limit must be an integer from 1 to 200', { code: 'invalid_request' })
+      }
+      query.set('limit', String(options.limit))
+    }
+    if (options.offset !== undefined) {
+      if (!Number.isSafeInteger(options.offset) || options.offset < 0) {
+        throw new OrbioError('offset must be a non-negative safe integer', { code: 'invalid_request' })
+      }
+      query.set('offset', String(options.offset))
+    }
+    if (options.sort !== undefined) query.set('sort', options.sort)
+    if (options.search !== undefined) query.set('q', options.search)
+    return await this.http.get(`/api/protocol/agents${query.size ? `?${query}` : ''}`)
   }
 
-  /** One agent, by id or by the token it launched. */
-  async get(ref: string | bigint): Promise<AgentSummary | null> {
+  /** One agent by vault id, or an agent/listed token by token address. */
+  async get(ref: string | bigint): Promise<AgentDirectoryItem | null> {
     try {
-      return await this.http.get<AgentSummary>(`/api/protocol/agents/${String(ref)}`)
+      return await this.http.get<AgentDirectoryItem>(`/api/protocol/agents/${encodeURIComponent(String(ref))}`)
     } catch (error) {
       if (error instanceof OrbioError && error.status === 404) return null
       throw error
     }
   }
 
-  /** The agents a wallet owns. A filter, not an authorisation: anyone may ask. */
+  /** Up to the newest 200 agents a wallet owns or operates. This is a public filter. */
   async ownedBy(wallet: Address): Promise<{ data: AgentSummary[] }> {
     return await this.http.get(`/api/protocol/agents?wallet=${wallet}`)
   }
@@ -110,7 +152,7 @@ export class Agents {
   async capabilities(agentId: bigint): Promise<{ owner: boolean; agentWallet: boolean; canWithdraw: boolean }> {
     const signer = requireSigner(this.signer, 'reading capabilities')
     const agent = await this.get(agentId)
-    if (!agent) throw new OrbioError(`no agent ${agentId}`, { code: 'invalid_request', status: 404 })
+    if (!agent || agent.kind !== 'agent') throw new OrbioError(`no agent ${agentId}`, { code: 'invalid_request', status: 404 })
     const me = signer.address.toLowerCase()
     const owner = agent.owner.toLowerCase() === me
     return { owner, agentWallet: agent.agentWallet.toLowerCase() === me, canWithdraw: owner }

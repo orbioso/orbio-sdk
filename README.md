@@ -312,6 +312,23 @@ needs rather than everything you own.
 `launch` is the one call no relay can sponsor. It is payable, and a sponsored
 operation spends the sender's own ETH.
 
+Directory reads return one page, ranked by market cap by default. Pass `limit`
+(up to 200), `offset`, `sort: 'newest'`, or `search`; `page.total` gives the count.
+
+```ts
+const page = await orbio.agents.list({ limit: 100, offset: 100, sort: 'newest' })
+for (const item of page.data) {
+  if (item.kind === 'agent') {
+    console.log(item.agentId, item.stake.orbioWei, item.credit.owedAtoms)
+  }
+}
+```
+
+Balances are nested, with `null` meaning unavailable. The old flat `stakeWei`
+and `creditOwedAtoms` declarations did not exist in API responses. Listed tokens
+have `kind: 'listed'` and no vault fields; check `kind` on directory and detail
+results before reading an owner, stake, or rewards. `beneficiary` is detail-only.
+
 ## Errors are something to branch on
 
 ```ts

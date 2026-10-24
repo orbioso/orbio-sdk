@@ -58,6 +58,9 @@ export { chainOf, type Signer, type SignerInput } from './chain/signer.js'
 export { type ActivateResult } from './chain/credit.js'
 export { type StakeResult } from './chain/staking.js'
 export { type BuyResult, type SwapQuote, type SwapToken } from './chain/swap.js'
-export { type AgentSummary, type LaunchParams, type LaunchResult } from './chain/agents.js'
+export {
+  type AgentSummary, type ListedTokenSummary, type AgentDirectoryItem, type AgentPage,
+  type AgentListOptions, type LaunchParams, type LaunchResult,
+} from './chain/agents.js'
 
 export { topUp, keepFunded, describeFloor, type TopUpOptions, type TopUpResult } from './topup.js'
