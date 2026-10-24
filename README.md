@@ -275,6 +275,9 @@ for await (const event of orbio.keepFunded({
 
 It is a generator rather than a daemon: it yields every time it does something,
 holds no timers that could outlive your process, and stops when you break.
+`limit` caps top-up attempts; `limit: 0` makes no purchases. The loop ends after
+a failed attempt or a top-up warning. Check the wallet transactions and gateway
+balance before restarting: a failed call may already have spent funds.
 
 ## Buying is Uniswap
 

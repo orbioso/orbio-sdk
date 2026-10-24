@@ -122,7 +122,7 @@ export async function* keepFunded(
     buy: TopUpOptions
     /** How often to look. Default five minutes. */
     everyMs?: number
-    /** Stop after this many top-ups. Unset, it runs until the caller breaks. */
+    /** Maximum top-up attempts. Zero disables purchases. Failures stop the loop. */
     limit?: number
   },
 ): AsyncGenerator<
@@ -133,30 +133,35 @@ export async function* keepFunded(
 > {
   const floor = typeof options.floor === 'bigint' ? options.floor : parseCredit(options.floor)
   const every = options.everyMs ?? 300_000
+  if (options.limit !== undefined && (!Number.isSafeInteger(options.limit) || options.limit < 0)) {
+    throw new OrbioError('limit must be a nonnegative safe integer', { code: 'invalid_request' })
+  }
   let done = 0
 
-  for (;;) {
+  while (options.limit === undefined || done < options.limit) {
     const balance = await deps.account.balance()
     yield { kind: 'checked', balanceMicroUsd: balance.availableMicroUsd }
 
     if (balance.availableMicroUsd < floor) {
+      done += 1
       try {
         const result = await topUp(deps, options.buy)
         yield { kind: 'topped-up', result }
-        done += 1
-        if (options.limit !== undefined && done >= options.limit) return
+        // A delayed balance update must not trigger another purchase.
+        if (result.warning) return
       } catch (error) {
-        // A failed top-up is not a reason to stop watching: the next window
-        // may succeed, and an agent that gives up on one bad swap is an agent
-        // that dies of a transient RPC error.
+        // A rejected call may already have bought or activated CREDIT. Stop
+        // until the caller reconciles that attempt instead of buying again.
         yield {
           kind: 'failed',
           error: error instanceof OrbioError
             ? error
             : new OrbioError(error instanceof Error ? error.message : 'the top-up failed', { code: 'unknown' }),
         }
+        return
       }
     }
+    if (options.limit !== undefined && done >= options.limit) return
     await sleep(every)
   }
 }
