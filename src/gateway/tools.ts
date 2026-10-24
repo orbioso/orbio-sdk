@@ -1,5 +1,5 @@
 import { loadToolCatalogue, type ToolDescriptor } from '../config.js'
-import type { Http } from '../http.js'
+import { responseError, type Http } from '../http.js'
 import { OrbioError } from '../errors.js'
 import { formatCreditShort, parseCredit } from '../money.js'
 
@@ -23,15 +23,46 @@ export type ToolResult<T = unknown> = {
   /** A job that outlived the request. The charge settles when it finishes. */
   pending: boolean
   upstreamId: string | null
+  /** Tool to collect an existing job. Do not resubmit the original call. */
+  collectWith: string | null
+  /** Suggested delay before collecting again, in seconds. */
+  retryAfterSeconds: number | null
 }
 
 type Wire = {
   id: string
-  tool: string
+  tool?: string
   status?: string
   result?: unknown
-  upstream_id?: string
-  cost?: { credit?: string | null; upstream?: string | null; status?: string }
+  upstream_id?: string | null
+  collect_with?: string | null
+  retry_after_seconds?: number | null
+  cost?: { credit?: string | null; upstream?: string | null; status?: string } | null
+}
+
+const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value)
+const invalidResponse = (status: number) => new OrbioError('the tool returned an invalid response; remote work may have completed', { code: 'invalid_response', status })
+
+const wireOf = (data: unknown, status: number): Wire => {
+  if (!object(data) || typeof data.id !== 'string' || !data.id
+    || (data.tool !== undefined && (typeof data.tool !== 'string' || !data.tool))
+    || (data.status !== undefined && typeof data.status !== 'string')
+    || (data.status !== 'running' && !Object.hasOwn(data, 'result'))
+    || (data.upstream_id !== undefined && data.upstream_id !== null && typeof data.upstream_id !== 'string')
+    || (data.collect_with !== undefined && data.collect_with !== null && (typeof data.collect_with !== 'string' || !data.collect_with))
+    || (data.retry_after_seconds !== undefined && data.retry_after_seconds !== null
+      && (typeof data.retry_after_seconds !== 'number' || !Number.isSafeInteger(data.retry_after_seconds) || data.retry_after_seconds < 0))) {
+    throw invalidResponse(status)
+  }
+  if (data.cost !== undefined && data.cost !== null) {
+    if (!object(data.cost) || (data.cost.credit !== undefined && data.cost.credit !== null && typeof data.cost.credit !== 'string')) {
+      throw invalidResponse(status)
+    }
+    if (typeof data.cost.credit === 'string') {
+      try { parseCredit(data.cost.credit) } catch { throw invalidResponse(status) }
+    }
+  }
+  return data as Wire
 }
 
 const microFromHeader = (headers: Headers, name: string): bigint | null => {
@@ -112,11 +143,16 @@ export class Tools {
     const body: Record<string, unknown> = { ...args }
     if (options.maxCost !== undefined) body.max_cost = formatCreditShort(parseCredit(options.maxCost))
 
-    const { data, headers } = await this.http.postWithHeaders<Wire>(
+    const { data: bodyData, headers, status } = await this.http.postWithHeaders<unknown>(
       `/api/v1/tools/${encodeURIComponent(name)}`,
       body,
     )
 
+    if (object(bodyData) && bodyData.error !== undefined && bodyData.error !== null) {
+      const retry = headers.get('retry-after')
+      throw responseError(status, bodyData, retry && /^\d{1,6}$/.test(retry) ? Number(retry) : null)
+    }
+    const data = wireOf(bodyData, status)
     const charged = data.cost?.credit
     return {
       id: data.id,
@@ -126,6 +162,8 @@ export class Tools {
       balanceMicroUsd: microFromHeader(headers, 'X-Orbio-Balance'),
       pending: data.status === 'running',
       upstreamId: data.upstream_id ?? null,
+      collectWith: data.collect_with ?? null,
+      retryAfterSeconds: data.retry_after_seconds ?? null,
     }
   }
 

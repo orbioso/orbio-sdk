@@ -61,7 +61,7 @@ export class Http {
     return headers
   }
 
-  async request<T>(path: string, init: { method?: string; body?: Body; signal?: AbortSignal | undefined; maximumBytes?: number } = {}): Promise<{ data: T; headers: Headers }> {
+  async request<T>(path: string, init: { method?: string; body?: Body; signal?: AbortSignal | undefined; maximumBytes?: number } = {}): Promise<{ data: T; headers: Headers; status: number }> {
     const doFetch = this.options.fetch ?? fetch
     if (init.signal?.aborted) throw new OrbioError('the local request was aborted; this does not cancel remote work', { code: 'aborted' })
     if (init.maximumBytes !== undefined && (!Number.isSafeInteger(init.maximumBytes) || init.maximumBytes < 1)) throw new OrbioError('invalid response size bound', { code: 'invalid_request' })
@@ -82,14 +82,18 @@ export class Http {
 
       const text = init.maximumBytes === undefined ? await response.text() : await boundedText(response, init.maximumBytes)
       if (init.signal?.aborted) throw new OrbioError('the local request was aborted; this does not cancel remote work', { code: 'aborted' })
-      const parsed: unknown = text ? safeJson(text) : null
-
       if (!response.ok) {
         const header = response.headers.get('retry-after')
         const retry = header && /^\d{1,6}$/.test(header) ? Number(header) : null
-        throw responseError(response.status, parsed, retry)
+        throw responseError(response.status, text ? safeJson(text) : null, retry)
       }
-      return { data: parsed as T, headers: response.headers }
+      let parsed: unknown
+      try {
+        parsed = JSON.parse(text)
+      } catch {
+        throw new OrbioError('the server returned an invalid JSON response; remote work may have completed', { code: 'invalid_response', status: response.status })
+      }
+      return { data: parsed as T, headers: response.headers, status: response.status }
     } catch (error) {
       if (error instanceof OrbioError) throw error
       if (init.signal?.aborted) throw new OrbioError('the local request was aborted; this does not cancel remote work', { code: 'aborted' })
@@ -113,7 +117,7 @@ export class Http {
   }
 
   /** Like `post`, but the caller wants the headers too: cost and balance ride on them. */
-  async postWithHeaders<T>(path: string, body: Body): Promise<{ data: T; headers: Headers }> {
+  async postWithHeaders<T>(path: string, body: Body): Promise<{ data: T; headers: Headers; status: number }> {
     return await this.request<T>(path, { method: 'POST', body })
   }
 

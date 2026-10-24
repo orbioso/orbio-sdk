@@ -203,6 +203,14 @@ The honest limit: types cannot be generated from data fetched at runtime, so
 `tools.call(name, args)` is structurally typed. If you want strict types, pin
 them to a moment with codegen. The runtime is never pinned.
 
+For a running tool job, `pending` is true. When `collectWith` is supplied, wait
+`retryAfterSeconds` and call that tool with `{ id: job.id }` to collect the
+existing job. Do not resubmit the original paid call. These fields are `null`
+when the gateway supplies no collection instructions.
+
+Malformed responses raise `invalid_response`; remote work may still have
+completed. Inspect the existing job before considering another paid call.
+
 ## Money is integers
 
 One CREDIT is one dollar and CREDIT has six decimals, so a balance is an exact
