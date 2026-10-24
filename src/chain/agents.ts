@@ -1,4 +1,4 @@
-import { decodeEventLog, type Address, type Hex } from 'viem'
+import { decodeEventLog, zeroAddress, type Address, type Hex } from 'viem'
 import { agentLaunchAbi, agentVaultAbi } from '../abi.js'
 import type { Http } from '../http.js'
 import { OrbioError } from '../errors.js'
@@ -9,10 +9,9 @@ import { requireSigner, type Signer } from './signer.js'
  * The agent launchpad: launching a token, and everything an agent does with
  * what that token earns.
  *
- * An agent launches a token, the launchpad takes 5% of its creator fees and
- * stakes the rest as ORBIO on the agent's behalf, and the staked position
- * earns CREDIT hourly like any other. The agent claims that CREDIT and either
- * takes the tokens or activates them into inference balance.
+ * Creator fees are allocated according to the current launch terms. The agent
+ * wallet operates the agent and receives its earnings. The owner controls
+ * principal and wallet settings.
  *
  * ## One wallet
  *
@@ -43,7 +42,7 @@ export type LaunchParams = {
   description?: string
   logo?: string
   socials?: { twitter?: string; telegram?: string; discord?: string; website?: string; farcaster?: string }
-  /** Where the agent's CREDIT goes. Defaults to the launching wallet. */
+  /** @deprecated Earnings go to agentWallet. A separate beneficiary is not supported. */
   beneficiary?: Address | Hex
   /** The agent's hot wallet. Defaults to the launching wallet, which is the self-managed shape. */
   agentWallet?: Address
@@ -128,6 +127,14 @@ export class Agents {
   async launch(params: LaunchParams): Promise<LaunchResult> {
     const vault = this.address()
     const signer = requireSigner(this.signer, 'launching an agent')
+    const agentWallet = params.agentWallet && params.agentWallet !== zeroAddress ? params.agentWallet : signer.address
+    if (params.beneficiary) {
+      const beneficiary = params.beneficiary.length === 66
+        ? params.beneficiary as Hex : beneficiaryOf(params.beneficiary as Address)
+      if (beneficiary.toLowerCase() !== beneficiaryOf(agentWallet).toLowerCase()) {
+        throw new OrbioError('earnings go to agentWallet; a separate beneficiary is not supported', { code: 'invalid_request' })
+      }
+    }
     const socials = params.socials ?? {}
     const hash = await signer.wallet.writeContract({
       account: signer.account,
@@ -156,10 +163,7 @@ export class Agents {
           expectedEconomics: params.expectedEconomics,
           salt: params.salt ?? (`0x${'0'.repeat(64)}` as Hex),
         },
-        params.agentWallet ?? signer.address,
-        params.beneficiary
-          ? (params.beneficiary.length === 66 ? params.beneficiary as Hex : beneficiaryOf(params.beneficiary as Address))
-          : beneficiaryOf(signer.address),
+        agentWallet,
       ],
       value: params.feeWei,
     })
@@ -198,9 +202,7 @@ export class Agents {
    * Claim what an agent earned.
    *
    * `activate: true` burns the CREDIT straight into inference balance for the
-   * agent's beneficiary, which is the self-funding path and skips holding the
-   * token at all. `false` transfers the tokens to the beneficiary read as an
-   * address.
+   * agent wallet. `false` transfers the tokens to the same wallet.
    */
   async claimCredit(agentId: bigint, options: { activate?: boolean } = {}): Promise<Hex> {
     const vault = this.address()
@@ -217,7 +219,7 @@ export class Agents {
     return hash
   }
 
-  /** Collect creator fees and stake them. The keeper does this hourly; this is for impatience. */
+  /** Collect creator fees and allocate them according to the current vault settings. */
   async harvest(agentIds: bigint[]): Promise<Hex> {
     const vault = this.address()
     const signer = requireSigner(this.signer, 'harvesting')
@@ -233,7 +235,7 @@ export class Agents {
     return hash
   }
 
-  /** Take staked ORBIO back, once the ten day cliff has passed. Owner only. */
+  /** Take staked ORBIO back once the vault permits it. Owner only. */
   async withdrawPrincipal(agentId: bigint, amountWei: bigint): Promise<Hex> {
     const vault = this.address()
     const signer = requireSigner(this.signer, 'withdrawing principal')
@@ -262,7 +264,7 @@ export class Agents {
     return hash
   }
 
-  /** Point the agent at a different hot wallet. Owner only. */
+  /** Change both the agent operator and its payout wallet. Owner only. */
   async setAgentWallet(agentId: bigint, wallet: Address): Promise<Hex> {
     const vault = this.address()
     const signer = requireSigner(this.signer, 'changing the agent wallet')
@@ -278,20 +280,11 @@ export class Agents {
     return hash
   }
 
-  /** Send this agent's CREDIT somewhere else. Owner only. */
+  /** @deprecated Use setAgentWallet explicitly; it changes both operator and payout. */
   async setBeneficiary(agentId: bigint, beneficiary: Address | Hex): Promise<Hex> {
-    const vault = this.address()
-    const signer = requireSigner(this.signer, 'changing the beneficiary')
-    const wide = beneficiary.length === 66 ? beneficiary as Hex : beneficiaryOf(beneficiary as Address)
-    const hash = await signer.wallet.writeContract({
-      account: signer.account,
-      chain: signer.chain,
-      address: vault,
-      abi: agentVaultAbi,
-      functionName: 'setBeneficiary',
-      args: [agentId, wide],
-    })
-    await signer.public.waitForTransactionReceipt({ hash })
-    return hash
+    throw new OrbioError(
+      `setBeneficiary(${agentId}, ${beneficiary}) is not supported; setAgentWallet changes both operator and payout wallet`,
+      { code: 'invalid_request' },
+    )
   }
 }

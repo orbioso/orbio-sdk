@@ -1,0 +1,170 @@
+{
+  "block": "96737254",
+  "implementation": "0x862427215620DcBed7B60Ab7B885Ab33c622Fb86",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "agentId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "agentWallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "beneficiary",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "feeBps",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "launchedAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "AgentLaunched",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "logo",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "twitter",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "telegram",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "discord",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "website",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "farcaster",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IPonsV2Launch.Socials",
+              "name": "socials",
+              "type": "tuple"
+            },
+            {
+              "internalType": "address",
+              "name": "creatorFeeRecipient",
+              "type": "address"
+            },
+            {
+              "internalType": "uint16",
+              "name": "creatorTaxBps",
+              "type": "uint16"
+            },
+            {
+              "internalType": "bool",
+              "name": "buybackEnabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedEconomics",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IPonsV2Launch.TokenParams",
+          "name": "params",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "agentWallet",
+          "type": "address"
+        }
+      ],
+      "name": "launch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "agentId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "source": "https://robinhoodchain.blockscout.com/address/0x862427215620DcBed7B60Ab7B885Ab33c622Fb86#code"
+}

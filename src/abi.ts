@@ -44,7 +44,6 @@ export const agentVaultAbi = parseAbi([
   'function withdrawPrincipal(uint256 agentId, uint256 orbioWei)',
   'function harvest(uint256[] agentIds) returns (uint256 stakedWei)',
   'function setAgentWallet(uint256 agentId, address wallet)',
-  'function setBeneficiary(uint256 agentId, bytes32 beneficiary)',
   'function creditOwed(uint256 agentId) view returns (uint256 creditAtoms)',
   'function stakeOf(uint256 agentId) view returns (uint256 orbioWei)',
   'function unlocksAt(uint256 agentId) view returns (uint64)',
@@ -59,6 +58,6 @@ export const agentVaultAbi = parseAbi([
 export const agentLaunchAbi = parseAbi([
   'struct Socials { string twitter; string telegram; string discord; string website; string farcaster; }',
   'struct TokenParams { string name; string symbol; string logo; string description; Socials socials; address creatorFeeRecipient; uint16 creatorTaxBps; bool buybackEnabled; bytes32 expectedEconomics; bytes32 salt; }',
-  'function launch(TokenParams params, address agentWallet, bytes32 beneficiary) payable returns (uint256 agentId, address token)',
+  'function launch(TokenParams params, address agentWallet) payable returns (uint256 agentId, address token)',
   'event AgentLaunched(uint256 indexed agentId, address indexed token, address indexed owner, address receiver, address agentWallet, bytes32 beneficiary, uint16 feeBps, uint64 launchedAt)',
 ])

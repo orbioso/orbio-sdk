@@ -286,8 +286,8 @@ transaction to any address but the router.
 
 ## The agent launchpad
 
-An agent launches a token, the launchpad takes 5% of its creator fees and
-stakes the rest, and that position earns CREDIT hourly.
+Creator fees are allocated using the current vault settings. Read
+`launchTerms()` for the active fee split before launching.
 
 ```ts
 const terms = await orbio.agents.launchTerms()
@@ -308,6 +308,12 @@ agent wallet, so one key does everything and the agent owns itself.
 `capabilities(agentId)` reports what the connected wallet may actually do. Said
 once: that key can also withdraw principal, so it should hold what the agent
 needs rather than everything you own.
+
+The current vault uses `launch(TokenParams,address)`. The agent wallet is both
+operator and payout destination. The deprecated `beneficiary` option is accepted
+only when it matches that wallet; a different destination is rejected before
+sending a transaction. `setBeneficiary` is no longer supported. Call
+`setAgentWallet` explicitly to change both operator and payout destination.
 
 `launch` is the one call no relay can sponsor. It is payable, and a sponsored
 operation spends the sender's own ETH.
