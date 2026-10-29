@@ -45,19 +45,38 @@ export type TopUpOptions = {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+/** The wallet an activation lands on: the beneficiary named, or the one that signs. Null when it is not a wallet. */
+const destination = (credit: Credit, beneficiary: Address | Hex | undefined): string | null => {
+  if (!beneficiary) return credit.wallet?.toLowerCase() ?? null
+  if (/^0x[0-9a-fA-F]{40}$/.test(beneficiary)) return beneficiary.toLowerCase()
+  if (/^0x0{24}[0-9a-fA-F]{40}$/i.test(beneficiary)) return `0x${beneficiary.slice(26)}`.toLowerCase()
+  return null
+}
+
 /**
  * The balance to top up from. A wallet key whose wallet has nothing activated
  * yet has no account, and for topping up that is a balance of zero: it is the
  * first top-up of every new agent, and refusing to start it would leave a
  * wallet with no way to fund itself. `account` says which of the two it was.
- * Anything else that fails still throws.
+ *
+ * Zero only when what is about to be bought lands on that same wallet. A key
+ * that spends as one wallet while the CREDIT goes to another would never see
+ * it, and a loop topping it up would buy for ever, so that is refused before
+ * anything is bought. Anything else that fails still throws.
  */
-const available = async (account: Account): Promise<{ microUsd: bigint; account: boolean }> => {
+const available = async (account: Account, landsOn: string | null): Promise<{ microUsd: bigint; account: boolean }> => {
   try {
     return { microUsd: (await account.balance()).availableMicroUsd, account: true }
   } catch (error) {
-    if (error instanceof WalletNotActivatedError) return { microUsd: 0n, account: false }
-    throw error
+    if (!(error instanceof WalletNotActivatedError)) throw error
+    if (error.address && error.address.toLowerCase() !== landsOn) {
+      throw new OrbioError(
+        `this key spends as ${error.address}, but the CREDIT would be activated to ${landsOn ?? 'something that is not a wallet'}, `
+        + `so the key would never see it. Activate to ${error.address}, or use the key ${landsOn ?? 'that wallet'} signs.`,
+        { code: 'invalid_request' },
+      )
+    }
+    return { microUsd: 0n, account: false }
   }
 }
 
@@ -73,7 +92,8 @@ export const topUp = async (
   deps: { swap: Swap; credit: Credit; account: Account },
   options: TopUpOptions,
 ): Promise<TopUpResult> => {
-  const before = (await available(deps.account)).microUsd
+  const landsOn = destination(deps.credit, options.beneficiary)
+  const before = (await available(deps.account, landsOn)).microUsd
 
   const bought = await deps.swap.buy({
     token: options.token,
@@ -101,7 +121,7 @@ export const topUp = async (
   let indexed = true
   while (Date.now() < deadline) {
     await sleep(2_000)
-    const read = await available(deps.account)
+    const read = await available(deps.account, landsOn)
     after = read.microUsd
     indexed = read.account
     if (after > before) break
@@ -158,7 +178,7 @@ export async function* keepFunded(
   let done = 0
 
   for (;;) {
-    const balance = (await available(deps.account)).microUsd
+    const balance = (await available(deps.account, destination(deps.credit, options.buy.beneficiary))).microUsd
     yield { kind: 'checked', balanceMicroUsd: balance }
 
     if (balance < floor) {

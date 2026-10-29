@@ -251,8 +251,8 @@ action, rather than failing somewhere deeper.
 ## No API key: the wallet is the key
 
 An agent with a wallet needs no Orbio account and nobody to sign in for it.
-Give the client a private key (or a viem Account it holds) and no API key, and
-it signs the wallet's own key: the fixed line `Orbio API key · chain 4663 ·
+Give the client a private key (or a viem account made from one, a mnemonic or
+an HD path) and no API key, and it signs the wallet's own key: the fixed line `Orbio API key · chain 4663 ·
 epoch 0`, signed locally and sent as `sk-orb-0-<signature>`. Whatever CREDIT is activated to that wallet is the
 balance it spends, and its first activation is what creates its account.
 
@@ -273,13 +273,17 @@ const apiKey = await walletKey(process.env.ORBIO_PRIVATE_KEY as `0x${string}`)
 ```
 
 Until an activation to the wallet is indexed, a gateway call raises
-`WalletNotActivatedError`, whose `address` is the wallet the key was signed by.
-If that is not the wallet you funded, it was signed by another one. Sign a
+`WalletNotActivatedError`, whose `address` is the wallet the key was signed by
+(infrastructure calls name it in the message, and `address` is null there). If
+that is not the wallet you funded, it was signed by another one. `topUp` checks
+this before it buys: if the key spends as one wallet and the CREDIT would land
+on another, it refuses rather than buy CREDIT the key would never see. Sign a
 higher epoch to rotate (`walletKey(key, { epoch: 1 })`, or
 `createOrbio({ walletKey: { epoch: 1 } })`); the first request with it retires
 the lower ones. Pass `walletKey: false` to keep a client with a wallet
-read-only. A `WalletClient` is never asked to sign unprompted, since a browser
-wallet would ask a person; call `walletKey(walletClient)` and pass the result as
+read-only. A `WalletClient`, or an account from viem's `toAccount` (a hardware
+wallet, an HSM or a KMS), is never asked to sign unprompted, since it may mean a
+person or an audited signer; call `walletKey(it)` and pass the result as
 `apiKey`. A contract wallet cannot make a key, because its signature does not
 recover to its address. The full reference, with every refusal, is
 [Authentication](https://www.orbio.so/developers/authentication).

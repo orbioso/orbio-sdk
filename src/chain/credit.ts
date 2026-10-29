@@ -32,6 +32,11 @@ export class Credit {
     private readonly signer: Signer | null,
   ) {}
 
+  /** The wallet that signs, and so where an activation lands unless told otherwise. Null for a read-only client. */
+  get wallet(): Address | null {
+    return this.signer?.address ?? null
+  }
+
   /** CREDIT held as a token by an address, in base units. */
   async balanceOf(address?: Address): Promise<bigint> {
     const signer = requireSigner(this.signer, 'reading a CREDIT balance')

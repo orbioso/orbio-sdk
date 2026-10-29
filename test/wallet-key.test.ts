@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createWalletClient, http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { createWalletClient, http, serializeCompactSignature, signatureToCompactSignature, parseSignature } from 'viem'
+import { privateKeyToAccount, toAccount } from 'viem/accounts'
 import {
   createOrbio,
+  keepFunded,
   OrbioError,
   topUp,
   walletKey,
@@ -77,8 +78,15 @@ describe('a wallet key is one signature of one line', () => {
   })
 
   it('refuses a contract wallet\'s signature rather than minting a key that can never work', () => {
-    expect(() => walletKeyFromSignature(`0x${'ab'.repeat(97)}`)).toThrow(/contract wallet/)
+    expect(() => walletKeyFromSignature(`0x${'ab'.repeat(97)}`)).toThrow(/contract wallet cannot make/)
     expect(() => walletKeyFromSignature(`0x${'ab'.repeat(65)}`, 0)).not.toThrow()
+  })
+
+  it('widens a 64-byte compact signature to the 65 bytes the gateway reads', async () => {
+    const full = await privateKeyToAccount(PRIVATE_KEY).signMessage({ message: walletKeyMessage() })
+    const compact = serializeCompactSignature(signatureToCompactSignature(parseSignature(full)))
+    expect(compact.length).toBe(2 + 128)
+    expect(walletKeyFromSignature(compact)).toBe(EPOCH_0)
   })
 })
 
@@ -91,11 +99,28 @@ describe('a client given a wallet and no key spends as that wallet', () => {
     expect(seen.at(-1)).toBe(`Bearer ${EPOCH_0}`)
   })
 
-  it('never asks a WalletClient to sign unprompted: a browser wallet would ask a person', async () => {
-    const seen: (string | null)[] = []
-    const walletClient = createWalletClient({ account: ADDRESS, transport: http('https://rpc.invalid') })
-    await createOrbio({ fetch: gateway(seen), baseUrl: 'https://example.test', walletClient, rpcUrl: 'https://rpc.invalid' })
-    expect(seen.every((header) => header === null)).toBe(true)
+  it('never signs unprompted with a wallet it does not hold: a WalletClient, or a hardware, HSM or KMS account', async () => {
+    let asked = 0
+    const held = privateKeyToAccount(PRIVATE_KEY)
+    const custom = toAccount({
+      address: held.address,
+      signMessage: async (args) => { asked++; return held.signMessage(args) },
+      signTransaction: (args) => held.signTransaction(args),
+      signTypedData: (args) => held.signTypedData(args),
+    })
+    for (const wallet of [
+      { walletClient: createWalletClient({ account: ADDRESS, transport: http('https://rpc.invalid') }) },
+      { walletClient: createWalletClient({ account: held, transport: http('https://rpc.invalid') }) },
+      { account: custom },
+    ]) {
+      const seen: (string | null)[] = []
+      await createOrbio({ fetch: gateway(seen), baseUrl: 'https://example.test', rpcUrl: 'https://rpc.invalid', ...wallet })
+      expect(seen.every((header) => header === null)).toBe(true)
+    }
+    expect(asked).toBe(0)
+    // Asked outright, any of them makes the same key.
+    expect(await walletKey(custom)).toBe(EPOCH_0)
+    expect(asked).toBe(1)
   })
 
   it('keeps a key it was given, signs at the epoch it is told, and signs nothing when told not to', async () => {
@@ -136,6 +161,7 @@ describe('a new wallet can top itself up for the first time', () => {
     } as unknown as Account
     const swap = { buy: async () => ({ hash: '0xaa', creditOut: 10_000_000n }) } as unknown as Swap
     const credit = {
+      wallet: ADDRESS,
       balanceOf: async () => 10_000_000n,
       activate: async () => ({ hash: '0xbb' }),
     } as unknown as Credit
@@ -149,10 +175,28 @@ describe('a new wallet can top itself up for the first time', () => {
   it('says the first activation is not indexed yet, rather than blaming the beneficiary', async () => {
     const account = { balance: async () => { throw new WalletNotActivatedError('no account yet', ADDRESS.toLowerCase()) } } as unknown as Account
     const swap = { buy: async () => ({ hash: '0xaa', creditOut: 1_000_000n }) } as unknown as Swap
-    const credit = { balanceOf: async () => 1_000_000n, activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
+    const credit = { wallet: ADDRESS, balanceOf: async () => 1_000_000n, activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
     const result = await topUp({ swap, credit, account }, { token: 'USDG', amount: '1', confirmMs: 2_100 })
     expect(result.creditedMicroUsd).toBe(0n)
     expect(result.warning).toMatch(/not seen this wallet's first activation/)
+  }, 10_000)
+
+  it('refuses before buying when the key spends as another wallet than the CREDIT lands on', async () => {
+    let bought = 0
+    const other = '0x' + 'cd'.repeat(20)
+    const account = { balance: async () => { throw new WalletNotActivatedError('no account yet', other) } } as unknown as Account
+    const swap = { buy: async () => { bought++; return { hash: '0xaa', creditOut: 1n } } } as unknown as Swap
+    const credit = { wallet: ADDRESS, balanceOf: async () => 1n, activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
+    await expect(topUp({ swap, credit, account }, { token: 'USDG', amount: '1' })).rejects.toThrow(/spends as 0xcdcd/)
+    // A beneficiary named outright is held to the same rule, as an address or as bytes32.
+    await expect(topUp({ swap, credit, account }, { token: 'USDG', amount: '1', beneficiary: ADDRESS })).rejects.toThrow(/spends as/)
+    // And a loop that keeps a floor stops, rather than buying for ever.
+    await expect(keepFunded({ swap, credit, account }, { floor: '1', buy: { token: 'USDG', amount: '1' } }).next()).rejects.toThrow(/spends as/)
+    expect(bought).toBe(0)
+    // The wallet the key spends as, named as the beneficiary in bytes32, is the right one.
+    const aligned = { balance: async () => { throw new WalletNotActivatedError('no account yet', ADDRESS.toLowerCase()) } } as unknown as Account
+    const result = await topUp({ swap, credit, account: aligned }, { token: 'USDG', amount: '1', beneficiary: `0x${'0'.repeat(24)}${ADDRESS.slice(2)}`, confirmMs: 1 })
+    expect(result.beforeMicroUsd).toBe(0n)
   }, 10_000)
 
   it('still fails on anything that is not a missing account', async () => {

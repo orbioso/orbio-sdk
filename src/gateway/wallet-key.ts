@@ -1,4 +1,4 @@
-import { hexToBytes, type Account, type Hex, type WalletClient } from 'viem'
+import { compactSignatureToSignature, hexToBytes, parseCompactSignature, serializeSignature, type Account, type Hex, type WalletClient } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { OrbioError } from '../errors.js'
 
@@ -78,12 +78,18 @@ const signatureOf = async (wallet: WalletKeySigner, message: string): Promise<He
   )
 }
 
-/** The key from one signature, refusing anything the gateway would refuse. */
+/**
+ * The key from one signature, refusing anything the gateway would refuse. A
+ * 64-byte compact signature (EIP-2098) is the same signature written shorter,
+ * so it is widened to the 65 bytes the gateway reads; anything else that is not
+ * 65 bytes is not an EOA's, most often a contract wallet's.
+ */
 export const walletKeyFromSignature = (signature: Hex, epoch = 0): string => {
-  const bytes = hexToBytes(signature)
+  let bytes = hexToBytes(signature)
+  if (bytes.length === 64) bytes = hexToBytes(serializeSignature(compactSignatureToSignature(parseCompactSignature(signature))))
   if (bytes.length !== 65) {
     throw new OrbioError(
-      `that wallet returned a ${bytes.length}-byte signature, which is a contract wallet's. An Orbio wallet key needs an EOA's 65-byte signature.`,
+      `that wallet returned a ${bytes.length}-byte signature. An Orbio wallet key needs an EOA's 65-byte signature, which a contract wallet cannot make.`,
       { code: 'invalid_request' },
     )
   }

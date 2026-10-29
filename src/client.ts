@@ -29,14 +29,19 @@ import { Infrastructure } from './infra/client.js'
  * that wallet. No account, no sign-in and no dashboard are involved.
  */
 
+/** Where a local account's key lives when it is in this process, so signing with it asks nobody. */
+const HELD_SOURCES: ReadonlySet<string> = new Set(['privateKey', 'mnemonic', 'hd'])
+
 export type OrbioOptions = SignerInput & {
   /** The gateway key. Reads work without one; anything that spends needs it. Unset with a wallet given, the wallet's own key is used. */
   apiKey?: string | undefined
   /**
-   * The wallet key the client signs when it has a local account (a private
-   * key, or a viem Account this process holds) and no `apiKey`: the epoch to
-   * sign it at (0 unless you have rotated), or `false` to sign none and stay
-   * read-only until a key is given. A WalletClient is never asked unprompted.
+   * The wallet key the client signs when it holds the wallet's key itself (a
+   * private key, or a viem account from one, a mnemonic or an HD path) and has
+   * no `apiKey`: the epoch to sign it at (0 unless you have rotated), or `false`
+   * to sign none and stay read-only until a key is given. A WalletClient, and an
+   * account from `toAccount` (a hardware wallet, an HSM or a KMS), is never asked
+   * unprompted: pass `apiKey: await walletKey(it)` instead.
    */
   walletKey?: { epoch?: number } | false | undefined
   /** Optional scoped infrastructure credential. Defaults to the existing Orbio API key. */
@@ -99,11 +104,13 @@ export class Orbio {
       manifest.status.chainId,
     )
     // A wallet and no key: the wallet's own signature is the key, for the chain the gateway is on.
-    // Only a local account signs it unasked, one this process holds: a browser wallet would ask a
-    // person, and a page cannot use a key anyway. Anything else calls `walletKey()` itself.
+    // Only a key this process holds signs it unasked: a private key, a mnemonic or an HD wallet. A
+    // WalletClient may be a browser wallet that asks a person, and an account built with `toAccount`
+    // is usually a hardware wallet, an HSM or a KMS; those call `walletKey()` themselves.
     const keying = options.walletKey === false ? null : (options.walletKey ?? {})
     const epoch = keying?.epoch ?? 0
-    const apiKey = given ?? (signer && keying && signer.account.type === 'local'
+    const held = !options.walletClient && signer?.account.type === 'local' && HELD_SOURCES.has(signer.account.source)
+    const apiKey = given ?? (signer && keying && held
       ? walletKeyFromSignature(await signer.wallet.signMessage({ account: signer.account, message: walletKeyMessage(epoch, manifest.status.chainId) }), epoch)
       : undefined)
     const http = apiKey === given ? unkeyed : unkeyed.withKey(apiKey)
