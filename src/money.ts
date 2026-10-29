@@ -53,7 +53,10 @@ export const beneficiaryOf = (address: `0x${string}`): `0x${string}` =>
 /** Whole token units to base units, for a token of any decimals. */
 export const parseUnits = (value: string | number, decimals: number): bigint => {
   const text = String(value).trim()
-  if (!new RegExp(`^\\d+(\\.\\d{1,${decimals}})?$`).test(text)) {
+  // A token with no decimals takes whole numbers only; `\d{1,0}` is not a
+  // valid regular expression, so it cannot share the general pattern.
+  const pattern = decimals === 0 ? /^\d+$/ : new RegExp(`^\\d+(\\.\\d{1,${decimals}})?$`)
+  if (!pattern.test(text)) {
     throw new TypeError(`${text} is not an amount with at most ${decimals} decimals`)
   }
   const [whole = '0', fraction = ''] = text.split('.')
