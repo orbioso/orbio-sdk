@@ -8,6 +8,7 @@ import { Staking } from './chain/staking.js'
 import { Swap } from './chain/swap.js'
 import { Agents } from './chain/agents.js'
 import { keepFunded, topUp, type TopUpOptions, type TopUpResult } from './topup.js'
+import { walletKeyFromSignature, walletKeyMessage } from './gateway/wallet-key.js'
 import { Infrastructure } from './infra/client.js'
 
 /**
@@ -22,11 +23,22 @@ import { Infrastructure } from './infra/client.js'
  * Everything works with just an API key. A wallet is needed only for the
  * things that need a signature, and asking for one of those without a wallet
  * raises an error naming the action rather than failing somewhere deeper.
+ *
+ * Or with just a wallet. Given one and no API key, the client signs the
+ * wallet's own key (`walletKey`) and spends whatever CREDIT is activated to
+ * that wallet. No account, no sign-in and no dashboard are involved.
  */
 
 export type OrbioOptions = SignerInput & {
-  /** The gateway key. Reads work without one; anything that spends needs it. */
+  /** The gateway key. Reads work without one; anything that spends needs it. Unset with a wallet given, the wallet's own key is used. */
   apiKey?: string | undefined
+  /**
+   * The wallet key the client signs when it has a local account (a private
+   * key, or a viem Account this process holds) and no `apiKey`: the epoch to
+   * sign it at (0 unless you have rotated), or `false` to sign none and stay
+   * read-only until a key is given. A WalletClient is never asked unprompted.
+   */
+  walletKey?: { epoch?: number } | false | undefined
   /** Optional scoped infrastructure credential. Defaults to the existing Orbio API key. */
   infraKey?: string | undefined
   /** Point somewhere other than production, for a preview or a local stack. */
@@ -68,15 +80,15 @@ export class Orbio {
   }
 
   static async create(options: OrbioOptions = {}): Promise<Orbio> {
-    const apiKey = options.apiKey ?? process.env.ORBIO_API_KEY
-    const http = new Http({
+    const given = options.apiKey ?? process.env.ORBIO_API_KEY
+    const unkeyed = new Http({
       baseUrl: (options.baseUrl ?? process.env.ORBIO_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
-      apiKey,
+      apiKey: given,
       fetch: options.fetch,
       timeoutMs: options.timeoutMs,
     })
 
-    const manifest = await loadManifest(http)
+    const manifest = await loadManifest(unkeyed)
     const key = options.account ?? (process.env.ORBIO_PRIVATE_KEY as `0x${string}` | undefined)
     const signer = makeSigner(
       {
@@ -86,6 +98,15 @@ export class Orbio {
       },
       manifest.status.chainId,
     )
+    // A wallet and no key: the wallet's own signature is the key, for the chain the gateway is on.
+    // Only a local account signs it unasked, one this process holds: a browser wallet would ask a
+    // person, and a page cannot use a key anyway. Anything else calls `walletKey()` itself.
+    const keying = options.walletKey === false ? null : (options.walletKey ?? {})
+    const epoch = keying?.epoch ?? 0
+    const apiKey = given ?? (signer && keying && signer.account.type === 'local'
+      ? walletKeyFromSignature(await signer.wallet.signMessage({ account: signer.account, message: walletKeyMessage(epoch, manifest.status.chainId) }), epoch)
+      : undefined)
+    const http = apiKey === given ? unkeyed : unkeyed.withKey(apiKey)
     const infraHttp = new Http({
       baseUrl: http.baseUrl, apiKey: options.infraKey ?? process.env.ORBIO_INFRA_KEY ?? apiKey,
       fetch: options.fetch, timeoutMs: options.timeoutMs ?? 30_000,

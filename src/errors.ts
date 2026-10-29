@@ -11,6 +11,7 @@ export type OrbioErrorCode =
   | 'missing_api_key'
   | 'invalid_api_key'
   | 'key_rotated'
+  | 'wallet_not_activated'
   | 'invalid_request'
   | 'unknown_tool'
   | 'not_connected'
@@ -74,6 +75,28 @@ export class InsufficientBalanceError extends OrbioError {
   constructor(message = 'not enough CREDIT for this call') {
     super(message, { code: 'invalid_request', status: 402 })
     this.name = 'InsufficientBalanceError'
+  }
+}
+
+/**
+ * A wallet key whose wallet has nothing activated to it yet, so there is no
+ * account to spend. The key itself is fine: activate CREDIT to `address`, and
+ * once the gateway's indexer has applied the activation the same call works.
+ *
+ * `address` is the wallet the signature recovered to. If it is not the wallet
+ * you funded, the key was signed by another wallet or over different text.
+ */
+export class WalletNotActivatedError extends OrbioError {
+  readonly address: string | null
+
+  constructor(message: string, address: string | null) {
+    super(message, { code: 'wallet_not_activated', status: 402 })
+    this.name = 'WalletNotActivatedError'
+    this.address = address
+  }
+
+  override get retryable(): boolean {
+    return false
   }
 }
 

@@ -1,3 +1,7 @@
+## 2026-10-29: a wallet is enough (0.3.0)
+
+`walletKey(wallet, { epoch })` makes a wallet's own Orbio key, `sk-orb-N-<base64 signature>` over `Orbio API key · chain 4663 · epoch N`, from a private key, a viem Account or a WalletClient, and refuses a contract wallet's signature. `createOrbio` with a local account and no API key signs that key itself (`walletKey: { epoch }` to rotate, `false` to stay read-only); a WalletClient is never asked unprompted. A wallet with nothing activated raises `WalletNotActivatedError` (402 `wallet_not_activated`, with `address`), and `topUp`/`keepFunded` read it as a balance of zero, so a new wallet can fund itself for the first time. Pairs with the platform PR that adds `wallet_not_activated` and `/developers/authentication`; the key vector in `test/wallet-key.test.ts` is the gateway's own fixture.
+
 ## 2026-10-05: managed infrastructure credential onboarding (0.2.1)
 
 Use the existing Orbio API key by default for both createOrbio().infra and createInfrastructure(). Explicit infraKey/ORBIO_INFRA_KEY still takes precedence. Backend app PR accompanies this SDK patch: each verified credential or infra-consented MCP connection gets an isolated persisted agent scope. Existing restricted/revoked grants are never elevated or recreated. A new API credential gets new resources; reconnect with the same credential for continuity. No provider keys or manual product setup. Tests cover default auth, overrides, and refresh continuity. Release after the backend credential-scope migration and routes are live.

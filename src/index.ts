@@ -30,8 +30,19 @@ export {
   NotConnectedError,
   NoSignerError,
   NotLiveError,
+  WalletNotActivatedError,
   type OrbioErrorCode,
 } from './errors.js'
+
+export {
+  walletKey,
+  walletKeyMessage,
+  walletKeyFromSignature,
+  WALLET_KEY_PREFIX,
+  WALLET_KEY_CHAIN_ID,
+  type WalletKeyOptions,
+  type WalletKeySigner,
+} from './gateway/wallet-key.js'
 
 export {
   CREDIT_DECIMALS,

@@ -2,7 +2,7 @@ import type { Address, Hex } from 'viem'
 import type { Account } from './gateway/account.js'
 import type { Credit } from './chain/credit.js'
 import type { Swap, SwapToken } from './chain/swap.js'
-import { OrbioError } from './errors.js'
+import { OrbioError, WalletNotActivatedError } from './errors.js'
 import { formatCredit, parseCredit } from './money.js'
 
 /**
@@ -46,6 +46,22 @@ export type TopUpOptions = {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
+ * The balance to top up from. A wallet key whose wallet has nothing activated
+ * yet has no account, and for topping up that is a balance of zero: it is the
+ * first top-up of every new agent, and refusing to start it would leave a
+ * wallet with no way to fund itself. `account` says which of the two it was.
+ * Anything else that fails still throws.
+ */
+const available = async (account: Account): Promise<{ microUsd: bigint; account: boolean }> => {
+  try {
+    return { microUsd: (await account.balance()).availableMicroUsd, account: true }
+  } catch (error) {
+    if (error instanceof WalletNotActivatedError) return { microUsd: 0n, account: false }
+    throw error
+  }
+}
+
+/**
  * Swap for CREDIT and activate it, then prove the balance moved.
  *
  * The confirmation loop exists because the gateway learns about an activation
@@ -57,7 +73,7 @@ export const topUp = async (
   deps: { swap: Swap; credit: Credit; account: Account },
   options: TopUpOptions,
 ): Promise<TopUpResult> => {
-  const before = await deps.account.balance()
+  const before = (await available(deps.account)).microUsd
 
   const bought = await deps.swap.buy({
     token: options.token,
@@ -82,22 +98,28 @@ export const topUp = async (
   // the receipt rather than arriving with it.
   const deadline = Date.now() + (options.confirmMs ?? 30_000)
   let after = before
+  let indexed = true
   while (Date.now() < deadline) {
     await sleep(2_000)
-    after = await deps.account.balance()
-    if (after.availableMicroUsd > before.availableMicroUsd) break
+    const read = await available(deps.account)
+    after = read.microUsd
+    indexed = read.account
+    if (after > before) break
   }
 
-  const credited = after.availableMicroUsd - before.availableMicroUsd
+  const credited = after - before
   return {
-    beforeMicroUsd: before.availableMicroUsd,
-    afterMicroUsd: after.availableMicroUsd,
+    beforeMicroUsd: before,
+    afterMicroUsd: after,
     creditedMicroUsd: credited,
     swapHash: bought.hash,
     activateHash: activated.hash,
     warning: credited > 0n ? null
-      : 'the CREDIT was activated but this key\'s balance did not change. The beneficiary is probably '
-        + 'not the account this key spends from: check which account the key belongs to, and activate to that.',
+      : !indexed
+        ? 'the CREDIT was activated, but the gateway has not seen this wallet\'s first activation yet. '
+          + 'Read the balance again in a little while: until it lands the key answers wallet_not_activated.'
+        : 'the CREDIT was activated but this key\'s balance did not change. The beneficiary is probably '
+          + 'not the account this key spends from: check which account the key belongs to, and activate to that.',
   }
 }
 
@@ -136,10 +158,10 @@ export async function* keepFunded(
   let done = 0
 
   for (;;) {
-    const balance = await deps.account.balance()
-    yield { kind: 'checked', balanceMicroUsd: balance.availableMicroUsd }
+    const balance = (await available(deps.account)).microUsd
+    yield { kind: 'checked', balanceMicroUsd: balance }
 
-    if (balance.availableMicroUsd < floor) {
+    if (balance < floor) {
       try {
         const result = await topUp(deps, options.buy)
         yield { kind: 'topped-up', result }

@@ -1,4 +1,4 @@
-import { NotConnectedError, OrbioError, type OrbioErrorCode } from './errors.js'
+import { NotConnectedError, OrbioError, WalletNotActivatedError, type OrbioErrorCode } from './errors.js'
 
 /**
  * The one place a request leaves this library.
@@ -23,7 +23,7 @@ export type HttpOptions = {
 type Body = Record<string, unknown>
 
 type ErrorShape = {
-  error?: { message?: unknown; code?: unknown; type?: unknown } | string
+  error?: { message?: unknown; code?: unknown; type?: unknown; address?: unknown } | string
   connect_url?: unknown
   setup_url?: unknown
   retry_after_seconds?: unknown
@@ -38,6 +38,9 @@ export const responseError = (status: number, body: unknown, retryAfter: number 
   const message = typeof detail.message === 'string' ? detail.message : `request failed with ${status}`
   const rawCode = typeof detail.code === 'string' ? detail.code : typeof detail.type === 'string' ? detail.type : ''
 
+  if (rawCode === 'wallet_not_activated') {
+    return new WalletNotActivatedError(message, typeof detail.address === 'string' ? detail.address : null)
+  }
   if (CONNECT_CODES.has(rawCode)) {
     const url = typeof shape.connect_url === 'string' ? shape.connect_url : undefined
     return new NotConnectedError(message, rawCode as OrbioErrorCode, url)
