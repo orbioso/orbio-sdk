@@ -159,10 +159,12 @@ describe('a new wallet can top itself up for the first time', () => {
         return { availableMicroUsd: 9_500_000n, usedMicroUsd: 0n, available: '9.5', used: '0' }
       },
     } as unknown as Account
-    const swap = { buy: async () => ({ hash: '0xaa', creditOut: 10_000_000n }) } as unknown as Swap
+    // A new wallet holds no CREDIT until the swap delivers it.
+    let held = 0n
+    const swap = { buy: async () => { held += 10_000_000n; return { hash: '0xaa', creditOut: 10_000_000n } } } as unknown as Swap
     const credit = {
       wallet: ADDRESS,
-      balanceOf: async () => 10_000_000n,
+      balanceOf: async () => held,
       activate: async () => ({ hash: '0xbb' }),
     } as unknown as Credit
     const result = await topUp({ swap, credit, account }, { token: 'USDG', amount: '10', confirmMs: 10_000 })
@@ -174,8 +176,9 @@ describe('a new wallet can top itself up for the first time', () => {
 
   it('says the first activation is not indexed yet, rather than blaming the beneficiary', async () => {
     const account = { balance: async () => { throw new WalletNotActivatedError('no account yet', ADDRESS.toLowerCase()) } } as unknown as Account
-    const swap = { buy: async () => ({ hash: '0xaa', creditOut: 1_000_000n }) } as unknown as Swap
-    const credit = { wallet: ADDRESS, balanceOf: async () => 1_000_000n, activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
+    let held = 0n
+    const swap = { buy: async () => { held += 1_000_000n; return { hash: '0xaa', creditOut: 1_000_000n } } } as unknown as Swap
+    const credit = { wallet: ADDRESS, balanceOf: async () => held, activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
     const result = await topUp({ swap, credit, account }, { token: 'USDG', amount: '1', confirmMs: 2_100 })
     expect(result.creditedMicroUsd).toBe(0n)
     expect(result.warning).toMatch(/not seen this wallet's first activation/)
@@ -186,7 +189,7 @@ describe('a new wallet can top itself up for the first time', () => {
     const other = '0x' + 'cd'.repeat(20)
     const account = { balance: async () => { throw new WalletNotActivatedError('no account yet', other) } } as unknown as Account
     const swap = { buy: async () => { bought++; return { hash: '0xaa', creditOut: 1n } } } as unknown as Swap
-    const credit = { wallet: ADDRESS, balanceOf: async () => 1n, activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
+    const credit = { wallet: ADDRESS, balanceOf: async () => BigInt(bought), activate: async () => ({ hash: '0xbb' }) } as unknown as Credit
     await expect(topUp({ swap, credit, account }, { token: 'USDG', amount: '1' })).rejects.toThrow(/spends as 0xcdcd/)
     // A beneficiary named outright is held to the same rule, as an address or as bytes32.
     await expect(topUp({ swap, credit, account }, { token: 'USDG', amount: '1', beneficiary: ADDRESS })).rejects.toThrow(/spends as/)

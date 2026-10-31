@@ -94,6 +94,9 @@ export const topUp = async (
 ): Promise<TopUpResult> => {
   const landsOn = destination(deps.credit, options.beneficiary)
   const before = (await available(deps.account, landsOn)).microUsd
+  // CREDIT this wallet already holds is not ours to spend: activation burns
+  // it for good, so only what this swap adds is activated.
+  const heldBefore = await deps.credit.balanceOf()
 
   const bought = await deps.swap.buy({
     token: options.token,
@@ -104,13 +107,13 @@ export const topUp = async (
   // Activate what actually arrived, not what was quoted. A swap can return
   // more than its minimum, and activating the quote would leave the remainder
   // stranded as a token nobody meant to hold.
-  const held = await deps.credit.balanceOf()
-  if (held <= 0n) {
+  const arrived = (await deps.credit.balanceOf()) - heldBefore
+  if (arrived <= 0n) {
     throw new OrbioError('the swap finished but no CREDIT arrived in this wallet', { code: 'swap_failed', status: 502 })
   }
 
   const activated = await deps.credit.activate({
-    amountMicroUsd: held,
+    amountMicroUsd: arrived,
     ...(options.beneficiary === undefined ? {} : { beneficiary: options.beneficiary }),
   })
 
