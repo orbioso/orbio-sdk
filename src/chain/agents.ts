@@ -3,7 +3,7 @@ import { agentLaunchAbi, agentVaultAbi } from '../abi.js'
 import type { Http } from '../http.js'
 import { OrbioError } from '../errors.js'
 import { beneficiaryOf } from '../money.js'
-import { requireSigner, type Signer } from './signer.js'
+import { mined, requireSigner, type Signer } from './signer.js'
 
 /**
  * The agent launchpad: launching a token, and everything an agent does with
@@ -213,7 +213,7 @@ export class Agents {
       functionName: 'claimCredit',
       args: [agentId, options.activate ?? true],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the CREDIT claim')
     return hash
   }
 
@@ -229,7 +229,7 @@ export class Agents {
       functionName: 'harvest',
       args: [agentIds],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the harvest')
     return hash
   }
 
@@ -258,7 +258,7 @@ export class Agents {
       functionName: 'withdrawPrincipal',
       args: [agentId, amountWei],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the principal withdrawal')
     return hash
   }
 
@@ -274,7 +274,7 @@ export class Agents {
       functionName: 'setAgentWallet',
       args: [agentId, wallet],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the agent wallet change')
     return hash
   }
 
@@ -291,7 +291,7 @@ export class Agents {
       functionName: 'setBeneficiary',
       args: [agentId, wide],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the beneficiary change')
     return hash
   }
 }

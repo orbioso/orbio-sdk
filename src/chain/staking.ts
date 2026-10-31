@@ -2,7 +2,7 @@ import type { Address, Hex } from 'viem'
 import { erc20Abi, stakingAbi } from '../abi.js'
 import type { ProtocolAddresses } from '../config.js'
 import { NotLiveError, OrbioError } from '../errors.js'
-import { requireSigner, type Signer } from './signer.js'
+import { mined, requireSigner, type Signer } from './signer.js'
 
 /**
  * Staking ORBIO, and claiming the CREDIT it earns.
@@ -93,7 +93,7 @@ export class Staking {
         functionName: 'approve',
         args: [this.addresses.staking, amountWei],
       })
-      await signer.public.waitForTransactionReceipt({ hash: approvalHash })
+      await mined(signer, approvalHash, 'the ORBIO approval')
     }
 
     const hash = await signer.wallet.writeContract({
@@ -104,7 +104,7 @@ export class Staking {
       functionName: 'stake',
       args: [amountWei],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the stake')
     return { hash, approvalHash, amountWei }
   }
 
@@ -119,7 +119,7 @@ export class Staking {
       functionName: 'unstake',
       args: [amountWei],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the unstake')
     return hash
   }
 
@@ -134,7 +134,7 @@ export class Staking {
       functionName: 'claim',
       args: [],
     })
-    await signer.public.waitForTransactionReceipt({ hash })
+    await mined(signer, hash, 'the claim')
     return hash
   }
 }
